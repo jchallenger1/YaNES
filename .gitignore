@@ -30,3 +30,10 @@
 *.exe
 *.out
 *.app
+
+# Qt flies
+*.user
+*.pro.user*
+Makefile*
+*_resource.rc
+*.autosave
