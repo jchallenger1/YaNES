@@ -5,11 +5,13 @@ CONFIG -= qt
 
 SOURCES += \
         src/State6502.cpp \
-        src/main.cpp
+        src/main.cpp \
+        src/memory.cpp
 
 
 
 INCLUDEPATH += include/
 
 HEADERS += \
-    include/State6502.hpp
+    include/State6502.hpp \
+    include/memory.hpp

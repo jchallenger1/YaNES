@@ -5,12 +5,12 @@
 
 struct State6502 {
     // Registers
-    uint8_t a = 0;
-    uint8_t x = 0;
-    uint8_t y = 0;
+    uint8_t a = 0; // Accumulator
+    uint8_t x = 0; // Index Register X
+    uint8_t y = 0; // Index Register Y
 
-    uint8_t sp = 0;
-    uint16_t pc = 0;
+    uint8_t sp = 0; // Stack Pointer
+    uint16_t pc = 0; // Program Counter
 
     // Struct bitfield for status registers
     struct Status {
