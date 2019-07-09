@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+#include "memory.hpp"
+
 struct State6502 {
     // Registers
     uint8_t a = 0; // Accumulator
@@ -12,6 +14,7 @@ struct State6502 {
     uint8_t sp = 0; // Stack Pointer
     uint16_t pc = 0; // Program Counter
 
+    uint32_t cycleCount;
     // Struct bitfield for status registers
     struct Status {
         uint8_t c : 1; // Carry flag
@@ -24,6 +27,7 @@ struct State6502 {
         uint8_t n : 1; // Negative Flag
     };
 
+    Memory memory;
 };
 
 

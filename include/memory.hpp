@@ -9,8 +9,8 @@ class Memory {
 public:
     Memory();
 
-    uint8_t read(const uint8_t& adr) const;
-    void write(const uint8_t& adr, const uint8_t& val);
+    uint8_t read(const uint16_t& adr) const;
+    void write(const uint16_t& adr, const uint8_t& val);
 
 private:
     std::array<uint8_t, MAXBYTES> memory{};
