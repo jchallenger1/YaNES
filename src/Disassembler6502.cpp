@@ -3,6 +3,8 @@
 #define EXECOPCODE(instrPtr, adringPtr, state) (this->*(instrPtr))((state), (adringPtr))
 #define EXECADDRESSING(adringPtr, state) (this->*(adringPtr))(state)
 
+#include <iostream>
+#include <iomanip>
 
 Disassembler6502::Disassembler6502() {
 
@@ -89,7 +91,7 @@ uint16_t Disassembler6502::ADR_ABS(State6502& state) {
 // AbsoluteX: Similar to Absolute, but address is added with register X
 // Assumption that no wrapping occurs
 uint16_t Disassembler6502::ADR_ABSX(State6502& state) {
-    uint16_t address = (static_cast<uint16_t>(state.memory.read(state.pc + 2)) << 8) & state.memory.read(state.pc + 1) + state.x;
+    uint16_t address = ((static_cast<uint16_t>(state.memory.read(state.pc + 2)) << 8) & state.memory.read(state.pc + 1)) + state.x;
     uint8_t byte = state.memory.read(address);
     state.pc += 3;
     return byte;
@@ -98,7 +100,7 @@ uint16_t Disassembler6502::ADR_ABSX(State6502& state) {
 // AbsoluteX: Similar to Absolute, but address is added with register Y
 // Assumption that no wrapping occurs
 uint16_t Disassembler6502::ADR_ABSY(State6502& state) {
-    uint16_t address = (static_cast<uint16_t>(state.memory.read(state.pc + 2)) << 8) & state.memory.read(state.pc + 1) + state.y;
+    uint16_t address = ((static_cast<uint16_t>(state.memory.read(state.pc + 2)) << 8) & state.memory.read(state.pc + 1)) + state.y;
     uint8_t byte = state.memory.read(address);
     state.pc += 3;
     return byte;

@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include "memory.hpp"
+#include "Memory.hpp"
 
 struct State6502 {
     // Registers

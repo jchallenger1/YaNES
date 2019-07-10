@@ -1,7 +1,13 @@
-#include "memory.hpp"
+#include "Memory.hpp"
+
+
 
 inline bool inRange(const uint8_t& min, const uint8_t& max, const uint8_t& val) {
     return val <= max && val >= min;
+}
+
+Memory::Memory() {
+    ;
 }
 
 // These two functions will be much more in depth due to mirrors later.
