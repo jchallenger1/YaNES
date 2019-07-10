@@ -27,6 +27,7 @@ private:
     void OP_AND(State6502&, AddressingPtr&);
     void OP_LDA(State6502&, AddressingPtr&);
     void OP_STA(State6502&, AddressingPtr&);
+    void OP_ADC(State6502&, AddressingPtr&);
 
     uint16_t ADR_IMPLICIT(State6502&);
     uint16_t ADR_ACCUM(State6502&);
