@@ -20,7 +20,7 @@ private:
     std::array<Instr, 0xFF> opcodeTable{};
 
     void OP_AND(State6502&, addressingPtr&);
-
+    void OP_LDA(State6502&, addressingPtr&);
 
     uint16_t ADR_IMPLICIT(State6502&);
     uint16_t ADR_ACCUM(State6502&);
@@ -35,6 +35,10 @@ private:
     uint16_t ADR_INDIRECT(State6502&);
     uint16_t ADR_INDEXINDIRECT(State6502&);
     uint16_t ADR_INDRECTINDEX(State6502&);
+
+
+    inline void setZero(State6502&, const uint16_t&) const;
+    inline void setNegative(State6502&, const uint16_t&) const;
 
 };
 

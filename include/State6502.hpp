@@ -26,6 +26,7 @@ struct State6502 {
         uint8_t o : 1; // Overflow Flag
         uint8_t n : 1; // Negative Flag
     };
+    Status status{};
 
     Memory memory;
 };
