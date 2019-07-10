@@ -12,3 +12,7 @@ uint8_t Memory::read(const uint16_t& adr) const {
 void Memory::write(const uint16_t& adr, const uint8_t& val) {
     memory[adr] = val;
 }
+
+void Memory::clear() {
+    memory.fill(0);
+}
