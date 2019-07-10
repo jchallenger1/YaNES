@@ -3,9 +3,6 @@
 #define EXECOPCODE(instrPtr, adringPtr, state) (this->*(instrPtr))((state), (adringPtr))
 #define EXECADDRESSING(adringPtr, state) (this->*(adringPtr))(state)
 
-#include <iostream>
-#include <iomanip>
-
 Disassembler6502::Disassembler6502() {
 
     // LDA

@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE( LDA_ADDRESSING_TESTS ) {
     if (!passed)
         BOOST_FAIL("Immediate failure");
 
-    /*
+
     memory.write(2, 0xA5); // check zeropage
     memory.write(3, 0x00);
     dis.runCycle(state);
@@ -32,6 +32,12 @@ BOOST_AUTO_TEST_CASE( LDA_ADDRESSING_TESTS ) {
     passed = state.pc == 0x6 && state.a == 0xBB;
     if (!passed)
         BOOST_FAIL("Zero page X failure");
-    */
-
+    memory.write(6, 0xAD); // check ABS
+    memory.write(7, 0x10);
+    memory.write(8, 0xAF);
+    memory.write(0x10AF, 0xAA);
+    dis.runCycle(state);
+    passed = state.pc == 0x9 && state.a == 0xAA;
+    if (!passed)
+        BOOST_FAIL("ABS failure");
 }
