@@ -9,21 +9,22 @@
 Disassembler6502::Disassembler6502() {
 
     // LDA
-    opcodeTable[0xA9] = std::make_pair(&Disassembler6502::OP_LDA, &Disassembler6502::ADR_IMMEDIATE);
-    opcodeTable[0xA5] = std::make_pair(&Disassembler6502::OP_LDA, &Disassembler6502::ADR_ZEROPAGE);
-    opcodeTable[0xB5] = std::make_pair(&Disassembler6502::OP_LDA, &Disassembler6502::ADR_ZEROPAGEX);
-    opcodeTable[0xAD] = std::make_pair(&Disassembler6502::OP_LDA, &Disassembler6502::ADR_ABS);
-    opcodeTable[0xBD] = std::make_pair(&Disassembler6502::OP_LDA, &Disassembler6502::ADR_ABSX);
-    opcodeTable[0xB9] = std::make_pair(&Disassembler6502::OP_LDA, &Disassembler6502::ADR_ABSY);
-    opcodeTable[0xA1] = std::make_pair(&Disassembler6502::OP_LDA, &Disassembler6502::ADR_INDEXINDIRECT);
-    opcodeTable[0xB1] = std::make_pair(&Disassembler6502::OP_LDA, &Disassembler6502::ADR_INDRECTINDEX);
+    opcodeTable[0xA9] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_IMMEDIATE};
+    opcodeTable[0xA5] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0xB5] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0xAD] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_ABS};
+    opcodeTable[0xBD] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_ABSX};
+    opcodeTable[0xB9] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_ABSY};
+    opcodeTable[0xA1] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_INDEXINDIRECT};
+    opcodeTable[0xB1] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_INDRECTINDEX};
 
 }
 
 
 void Disassembler6502::runCycle(State6502& state) {
-    Instr instruction = opcodeTable[state.pc];
-    EXECOPCODE(instruction.first, instruction.second, state);
+    uint8_t opcode = state.memory.read(state.pc);
+    Instr instruction = opcodeTable[opcode];
+    EXECOPCODE(instruction.instr, instruction.addr, state);
 }
 
 ///
@@ -130,12 +131,12 @@ uint16_t Disassembler6502::ADR_INDEXINDIRECT(State6502& state) {
 
 
 // Load accumulator from memory
-void Disassembler6502::OP_LDA(State6502& state, addressingPtr& adr) {
+void Disassembler6502::OP_LDA(State6502& state, AddressingPtr& adr) {
     state.a = EXECADDRESSING(adr, state) & 0xFF;
     setZero(state, state.a);
     setNegative(state, state.a);
 }
 
-void Disassembler6502::OP_AND(State6502&, addressingPtr&) {
+void Disassembler6502::OP_AND(State6502&, AddressingPtr&) {
 
 }

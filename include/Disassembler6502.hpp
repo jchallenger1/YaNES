@@ -9,18 +9,23 @@ class Disassembler6502 {
 public:
     // First is the particular instruction
     // Second is the addressing mode w/ the instruction
-    using addressingPtr = uint16_t (Disassembler6502::*)(State6502&);
-    using instrPtr = void (Disassembler6502::*)(State6502&, addressingPtr&);
-    using Instr = std::pair<instrPtr, addressingPtr>;
+    using AddressingPtr = uint16_t (Disassembler6502::*)(State6502&);
+    using InstrFuncPtr = void (Disassembler6502::*)(State6502&, AddressingPtr&);
 
     Disassembler6502();
     
     void runCycle(State6502&);
 private:
-    std::array<Instr, 0xFF> opcodeTable{};
 
-    void OP_AND(State6502&, addressingPtr&);
-    void OP_LDA(State6502&, addressingPtr&);
+    struct Instr {
+        InstrFuncPtr instr;
+        AddressingPtr addr;
+    };
+
+    std::array<Instr, 0xFF> opcodeTable;
+
+    void OP_AND(State6502&, AddressingPtr&);
+    void OP_LDA(State6502&, AddressingPtr&);
 
     uint16_t ADR_IMPLICIT(State6502&);
     uint16_t ADR_ACCUM(State6502&);
