@@ -14,7 +14,14 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0xB9] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_ABSY};
     opcodeTable[0xA1] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_INDEXINDIRECT};
     opcodeTable[0xB1] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_INDRECTINDEX};
-
+    // STA
+    opcodeTable[0x85] = {&Disassembler6502::OP_STA, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0x95] = {&Disassembler6502::OP_STA, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0x8D] = {&Disassembler6502::OP_STA, &Disassembler6502::ADR_ABS};
+    opcodeTable[0x9D] = {&Disassembler6502::OP_STA, &Disassembler6502::ADR_ABSX};
+    opcodeTable[0x99] = {&Disassembler6502::OP_STA, &Disassembler6502::ADR_ABSY};
+    opcodeTable[0x81] = {&Disassembler6502::OP_STA, &Disassembler6502::ADR_INDEXINDIRECT};
+    opcodeTable[0x91] = {&Disassembler6502::OP_STA, &Disassembler6502::ADR_INDRECTINDEX};
 }
 
 
@@ -45,35 +52,31 @@ inline void Disassembler6502::setNegative(State6502& state, const uint16_t& val)
 
 // Immediate: The data to be obtained is simply the next byte
 uint16_t Disassembler6502::ADR_IMMEDIATE(State6502& state) {
-    uint8_t immediateByte = state.memory.read(state.pc + 1);
     state.pc += 2;
-    return immediateByte;
+    return state.pc + 1;
 }
 
 // ZeroPage: The data is in the location of the address of the next byte
 // Limits the address from 0-256
 uint16_t Disassembler6502::ADR_ZEROPAGE(State6502& state) {
     uint8_t address = state.memory.read(state.pc + 1);
-    uint8_t byte = state.memory.read(address);
     state.pc += 2;
-    return byte;
+    return address;
 
 }
 // ZeroPageX: Similar to ZeroPage, but address is added with register X
 // Number will wrap around if address >= 256
 uint16_t Disassembler6502::ADR_ZEROPAGEX(State6502& state) {
     uint8_t address = (state.memory.read(state.pc + 1) + state.x) % 256;
-    uint8_t byte = state.memory.read(address);
     state.pc += 2;
-    return byte;
+    return address;
 }
 
 // ZeroPageY: Same as X, but add Y instead
 uint16_t Disassembler6502::ADR_ZEROPAGEY(State6502& state) {
     uint8_t address = (state.memory.read(state.pc + 1) + state.y) % 256;
-    uint8_t byte = state.memory.read(address);
     state.pc += 2;
-    return byte;
+    return address;
 }
 
 // Absolute: A full 16 bit address is used to identify target location
@@ -81,27 +84,24 @@ uint16_t Disassembler6502::ADR_ZEROPAGEY(State6502& state) {
 // lowest bits @ 0, highest @ 1
 uint16_t Disassembler6502::ADR_ABS(State6502& state) {
     uint16_t address = (static_cast<uint16_t>(state.memory.read(state.pc + 2)) << 8) & state.memory.read(state.pc + 1);
-    uint8_t byte = state.memory.read(address);
     state.pc += 3;
-    return byte;
+    return address;
 }
 
 // AbsoluteX: Similar to Absolute, but address is added with register X
 // Assumption that no wrapping occurs
 uint16_t Disassembler6502::ADR_ABSX(State6502& state) {
     uint16_t address = ((static_cast<uint16_t>(state.memory.read(state.pc + 2)) << 8) & state.memory.read(state.pc + 1)) + state.x;
-    uint8_t byte = state.memory.read(address);
     state.pc += 3;
-    return byte;
+    return address;
 }
 
 // AbsoluteX: Similar to Absolute, but address is added with register Y
 // Assumption that no wrapping occurs
 uint16_t Disassembler6502::ADR_ABSY(State6502& state) {
     uint16_t address = ((static_cast<uint16_t>(state.memory.read(state.pc + 2)) << 8) & state.memory.read(state.pc + 1)) + state.y;
-    uint8_t byte = state.memory.read(address);
     state.pc += 3;
-    return byte;
+    return address;
 }
 
 // IndirectIndexed/Indirect,Y: Get a full 16bit address from zero page(0-255) memory
@@ -113,7 +113,7 @@ uint16_t Disassembler6502::ADR_INDRECTINDEX(State6502& state) {
     uint16_t address = (static_cast<uint16_t>(state.memory.read(p + 1)) << 8) & state.memory.read(p);
     address += state.y;
     state.pc += 2;
-    return state.memory.read(address);
+    return address;
 }
 
 // IndexedIndirect/Indirect,X:
@@ -123,15 +123,22 @@ uint16_t Disassembler6502::ADR_INDEXINDIRECT(State6502& state) {
     uint8_t p = state.memory.read(state.pc + 1);
     uint16_t address = (static_cast<uint16_t>(state.memory.read(p + state.x + 1)) << 8) & state.memory.read(p + state.x);
     state.pc += 2;
-    return state.memory.read(address);
+    return address;
 }
 
 
 // Load accumulator from memory
 void Disassembler6502::OP_LDA(State6502& state, AddressingPtr& adr) {
-    state.a = EXECADDRESSING(adr, state) & 0xFF;
+    uint16_t address = EXECADDRESSING(adr, state);
+    state.a = state.memory.read(address);
     setZero(state, state.a);
     setNegative(state, state.a);
+}
+
+// Store accumulator in memory
+void Disassembler6502::OP_STA(State6502& state, AddressingPtr& adr) {
+    uint16_t address = EXECADDRESSING(adr, state);
+    state.memory.write(address, state.a);
 }
 
 void Disassembler6502::OP_AND(State6502&, AddressingPtr&) {
