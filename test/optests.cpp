@@ -35,9 +35,34 @@ BOOST_AUTO_TEST_CASE( LDA_ADDRESSING_TESTS ) {
     memory.write(6, 0xAD); // check ABS
     memory.write(7, 0x10);
     memory.write(8, 0xAF);
-    memory.write(0x10AF, 0xAA);
+    memory.write(0xAF10, 0xAA);
     dis.runCycle(state);
     passed = state.pc == 0x9 && state.a == 0xAA;
     if (!passed)
         BOOST_FAIL("ABS failure");
+}
+
+// These tests are from the examples databook
+BOOST_AUTO_TEST_CASE( ADC_SBC ) {
+    State6502 state;
+    Disassembler6502 dis;
+    auto& memory = state.memory;
+    memory.write(0, 0xE9);
+    memory.write(1, 211);
+    state.a = 13;
+    state.status.c = 1;
+    dis.runCycle(state);
+    bool passed = state.a == 225 && state.status.c == 0;
+    if (!passed)
+        BOOST_ERROR("2.1 ADC failure");
+    state.clear();
+    memory.write(0, 0xE9);
+    memory.write(1, 6);
+    state.a = 254;
+    state.status.c = 1;
+    passed = state.a == 5 && state.status.c == 1;
+    if (!passed)
+        BOOST_ERROR("2.2 ADC failure");
+
+
 }

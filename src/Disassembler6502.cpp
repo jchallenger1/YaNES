@@ -70,8 +70,9 @@ inline void Disassembler6502::setNegative(State6502& state, const uint16_t& val)
 
 // Immediate: The data to be obtained is simply the next byte
 uint16_t Disassembler6502::ADR_IMMEDIATE(State6502& state) {
+    uint16_t address = state.pc + 1;
     state.pc += 2;
-    return state.pc + 1;
+    return address;
 }
 
 // ZeroPage: The data is in the location of the address of the next byte
@@ -101,7 +102,7 @@ uint16_t Disassembler6502::ADR_ZEROPAGEY(State6502& state) {
 // Note that this system uses little endian architecture
 // lowest bits @ 0, highest @ 1
 uint16_t Disassembler6502::ADR_ABS(State6502& state) {
-    uint16_t address = (static_cast<uint16_t>(state.memory.read(state.pc + 2)) << 8) & state.memory.read(state.pc + 1);
+    uint16_t address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(state.pc + 2)) << 8) | state.memory.read(state.pc + 1) );
     state.pc += 3;
     return address;
 }
@@ -109,7 +110,7 @@ uint16_t Disassembler6502::ADR_ABS(State6502& state) {
 // AbsoluteX: Similar to Absolute, but address is added with register X
 // Assumption that no wrapping occurs
 uint16_t Disassembler6502::ADR_ABSX(State6502& state) {
-    uint16_t address = ((static_cast<uint16_t>(state.memory.read(state.pc + 2)) << 8) & state.memory.read(state.pc + 1)) + state.x;
+    uint16_t address = static_cast<uint16_t>( ((static_cast<uint16_t>(state.memory.read(state.pc + 2)) << 8) | state.memory.read(state.pc + 1)) + state.x );
     state.pc += 3;
     return address;
 }
@@ -117,7 +118,7 @@ uint16_t Disassembler6502::ADR_ABSX(State6502& state) {
 // AbsoluteX: Similar to Absolute, but address is added with register Y
 // Assumption that no wrapping occurs
 uint16_t Disassembler6502::ADR_ABSY(State6502& state) {
-    uint16_t address = ((static_cast<uint16_t>(state.memory.read(state.pc + 2)) << 8) & state.memory.read(state.pc + 1)) + state.y;
+    uint16_t address = static_cast<uint16_t>( ((static_cast<uint16_t>(state.memory.read(state.pc + 2)) << 8) | state.memory.read(state.pc + 1)) + state.y );
     state.pc += 3;
     return address;
 }
@@ -128,7 +129,7 @@ uint16_t Disassembler6502::ADR_ABSY(State6502& state) {
 // The byte is then that full location
 uint16_t Disassembler6502::ADR_INDRECTINDEX(State6502& state) {
     uint8_t p = state.memory.read(state.pc + 1);
-    uint16_t address = (static_cast<uint16_t>(state.memory.read(p + 1)) << 8) & state.memory.read(p);
+    uint16_t address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(p + 1)) << 8) | state.memory.read(p) );
     address += state.y;
     state.pc += 2;
     return address;
@@ -139,7 +140,7 @@ uint16_t Disassembler6502::ADR_INDRECTINDEX(State6502& state) {
 // Instead of p and p+1, it is p+x and p+x+1
 uint16_t Disassembler6502::ADR_INDEXINDIRECT(State6502& state) {
     uint8_t p = state.memory.read(state.pc + 1);
-    uint16_t address = (static_cast<uint16_t>(state.memory.read(p + state.x + 1)) << 8) & state.memory.read(p + state.x);
+    uint16_t address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(p + state.x + 1)) << 8) | state.memory.read(p + state.x) );
     state.pc += 2;
     return address;
 }
