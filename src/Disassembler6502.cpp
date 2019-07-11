@@ -160,47 +160,48 @@ void Disassembler6502::OP_STA(State6502& state, AddressingPtr& adr) {
     state.memory.write(address, state.a);
 }
 
-// https://stackoverflow.com/questions/29193303/6502-emulation-proper-way-to-implement-adc-and-sbc
 // Add with carry from memory (A + M + C -> A)
+// https://stackoverflow.com/questions/29193303/6502-emulation-proper-way-to-implement-adc-and-sbc  and
+// https://github.com/gianlucag/mos6502/blob/master/mos6502.cpp in ADC and SBC
 void Disassembler6502::OP_ADC(State6502& state, AddressingPtr& adr) {
     uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
     uint16_t sum = state.a + byte + state.status.c;
 
     if (state.status.d) {
-        if ( ((state.a ^ byte ^ sum) & 0x10) == 0x10) {
-            sum += 0x06;
-        }
-        if ((sum & 0xf0) > 0x90) {
-            sum += 0x60;
-        }
+        if ( (state.a & 0xF) + (byte & 0xF) + state.status.c > 9)
+            sum += 6;
+        setNegative(state, sum);
+        state.status.o = ((state.a ^ sum) & (byte ^ sum) & 0x80) == 0x80;
+        if (sum > 0x99)
+            sum += 96;
+        state.status.c = sum > 0x99;
     }
-
-    state.status.o = ((state.a ^ sum) & (byte ^ sum) & 0x80) == 0x80 ? 1 : 0;
-    state.status.c = sum > 0xFF;
-    setZero(state, sum);
-    setNegative(state, sum);
+    else {
+        setNegative(state, sum);
+        state.status.o = ((state.a ^ sum) & (byte ^ sum) & 0x80) == 0x80;
+        state.status.c = sum > 0xFF;
+    }
 
     state.a = sum & 0xFF;
 }
 
+// Subtract memory from a (A - M - C -> A)
+// Same sources used for ADC
 void Disassembler6502::OP_SBC(State6502& state, AddressingPtr& adr) {
     uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
     uint16_t sum = state.a - byte - state.status.c;
-
-    if (state.status.d) {
-        if ( ((state.a ^ byte ^ sum) & 0x10) == 0x10) {
-            sum -= 0x06;
-        }
-        if ((sum & 0xf0) > 0x90) {
-            sum -= 0x60;
-        }
-    }
-
-    state.status.o = ((state.a ^ sum) & (byte ^ sum) & 0x80) == 0x80 ? 1 : 0;
-    state.status.c = sum < 0x100;
     setNegative(state, sum);
     setZero(state, sum);
+    state.status.o = ((state.a ^ sum) & (byte ^ sum) & 0x80) == 0x80;
 
+    if (state.status.d) {
+        if ((state.a & 0x0F) - state.status.c < (byte & 0x0F))
+            sum -= 6;
+        if (sum >= 0x99)
+            sum -= 0x60;
+    }
+
+    state.status.c = sum < 0x100;
     state.a = sum & 0xFF;
 }
 

@@ -43,11 +43,14 @@ BOOST_AUTO_TEST_CASE( LDA_ADDRESSING_TESTS ) {
 }
 
 // These tests are from the examples databook
+// Tests are important for these instructions as they are the hardest in the entire instruction set
 BOOST_AUTO_TEST_CASE( ADC_SBC ) {
     State6502 state;
     Disassembler6502 dis;
     auto& memory = state.memory;
-    memory.write(0, 0xE9);
+
+    // Regular Add test
+    memory.write(0, 0x69);
     memory.write(1, 211);
     state.a = 13;
     state.status.c = 1;
@@ -56,13 +59,47 @@ BOOST_AUTO_TEST_CASE( ADC_SBC ) {
     if (!passed)
         BOOST_ERROR("2.1 ADC failure");
     state.clear();
-    memory.write(0, 0xE9);
+
+    // Add with carry
+    memory.write(0, 0x69);
     memory.write(1, 6);
     state.a = 254;
     state.status.c = 1;
+    dis.runCycle(state);
     passed = state.a == 5 && state.status.c == 1;
     if (!passed)
         BOOST_ERROR("2.2 ADC failure");
+    state.clear();
 
+    // Add two pos with overflow
+    memory.write(0, 0x69);
+    memory.write(1, 2);
+    state.a = 127;
+    state.status.c = 0;
+    dis.runCycle(state);
+    passed = state.a == 129 && state.status.o == 1; // 129 is really -127
+    if (!passed)
+        BOOST_ERROR("2.7 ADC failure");
+    state.clear();
 
+    // Add two in decimal mode
+    memory.write(0, 0x69);
+    memory.write(1, 20); // 20 in BCD is 14
+    state.status.c = 0;
+    state.status.d = 1;
+    state.a = 121; // 79 in BCD
+    dis.runCycle(state);
+    passed = state.a == 147; // 93 in BCD (79+14=93)
+    if (!passed)
+        BOOST_ERROR("2.12 Decimal ADC failure");
+    state.clear();
+
+    // Sub 2 num w/ borrow w/ positive
+    memory.write(0, 0xE9);
+    memory.write(1, 3);
+    state.a = 5;
+    dis.runCycle(state);
+    passed = state.a == 2 && state.status.c == 1;
+    if (!passed)
+        BOOST_ERROR("2.13 SBC failure");
 }
