@@ -24,11 +24,14 @@ private:
 
     std::array<Instr, 0xFF> opcodeTable;
 
-    void OP_AND(State6502&, AddressingPtr&);
+
     void OP_LDA(State6502&, AddressingPtr&);
     void OP_STA(State6502&, AddressingPtr&);
     void OP_ADC(State6502&, AddressingPtr&);
     void OP_SBC(State6502&, AddressingPtr&);
+    void OP_AND(State6502&, AddressingPtr&);
+    void OP_ORA(State6502&, AddressingPtr&);
+    void OP_EOR(State6502&, AddressingPtr&);
 
     uint16_t ADR_IMPLICIT(State6502&);
     uint16_t ADR_ACCUM(State6502&);

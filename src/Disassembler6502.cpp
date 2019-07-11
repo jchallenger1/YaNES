@@ -40,6 +40,33 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0xF9] = {&Disassembler6502::OP_SBC, &Disassembler6502::ADR_ABSY};
     opcodeTable[0xE1] = {&Disassembler6502::OP_SBC, &Disassembler6502::ADR_INDEXINDIRECT};
     opcodeTable[0xF1] = {&Disassembler6502::OP_SBC, &Disassembler6502::ADR_INDRECTINDEX};
+    // AND
+    opcodeTable[0x29] = {&Disassembler6502::OP_AND, &Disassembler6502::ADR_IMMEDIATE};
+    opcodeTable[0x25] = {&Disassembler6502::OP_AND, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0x35] = {&Disassembler6502::OP_AND, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0x2D] = {&Disassembler6502::OP_AND, &Disassembler6502::ADR_ABS};
+    opcodeTable[0x3D] = {&Disassembler6502::OP_AND, &Disassembler6502::ADR_ABSX};
+    opcodeTable[0x39] = {&Disassembler6502::OP_AND, &Disassembler6502::ADR_ABSY};
+    opcodeTable[0x21] = {&Disassembler6502::OP_AND, &Disassembler6502::ADR_INDEXINDIRECT};
+    opcodeTable[0x31] = {&Disassembler6502::OP_AND, &Disassembler6502::ADR_INDRECTINDEX};
+    // OR
+    opcodeTable[0x09] = {&Disassembler6502::OP_ORA, &Disassembler6502::ADR_IMMEDIATE};
+    opcodeTable[0x05] = {&Disassembler6502::OP_ORA, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0x15] = {&Disassembler6502::OP_ORA, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0x0D] = {&Disassembler6502::OP_ORA, &Disassembler6502::ADR_ABS};
+    opcodeTable[0x1D] = {&Disassembler6502::OP_ORA, &Disassembler6502::ADR_ABSX};
+    opcodeTable[0x19] = {&Disassembler6502::OP_ORA, &Disassembler6502::ADR_ABSY};
+    opcodeTable[0x01] = {&Disassembler6502::OP_ORA, &Disassembler6502::ADR_INDEXINDIRECT};
+    opcodeTable[0x11] = {&Disassembler6502::OP_ORA, &Disassembler6502::ADR_INDRECTINDEX};
+    // EOR
+    opcodeTable[0x49] = {&Disassembler6502::OP_EOR, &Disassembler6502::ADR_IMMEDIATE};
+    opcodeTable[0x45] = {&Disassembler6502::OP_EOR, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0x55] = {&Disassembler6502::OP_EOR, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0x4D] = {&Disassembler6502::OP_EOR, &Disassembler6502::ADR_ABS};
+    opcodeTable[0x5D] = {&Disassembler6502::OP_EOR, &Disassembler6502::ADR_ABSX};
+    opcodeTable[0x59] = {&Disassembler6502::OP_EOR, &Disassembler6502::ADR_ABSY};
+    opcodeTable[0x41] = {&Disassembler6502::OP_EOR, &Disassembler6502::ADR_INDEXINDIRECT};
+    opcodeTable[0x51] = {&Disassembler6502::OP_EOR, &Disassembler6502::ADR_INDRECTINDEX};
 }
 
 
@@ -205,6 +232,26 @@ void Disassembler6502::OP_SBC(State6502& state, AddressingPtr& adr) {
     state.a = sum & 0xFF;
 }
 
-void Disassembler6502::OP_AND(State6502&, AddressingPtr&) {
+// Binary AND w/ accumulator ( A & M -> A)
+void Disassembler6502::OP_AND(State6502& state, AddressingPtr& adr) {
+    uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
+    state.a &= byte;
+    setZero(state, state.a);
+    setNegative(state, state.a);
+}
 
+// Binary OR w/ accumulator ( A | M -> A)
+void Disassembler6502::OP_ORA(State6502& state, AddressingPtr& adr) {
+    uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
+    state.a |= byte;
+    setZero(state, state.a);
+    setNegative(state, state.a);
+}
+
+// Binary XOR w/ accumulator ( A ^ M -> A)
+void Disassembler6502::OP_EOR(State6502& state, AddressingPtr& adr) {
+    uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
+    state.a ^= byte;
+    setZero(state, state.a);
+    setNegative(state, state.a);
 }

@@ -11,6 +11,7 @@ public:
 
     uint8_t read(const uint16_t& adr) const;
     void write(const uint16_t& adr, const uint8_t& val);
+
     void clear();
 private:
     std::array<uint8_t, MAXBYTES> memory{};
