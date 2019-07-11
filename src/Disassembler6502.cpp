@@ -5,6 +5,7 @@
 
 Disassembler6502::Disassembler6502() {
 
+    /// ----- Group 1 Instructions also chapter 2 of the data book instructions ------
     // LDA
     opcodeTable[0xA9] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_IMMEDIATE};
     opcodeTable[0xA5] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_ZEROPAGE};
