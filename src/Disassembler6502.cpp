@@ -31,7 +31,15 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0x79] = {&Disassembler6502::OP_ADC, &Disassembler6502::ADR_ABSY};
     opcodeTable[0x61] = {&Disassembler6502::OP_ADC, &Disassembler6502::ADR_INDEXINDIRECT};
     opcodeTable[0x71] = {&Disassembler6502::OP_ADC, &Disassembler6502::ADR_INDRECTINDEX};
-
+    // SBC
+    opcodeTable[0xE9] = {&Disassembler6502::OP_SBC, &Disassembler6502::ADR_IMMEDIATE};
+    opcodeTable[0xE5] = {&Disassembler6502::OP_SBC, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0xF5] = {&Disassembler6502::OP_SBC, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0xED] = {&Disassembler6502::OP_SBC, &Disassembler6502::ADR_ABS};
+    opcodeTable[0xFD] = {&Disassembler6502::OP_SBC, &Disassembler6502::ADR_ABSX};
+    opcodeTable[0xF9] = {&Disassembler6502::OP_SBC, &Disassembler6502::ADR_ABSY};
+    opcodeTable[0xE1] = {&Disassembler6502::OP_SBC, &Disassembler6502::ADR_INDEXINDIRECT};
+    opcodeTable[0xF1] = {&Disassembler6502::OP_SBC, &Disassembler6502::ADR_INDRECTINDEX};
 }
 
 
@@ -167,12 +175,33 @@ void Disassembler6502::OP_ADC(State6502& state, AddressingPtr& adr) {
     }
 
     state.status.o = ((state.a ^ sum) & (byte ^ sum) & 0x80) == 0x80 ? 1 : 0;
-    state.status.c = (sum & 0x100) == 0x100 ? 1 : 0;
+    state.status.c = sum > 0xFF;
     setZero(state, sum);
     setNegative(state, sum);
+
     state.a = sum & 0xFF;
 }
 
+void Disassembler6502::OP_SBC(State6502& state, AddressingPtr& adr) {
+    uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
+    uint16_t sum = state.a - byte - state.status.c;
+
+    if (state.status.d) {
+        if ( ((state.a ^ byte ^ sum) & 0x10) == 0x10) {
+            sum -= 0x06;
+        }
+        if ((sum & 0xf0) > 0x90) {
+            sum -= 0x60;
+        }
+    }
+
+    state.status.o = ((state.a ^ sum) & (byte ^ sum) & 0x80) == 0x80 ? 1 : 0;
+    state.status.c = sum < 0x100;
+    setNegative(state, sum);
+    setZero(state, sum);
+
+    state.a = sum & 0xFF;
+}
 
 void Disassembler6502::OP_AND(State6502&, AddressingPtr&) {
 
