@@ -41,6 +41,8 @@ private:
     void OP_CLD(State6502&, AddressingPtr&);
     void OP_CLV(State6502&, AddressingPtr&);
 
+    void OP_JMP(State6502&, AddressingPtr&);
+
 
     uint16_t ADR_IMPLICIT(State6502&);
     uint16_t ADR_ACCUM(State6502&);

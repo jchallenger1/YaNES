@@ -180,3 +180,42 @@ BOOST_AUTO_TEST_CASE( PROCESSOR_STATUS ) {
         BOOST_ERROR("CLV failure");
 
 }
+
+
+BOOST_AUTO_TEST_CASE (JMP) {
+    State6502 state;
+    Disassembler6502 dis;
+    auto& memory = state.memory;
+    memory.write(0, 0x4C);
+    memory.write(1, 0x56);
+    memory.write(2, 0xC9);
+    dis.runCycle(state);
+    bool passed = state.pc == 0xC956;
+    if (!passed)
+        BOOST_ERROR("ABS JMP failure");
+    state.clear();
+
+    memory.write(0xFA23, 0x65);
+    memory.write(0xFA23 + 1, 0xB3);
+    memory.write(0, 0x6C);
+    memory.write(1, 0x23);
+    memory.write(2, 0xFA);
+    dis.runCycle(state);
+    passed = state.pc == 0xB365;
+    if (!passed)
+        BOOST_ERROR("INDR JMP failure");
+    state.clear();
+
+    memory.write(0x3000, 0x40);
+    memory.write(0x30FF, 0x80);
+    memory.write(0x3100, 0x50);
+    memory.write(0, 0x6C);
+    memory.write(1, 0xFF);
+    memory.write(2, 0x30);
+    dis.runCycle(state);
+    passed = state.pc == 0x4080;
+    if (!passed)
+        BOOST_ERROR("INDR JMP page boundary failure");
+
+
+}

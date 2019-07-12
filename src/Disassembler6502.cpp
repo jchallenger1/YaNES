@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Disassembler6502.hpp"
 
 #define EXECOPCODE(instrPtr, adringPtr, state) (this->*(instrPtr))((state), (adringPtr))
@@ -78,6 +79,11 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0xB8] = {&Disassembler6502::OP_CLV, &Disassembler6502::ADR_IMPLICIT};
     opcodeTable[0xD8] = {&Disassembler6502::OP_CLD, &Disassembler6502::ADR_IMPLICIT};
     opcodeTable[0xF8] = {&Disassembler6502::OP_SED, &Disassembler6502::ADR_IMPLICIT};
+
+
+    /// --- Branching and Jumping Instructions -----
+    opcodeTable[0x4C] = {&Disassembler6502::OP_JMP, &Disassembler6502::ADR_ABS};
+    opcodeTable[0x6C] = {&Disassembler6502::OP_JMP, &Disassembler6502::ADR_INDIRECT};
 }
 
 
@@ -189,6 +195,28 @@ uint16_t Disassembler6502::ADR_IMPLICIT(State6502& state) {
     return 0;
 }
 
+// Indirect: Only the JMP instruction uses this
+// The next 16 bytes is a pointer to the real address to where it should jump
+// Note that if the lowest bits are at the end of the page boundary, then it should
+// wrap around back.
+// EX jmp 0xC1FF, should wrap to 0xC100 ONLY if low bits is 0xFF
+uint16_t Disassembler6502::ADR_INDIRECT(State6502& state) {
+    uint8_t lowByte = state.memory.read(state.pc + 1);
+    uint8_t highByte = state.memory.read(state.pc + 2);
+
+    uint8_t adrlByte = 0, adrhByte = 0;
+    adrlByte = state.memory.read(static_cast<uint16_t>( (static_cast<uint16_t>(highByte) << 8) | lowByte) );
+
+    if (lowByte == 0xFF) { // wraps to higbyte only, lowbits are all 0
+        adrhByte = state.memory.read( static_cast<uint16_t>(static_cast<uint16_t>(highByte) << 8) );
+        std::cerr << "jmp indirect bug taken\n";
+    }
+    else
+        adrhByte = state.memory.read(static_cast<uint16_t>( (static_cast<uint16_t>(highByte) << 8) | lowByte) + 1);
+    state.pc += 3;
+    return static_cast<uint16_t>( (static_cast<uint16_t>(adrhByte) << 8) | adrlByte);
+}
+
 // Load accumulator from memory
 void Disassembler6502::OP_LDA(State6502& state, AddressingPtr& adr) {
     uint16_t address = EXECADDRESSING(adr, state);
@@ -273,6 +301,8 @@ void Disassembler6502::OP_EOR(State6502& state, AddressingPtr& adr) {
 }
 
 
+
+
  // Set Carry bit
 void Disassembler6502::OP_SEC(State6502& state, AddressingPtr& adr) {
     EXECADDRESSING(adr, state);
@@ -315,3 +345,11 @@ void Disassembler6502::OP_CLV(State6502& state, AddressingPtr& adr) {
     state.status.o = 0;
 }
 
+
+
+
+// Jump to a new location
+void Disassembler6502::OP_JMP(State6502& state, AddressingPtr& adr) {
+    uint16_t address = EXECADDRESSING(adr, state);
+    state.pc = address;
+}
