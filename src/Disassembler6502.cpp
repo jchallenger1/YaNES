@@ -68,6 +68,16 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0x59] = {&Disassembler6502::OP_EOR, &Disassembler6502::ADR_ABSY};
     opcodeTable[0x41] = {&Disassembler6502::OP_EOR, &Disassembler6502::ADR_INDEXINDIRECT};
     opcodeTable[0x51] = {&Disassembler6502::OP_EOR, &Disassembler6502::ADR_INDRECTINDEX};
+
+    /// ----- Flag (Processor Status) Instructions ------
+
+    opcodeTable[0x18] = {&Disassembler6502::OP_CLC, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0x38] = {&Disassembler6502::OP_SEC, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0x58] = {&Disassembler6502::OP_CLI, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0x78] = {&Disassembler6502::OP_SEI, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0xB8] = {&Disassembler6502::OP_CLV, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0xD8] = {&Disassembler6502::OP_CLD, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0xF8] = {&Disassembler6502::OP_SED, &Disassembler6502::ADR_IMPLICIT};
 }
 
 
@@ -173,6 +183,11 @@ uint16_t Disassembler6502::ADR_INDEXINDIRECT(State6502& state) {
     return address;
 }
 
+// Implicit/Implied: No address is returned, its needed address is implied via the instruction
+uint16_t Disassembler6502::ADR_IMPLICIT(State6502& state) {
+    ++state.pc;
+    return 0;
+}
 
 // Load accumulator from memory
 void Disassembler6502::OP_LDA(State6502& state, AddressingPtr& adr) {
@@ -256,3 +271,47 @@ void Disassembler6502::OP_EOR(State6502& state, AddressingPtr& adr) {
     setZero(state, state.a);
     setNegative(state, state.a);
 }
+
+
+ // Set Carry bit
+void Disassembler6502::OP_SEC(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.status.c = 1;
+}
+
+// Clear Carry bit
+void Disassembler6502::OP_CLC(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.status.c = 0;
+}
+
+// Set interrupt
+void Disassembler6502::OP_SEI(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.status.i = 1;
+}
+
+// Clear Interrupt
+void Disassembler6502::OP_CLI(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.status.i = 0;
+}
+
+// Set Decimal
+void Disassembler6502::OP_SED(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.status.d = 1;
+}
+
+// Clear Decimal
+void Disassembler6502::OP_CLD(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.status.d = 0;
+}
+
+// Clear Overflow
+void Disassembler6502::OP_CLV(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.status.o = 0;
+}
+

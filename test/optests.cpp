@@ -131,3 +131,52 @@ BOOST_AUTO_TEST_CASE( AND_OR_XOR ) {
     if (!passed)
         BOOST_ERROR("XOR 2.21 failure");
 }
+
+BOOST_AUTO_TEST_CASE( PROCESSOR_STATUS ) {
+
+    State6502 state;
+    Disassembler6502 dis;
+    auto& memory = state.memory;
+
+    memory.write(0, 0x38);
+    dis.runCycle(state);
+    bool passed = state.status.c == 1;
+    if (!passed)
+        BOOST_ERROR("SEC failure");
+    memory.write(1, 0x18);
+    dis.runCycle(state);
+    passed = state.status.c == 0;
+    if (!passed)
+        BOOST_ERROR("CLC failure");
+
+
+    memory.write(2, 0x78);
+    dis.runCycle(state);
+    passed = state.status.i == 1;
+    if (!passed)
+        BOOST_ERROR("SEI failure");
+    memory.write(3, 0x58);
+    dis.runCycle(state);
+    passed = state.status.i == 0;
+    if (!passed)
+        BOOST_ERROR("CLI failure");
+
+    memory.write(4, 0xF8);
+    dis.runCycle(state);
+    passed = state.status.d == 1;
+    if (!passed)
+        BOOST_ERROR("SED failure");
+    memory.write(5, 0xD8);
+    dis.runCycle(state);
+    passed = state.status.d == 0;
+    if (!passed)
+        BOOST_ERROR("CLD failure");
+
+    state.status.o = 1;
+    memory.write(6, 0xB8);
+    dis.runCycle(state);
+    passed = state.status.o == 0;
+    if (!passed)
+        BOOST_ERROR("CLV failure");
+
+}

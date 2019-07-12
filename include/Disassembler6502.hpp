@@ -33,6 +33,15 @@ private:
     void OP_ORA(State6502&, AddressingPtr&);
     void OP_EOR(State6502&, AddressingPtr&);
 
+    void OP_SEC(State6502&, AddressingPtr&);
+    void OP_CLC(State6502&, AddressingPtr&);
+    void OP_SEI(State6502&, AddressingPtr&);
+    void OP_CLI(State6502&, AddressingPtr&);
+    void OP_SED(State6502&, AddressingPtr&);
+    void OP_CLD(State6502&, AddressingPtr&);
+    void OP_CLV(State6502&, AddressingPtr&);
+
+
     uint16_t ADR_IMPLICIT(State6502&);
     uint16_t ADR_ACCUM(State6502&);
     uint16_t ADR_IMMEDIATE(State6502&);
