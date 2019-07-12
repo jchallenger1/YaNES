@@ -218,7 +218,7 @@ uint16_t Disassembler6502::ADR_INDIRECT(State6502& state) {
 
     if (lowByte == 0xFF) { // wraps to higbyte only, lowbits are all 0
         adrhByte = state.memory.read( static_cast<uint16_t>(static_cast<uint16_t>(highByte) << 8) );
-        std::cerr << "jmp indirect bug taken\n";
+        std::cerr << "jmp indirect zero page boundary taken\n";
     }
     else
         adrhByte = state.memory.read(static_cast<uint16_t>( (static_cast<uint16_t>(highByte) << 8) | lowByte) + 1);
