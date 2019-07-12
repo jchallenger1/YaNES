@@ -232,6 +232,9 @@ uint16_t Disassembler6502::ADR_INDIRECT(State6502& state) {
 // Relative is only used by branching operations
 // The byte determines from where the pc should move in the range of -128 to +127
 uint16_t Disassembler6502::ADR_RELATIVE(State6502& state) {
+
+    if (!canBranch) return state.pc + 2;
+
     uint8_t byte = state.memory.read(state.pc + 1);
     bool isPositive = (0x80 & byte) >> 7 == 0;
     uint8_t offset = (~0x80) & byte;
@@ -374,6 +377,9 @@ void Disassembler6502::OP_JMP(State6502& state, AddressingPtr& adr) {
     uint16_t address = EXECADDRESSING(adr, state);
     state.pc = address;
 }
+
+// The next BXX instructions:
+// Branch/Jump if condition, specified in canBranch otherwise skip
 
 void Disassembler6502::OP_BMI(State6502& state, AddressingPtr& adr) {
     canBranch = state.status.n == 1;

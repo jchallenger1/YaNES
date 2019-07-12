@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE( PROCESSOR_STATUS ) {
 }
 
 
-BOOST_AUTO_TEST_CASE (JMP) {
+BOOST_AUTO_TEST_CASE (JMP_BRANCH ) {
     State6502 state;
     Disassembler6502 dis;
     auto& memory = state.memory;
@@ -217,5 +217,19 @@ BOOST_AUTO_TEST_CASE (JMP) {
     if (!passed)
         BOOST_ERROR("INDR JMP page boundary failure");
 
+    state.clear();
+    state.pc = 10;
+    memory.write(10, 0x10);
+    memory.write(11, 0x56);
+    dis.runCycle(state);
+    passed = state.pc == 10 + 0x56;
+    if (!passed)
+        BOOST_FAIL("Branch/Relative mode failure, can't test next one");
+    memory.write(10 + 0x56, 0x70);
+    memory.write(10 + 0x56 + 1, 0xFF);
+    dis.runCycle(state);
+    passed = state.pc == 10 + 0x56 + 2;
+    if (!passed)
+        BOOST_ERROR("branch/relative mode no branching failure");
 
 }
