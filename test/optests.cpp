@@ -103,3 +103,31 @@ BOOST_AUTO_TEST_CASE( ADC_SBC ) {
     if (!passed)
         BOOST_ERROR("2.13 SBC failure");
 }
+
+BOOST_AUTO_TEST_CASE( AND_OR_XOR ) {
+
+    State6502 state;
+    Disassembler6502 dis;
+    auto& memory = state.memory;
+    memory.write(0, 0x29);
+    memory.write(1, 0b11001111);
+    state.a = 0b11110111;
+    dis.runCycle(state);
+    bool passed = state.a == 0b11000111;
+    if (!passed)
+        BOOST_ERROR("AND 2.19 failure");
+    memory.write(2, 0x09);
+    memory.write(3, 0b11101111);
+    state.a = 0x8;
+    dis.runCycle(state);
+    passed = state.a == 0b11101111;
+    if (!passed)
+        BOOST_ERROR("OR 2.20 failure");
+    memory.write(4, 0x49);
+    memory.write(5, 0b10101111);
+    state.a = 0xFF;
+    dis.runCycle(state);
+    passed = state.a == 0b01010000;
+    if (!passed)
+        BOOST_ERROR("XOR 2.21 failure");
+}
