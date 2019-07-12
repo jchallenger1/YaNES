@@ -84,6 +84,15 @@ Disassembler6502::Disassembler6502() {
     /// --- Branching and Jumping Instructions -----
     opcodeTable[0x4C] = {&Disassembler6502::OP_JMP, &Disassembler6502::ADR_ABS};
     opcodeTable[0x6C] = {&Disassembler6502::OP_JMP, &Disassembler6502::ADR_INDIRECT};
+
+    opcodeTable[0x10] = {&Disassembler6502::OP_BPL, &Disassembler6502::ADR_RELATIVE};
+    opcodeTable[0x30] = {&Disassembler6502::OP_BMI, &Disassembler6502::ADR_RELATIVE};
+    opcodeTable[0x50] = {&Disassembler6502::OP_BVC, &Disassembler6502::ADR_RELATIVE};
+    opcodeTable[0x70] = {&Disassembler6502::OP_BVS, &Disassembler6502::ADR_RELATIVE};
+    opcodeTable[0x90] = {&Disassembler6502::OP_BCC, &Disassembler6502::ADR_RELATIVE};
+    opcodeTable[0xB0] = {&Disassembler6502::OP_BCS, &Disassembler6502::ADR_RELATIVE};
+    opcodeTable[0xD0] = {&Disassembler6502::OP_BNE, &Disassembler6502::ADR_RELATIVE};
+    opcodeTable[0xF0] = {&Disassembler6502::OP_BEQ, &Disassembler6502::ADR_RELATIVE};
 }
 
 
@@ -215,6 +224,18 @@ uint16_t Disassembler6502::ADR_INDIRECT(State6502& state) {
         adrhByte = state.memory.read(static_cast<uint16_t>( (static_cast<uint16_t>(highByte) << 8) | lowByte) + 1);
     state.pc += 3;
     return static_cast<uint16_t>( (static_cast<uint16_t>(adrhByte) << 8) | adrlByte);
+}
+
+
+
+// Relative : Similar to immediate however the byte is a signed number rather than unsigned
+// Relative is only used by branching operations
+// The byte determines from where the pc should move in the range of -128 to +127
+uint16_t Disassembler6502::ADR_RELATIVE(State6502& state) {
+    uint8_t byte = state.memory.read(state.pc + 1);
+    bool isPositive = (0x80 & byte) >> 7 == 0;
+    uint8_t offset = (~0x80) & byte;
+    return isPositive ? state.pc + offset : state.pc - offset;
 }
 
 // Load accumulator from memory
@@ -353,3 +374,44 @@ void Disassembler6502::OP_JMP(State6502& state, AddressingPtr& adr) {
     uint16_t address = EXECADDRESSING(adr, state);
     state.pc = address;
 }
+
+void Disassembler6502::OP_BMI(State6502& state, AddressingPtr& adr) {
+    canBranch = state.status.n == 1;
+    state.pc = EXECADDRESSING(adr, state);
+}
+
+void Disassembler6502::OP_BPL(State6502& state, AddressingPtr& adr) {
+    canBranch = state.status.n == 0;
+    state.pc = EXECADDRESSING(adr, state);
+}
+
+void Disassembler6502::OP_BCC(State6502& state, AddressingPtr& adr) {
+    canBranch = state.status.c == 0;
+    state.pc = EXECADDRESSING(adr, state);
+}
+
+void Disassembler6502::OP_BCS(State6502& state, AddressingPtr& adr) {
+    canBranch = state.status.c == 1;
+    state.pc = EXECADDRESSING(adr, state);
+}
+
+void Disassembler6502::OP_BEQ(State6502& state, AddressingPtr& adr) {
+    canBranch = state.status.z == 1;
+    state.pc = EXECADDRESSING(adr, state);
+}
+
+void Disassembler6502::OP_BNE(State6502& state, AddressingPtr& adr) {
+    canBranch = state.status.z == 0;
+    state.pc = EXECADDRESSING(adr, state);
+}
+
+void Disassembler6502::OP_BVS(State6502& state, AddressingPtr& adr) {
+    canBranch = state.status.o == 1;
+    state.pc = EXECADDRESSING(adr, state);
+}
+
+void Disassembler6502::OP_BVC(State6502& state, AddressingPtr& adr) {
+    canBranch = state.status.o == 0;
+    state.pc = EXECADDRESSING(adr, state);
+}
+

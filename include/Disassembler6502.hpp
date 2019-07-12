@@ -23,7 +23,7 @@ private:
     };
 
     std::array<Instr, 0xFF> opcodeTable;
-
+    bool canBranch;
 
     void OP_LDA(State6502&, AddressingPtr&);
     void OP_STA(State6502&, AddressingPtr&);
@@ -42,6 +42,15 @@ private:
     void OP_CLV(State6502&, AddressingPtr&);
 
     void OP_JMP(State6502&, AddressingPtr&);
+    void OP_BMI(State6502&, AddressingPtr&);
+    void OP_BPL(State6502&, AddressingPtr&);
+    void OP_BCC(State6502&, AddressingPtr&);
+    void OP_BCS(State6502&, AddressingPtr&);
+    void OP_BEQ(State6502&, AddressingPtr&);
+    void OP_BNE(State6502&, AddressingPtr&);
+    void OP_BVS(State6502&, AddressingPtr&);
+    void OP_BVC(State6502&, AddressingPtr&);
+
 
 
     uint16_t ADR_IMPLICIT(State6502&);
