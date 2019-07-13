@@ -103,6 +103,9 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0xC1] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_INDEXINDIRECT};
     opcodeTable[0xD1] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_INDRECTINDEX};
 
+    opcodeTable[0x24] = {&Disassembler6502::OP_BIT, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0x2C] = {&Disassembler6502::OP_BIT, &Disassembler6502::ADR_ABS};
+
 }
 
 
@@ -443,3 +446,12 @@ void Disassembler6502::OP_CMP(State6502& state, AddressingPtr& adr) {
 
 }
 
+// Test bits in memory with accumulator by using binary AND
+// -> A & M, no registers modified
+void Disassembler6502::OP_BIT(State6502& state, AddressingPtr& adr) {
+    uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
+    uint8_t sum = byte & state.a;
+    setZero(state, sum);
+    setNegative(state, sum);
+    state.status.o = (sum & 0x40) >> 6;
+}

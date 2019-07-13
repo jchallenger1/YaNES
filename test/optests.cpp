@@ -261,4 +261,25 @@ BOOST_AUTO_TEST_CASE (compareTests) {
     passed = state.status.z == 0 && state.status.n == 1 && state.status.c == 0;
     if (!passed)
         BOOST_ERROR("CMP a<m failure");
+
+    // bit tests
+    state.clear();
+    memory.write(0, 0x24);
+    memory.write(1, 128);
+    state.a = 127;
+    dis.runCycle(state);
+    passed = state.status.z == 1 && state.status.c == 0 && state.status.o == 0;
+    if (!passed)
+        BOOST_ERROR("BIT failure 1");
+
+    memory.write(2, 0x24);
+    memory.write(0xA1, 0xC9);
+    memory.write(3, 0xA1); // zero page addressing
+    state.a = 0xF5;
+    dis.runCycle(state);
+    passed = state.status.z == 0 && state.status.n == 1 && state.status.o == 1;
+    if (!passed)
+        BOOST_ERROR("BIT failure 2");
+
+
 }
