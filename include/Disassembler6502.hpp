@@ -23,7 +23,7 @@ private:
     };
 
     std::array<Instr, 0xFF> opcodeTable;
-    bool canBranch;
+    bool canBranch; // used by branching instructions
 
     void OP_LDA(State6502&, AddressingPtr&);
     void OP_STA(State6502&, AddressingPtr&);
@@ -51,6 +51,8 @@ private:
     void OP_BVS(State6502&, AddressingPtr&);
     void OP_BVC(State6502&, AddressingPtr&);
 
+    void OP_CMP(State6502&, AddressingPtr&);
+    void OP_BIT(State6502&, AddressingPtr&);
 
 
     uint16_t ADR_IMPLICIT(State6502&);

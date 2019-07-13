@@ -231,5 +231,34 @@ BOOST_AUTO_TEST_CASE (JMP_BRANCH ) {
     passed = state.pc == 10 + 0x56 + 2;
     if (!passed)
         BOOST_ERROR("branch/relative mode no branching failure");
+}
 
+BOOST_AUTO_TEST_CASE (compareTests) {
+    State6502 state;
+    Disassembler6502 dis;
+    auto& memory = state.memory;
+
+    memory.write(0, 0xC9);
+    memory.write(1, 0x62);
+    state.a = 0xF2;
+    dis.runCycle(state);
+    bool passed = state.status.z == 0 && state.status.n == 1 && state.status.c == 1;
+    if (!passed)
+        BOOST_ERROR("CMP a>m failure");
+
+    memory.write(2, 0xC9);
+    memory.write(3, 0xC4);
+    state.a = 0xC4;
+    dis.runCycle(state);
+    passed = state.status.z == 1 && state.status.n == 0 && state.status.c == 1;
+    if (!passed)
+        BOOST_ERROR("CMP a=m failure");
+
+    memory.write(4, 0xC9);
+    memory.write(5, 0xF8);
+    state.a = 0xC8;
+    dis.runCycle(state);
+    passed = state.status.z == 0 && state.status.n == 1 && state.status.c == 0;
+    if (!passed)
+        BOOST_ERROR("CMP a<m failure");
 }

@@ -93,6 +93,16 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0xB0] = {&Disassembler6502::OP_BCS, &Disassembler6502::ADR_RELATIVE};
     opcodeTable[0xD0] = {&Disassembler6502::OP_BNE, &Disassembler6502::ADR_RELATIVE};
     opcodeTable[0xF0] = {&Disassembler6502::OP_BEQ, &Disassembler6502::ADR_RELATIVE};
+
+    opcodeTable[0xC9] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_IMMEDIATE};
+    opcodeTable[0xC5] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0xD5] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0xCD] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_ABS};
+    opcodeTable[0xDD] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_ABSX};
+    opcodeTable[0xD9] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_ABSY};
+    opcodeTable[0xC1] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_INDEXINDIRECT};
+    opcodeTable[0xD1] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_INDRECTINDEX};
+
 }
 
 
@@ -419,5 +429,17 @@ void Disassembler6502::OP_BVS(State6502& state, AddressingPtr& adr) {
 void Disassembler6502::OP_BVC(State6502& state, AddressingPtr& adr) {
     canBranch = state.status.o == 0;
     state.pc = EXECADDRESSING(adr, state);
+}
+
+
+// Compare a byte with the accumulator by subtracting it from the accumulator
+// Effectively A - M, note that it does not modify any registers only status flags
+void Disassembler6502::OP_CMP(State6502& state, AddressingPtr& adr) {
+    uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
+    uint8_t sum = state.a + (~byte + 1);
+    setZero(state, sum);
+    setNegative(state, sum);
+    state.status.c = byte <= state.a;
+
 }
 
