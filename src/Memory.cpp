@@ -22,3 +22,12 @@ void Memory::write(const uint16_t& adr, const uint8_t& val) {
 void Memory::clear() {
     memory.fill(0);
 }
+
+
+uint8_t& Memory::operator[](const size_t& index) {
+    return memory[index];
+}
+
+const uint8_t& Memory::operator[](const size_t& index) const {
+    return memory[index];
+}

@@ -9,8 +9,13 @@ class Memory {
 public:
     Memory();
 
+    // These two read/write functions are necessary for later
     uint8_t read(const uint16_t& adr) const;
     void write(const uint16_t& adr, const uint8_t& val);
+
+    // For 'hard writing' into memory
+    uint8_t& operator[](const size_t&);
+    const uint8_t& operator[](const size_t&) const;
 
     void clear();
 private:
