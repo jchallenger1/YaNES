@@ -42,6 +42,12 @@ private:
     // Math Instructions
     void OP_ADC(State6502&, AddressingPtr&);
     void OP_SBC(State6502&, AddressingPtr&);
+    void OP_DEC(State6502&, AddressingPtr&);
+    void OP_DEX(State6502&, AddressingPtr&);
+    void OP_DEY(State6502&, AddressingPtr&);
+    void OP_INC(State6502&, AddressingPtr&);
+    void OP_INX(State6502&, AddressingPtr&);
+    void OP_INY(State6502&, AddressingPtr&);
     // Bitwise Instructions
     void OP_AND(State6502&, AddressingPtr&);
     void OP_ORA(State6502&, AddressingPtr&);
@@ -91,6 +97,8 @@ private:
     inline void LD(State6502&, AddressingPtr&, uint8_t& reg) const; // Load
     inline void ST(State6502&, AddressingPtr&, uint8_t& reg) const; // Store
     inline void TR(State6502&, AddressingPtr&, uint8_t& src, uint8_t& dst) const; // Transfer
+    inline void INC(State6502&, AddressingPtr&, uint8_t& reg) const;
+    inline void DEC(State6502&, AddressingPtr&, uint8_t& reg) const;
 
 
 };

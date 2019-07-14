@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE( LDA_ADDRESSING_TESTS ) {
 
 // These tests are from the examples databook
 // Tests are important for these instructions as they are the hardest in the entire instruction set
-BOOST_AUTO_TEST_CASE( ADC_SBC ) {
+BOOST_AUTO_TEST_CASE( math_tests ) {
     State6502 state;
     Disassembler6502 dis;
     auto& memory = state.memory;
@@ -112,6 +112,41 @@ BOOST_AUTO_TEST_CASE( ADC_SBC ) {
     passed = state.a == 2 && state.status.c == 1;
     if (!passed)
         BOOST_ERROR("2.13 SBC failure");
+
+    // Test INC in ABS
+    state.clear();
+    memory.write(0, 0xEE);
+    memory.write(1, 0x21);
+    memory.write(2, 0xF5);
+    memory.write(0xF521, 0xFF);
+    dis.runCycle(state);
+    passed = memory.read(0xF521) == 0 && state.status.z == 1;
+    if (!passed)
+        BOOST_ERROR("INC failure");
+    // Test INX
+    memory.write(3, 0xE8);
+    state.x = 0xFB;
+    dis.runCycle(state);
+    passed = state.x == 0xFB + 1;
+    if (!passed)
+        BOOST_ERROR("INX failure");
+    // Test DEC in zeropagex
+    state.x = 10;
+    memory.write(0xE2 + state.x, 0xFE);
+    memory.write(4, 0xD6);
+    memory.write(5, 0xE2);
+    dis.runCycle(state);
+    passed = memory.read(0xE2 + state.x) == 0xFE - 1;
+    if (!passed)
+        BOOST_ERROR("DEC failure");
+    // Test DEY
+    memory.write(6, 0x88);
+    state.x = 0;
+    dis.runCycle(state);
+    passed = state.y == 0xFF && state.status.n == 1;
+    if (!passed)
+        BOOST_ERROR("DEY failure");
+
 }
 
 BOOST_AUTO_TEST_CASE( AND_OR_XOR ) {

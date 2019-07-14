@@ -74,7 +74,20 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0xF9] = {&Disassembler6502::OP_SBC, &Disassembler6502::ADR_ABSY};
     opcodeTable[0xE1] = {&Disassembler6502::OP_SBC, &Disassembler6502::ADR_INDEXINDIRECT};
     opcodeTable[0xF1] = {&Disassembler6502::OP_SBC, &Disassembler6502::ADR_INDRECTINDEX};
-
+    // Decrementing
+    opcodeTable[0xC6] = {&Disassembler6502::OP_DEC, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0xD6] = {&Disassembler6502::OP_DEC, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0xCE] = {&Disassembler6502::OP_DEC, &Disassembler6502::ADR_ABS};
+    opcodeTable[0xDE] = {&Disassembler6502::OP_DEC, &Disassembler6502::ADR_ABSX};
+    opcodeTable[0xCA] = {&Disassembler6502::OP_DEX, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0x88] = {&Disassembler6502::OP_DEY, &Disassembler6502::ADR_IMPLICIT};
+    // Incrementing
+    opcodeTable[0xE6] = {&Disassembler6502::OP_INC, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0xF6] = {&Disassembler6502::OP_INC, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0xEE] = {&Disassembler6502::OP_INC, &Disassembler6502::ADR_ABS};
+    opcodeTable[0xFE] = {&Disassembler6502::OP_INC, &Disassembler6502::ADR_ABSX};
+    opcodeTable[0xE8] = {&Disassembler6502::OP_INX, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0xC8] = {&Disassembler6502::OP_INY, &Disassembler6502::ADR_IMPLICIT};
     /// ----- Bitwise Instructions -----
     ///
     ///
@@ -336,6 +349,22 @@ inline void Disassembler6502::TR(State6502& state, AddressingPtr& adr, uint8_t& 
     dst = src;
 }
 
+// Increment a register or memory byte
+// Addressing is put to the opcode function
+inline void Disassembler6502::INC(State6502& state, AddressingPtr&, uint8_t& reg) const {
+    ++reg;
+    setNegative(state, reg);
+    setZero(state, reg);
+}
+
+// Decrement a register or memory byte
+// Addressing is put to the opcode function
+inline void Disassembler6502::DEC(State6502& state, AddressingPtr&, uint8_t& reg) const {
+    --reg;
+    setNegative(state, reg);
+    setZero(state, reg);
+}
+
 ///
 ///
 /// ---------------- Opcode Functions ----------------
@@ -435,6 +464,38 @@ void Disassembler6502::OP_SBC(State6502& state, AddressingPtr& adr) {
     state.status.c = sum < 0x100;
     state.a = sum & 0xFF;
 }
+
+void Disassembler6502::OP_DEC(State6502& state, AddressingPtr& adr) {
+    uint16_t address = EXECADDRESSING(adr, state);
+    uint8_t byte = state.memory.read(address);
+    DEC(state, adr, byte);
+    state.memory.write(address, byte);
+}
+void Disassembler6502::OP_DEX(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    DEC(state, adr, state.x);
+}
+void Disassembler6502::OP_DEY(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    DEC(state, adr, state.y);
+}
+
+
+void Disassembler6502::OP_INC(State6502& state, AddressingPtr& adr) {
+    uint16_t address = EXECADDRESSING(adr, state);
+    uint8_t byte = state.memory.read(address);
+    INC(state, adr, byte);
+    state.memory.write(address, byte);
+}
+void Disassembler6502::OP_INX(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    INC(state, adr, state.x);
+}
+void Disassembler6502::OP_INY(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    INC(state, adr, state.y);
+}
+
 
 
 /// ----- Bitwise Instructions
