@@ -18,6 +18,18 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0xB9] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_ABSY};
     opcodeTable[0xA1] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_INDEXINDIRECT};
     opcodeTable[0xB1] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_INDRECTINDEX};
+    // LDX
+    opcodeTable[0xA2] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_IMMEDIATE};
+    opcodeTable[0xA6] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0xB6] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0xAE] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_ABS};
+    opcodeTable[0xBE] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_ABSX};
+    // LDY
+    opcodeTable[0xA0] = {&Disassembler6502::OP_LDY, &Disassembler6502::ADR_IMMEDIATE};
+    opcodeTable[0xA4] = {&Disassembler6502::OP_LDY, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0xB4] = {&Disassembler6502::OP_LDY, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0xAC] = {&Disassembler6502::OP_LDY, &Disassembler6502::ADR_ABS};
+    opcodeTable[0xBC] = {&Disassembler6502::OP_LDY, &Disassembler6502::ADR_ABSX};
     // STA
     opcodeTable[0x85] = {&Disassembler6502::OP_STA, &Disassembler6502::ADR_ZEROPAGE};
     opcodeTable[0x95] = {&Disassembler6502::OP_STA, &Disassembler6502::ADR_ZEROPAGEX};
@@ -289,7 +301,7 @@ uint16_t Disassembler6502::ADR_RELATIVE(State6502& state) const {
 ///
 
 // Load register reg from memory
-inline void Disassembler6502::LD(State6502& state, AddressingPtr& adr, uint8_t& reg) {
+inline void Disassembler6502::LD(State6502& state, AddressingPtr& adr, uint8_t& reg) const {
     uint16_t address = EXECADDRESSING(adr, state);
     reg = state.memory.read(address);
     setZero(state, reg);
@@ -308,6 +320,14 @@ inline void Disassembler6502::LD(State6502& state, AddressingPtr& adr, uint8_t& 
 // Load accumulator from memory
 void Disassembler6502::OP_LDA(State6502& state, AddressingPtr& adr) {
     LD(state, adr, state.a);
+}
+
+void Disassembler6502::OP_LDX(State6502& state, AddressingPtr& adr) {
+    LD(state, adr, state.x);
+}
+
+void Disassembler6502::OP_LDY(State6502& state, AddressingPtr& adr) {
+    LD(state, adr, state.y);
 }
 
 // Store accumulator in memory

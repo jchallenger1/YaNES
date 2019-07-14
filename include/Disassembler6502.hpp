@@ -28,6 +28,8 @@ private:
     /// -- Opcode Instructions --
     // Storage Instructions
     void OP_LDA(State6502&, AddressingPtr&);
+    void OP_LDX(State6502&, AddressingPtr&);
+    void OP_LDY(State6502&, AddressingPtr&);
     void OP_STA(State6502&, AddressingPtr&);
     // Math Instructions
     void OP_ADC(State6502&, AddressingPtr&);
@@ -78,7 +80,7 @@ private:
     inline void setNegative(State6502&, const uint16_t&) const noexcept;
 
     /// -- General CPU functions --
-    inline void LD(State6502&, AddressingPtr&, uint8_t& reg);
+    inline void LD(State6502&, AddressingPtr&, uint8_t& reg) const;
 
 
 };
