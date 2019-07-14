@@ -193,6 +193,11 @@ void Disassembler6502::runCycle(State6502& state) {
     EXECOPCODE(instruction.instr, instruction.addr, state);
 }
 
+void Disassembler6502::runN(State6502& state, const int& num) {
+    for (int i = 0; i != num; i++)
+        runCycle(state);
+}
+
 
 
 ///

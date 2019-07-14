@@ -15,6 +15,7 @@ public:
     Disassembler6502();
     
     void runCycle(State6502&);
+    void runN(State6502&, const int& num);
 private:
 
     struct Instr {
