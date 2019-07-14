@@ -142,12 +142,12 @@ void Disassembler6502::runCycle(State6502& state) {
 
 
 // zero flag is set if value is equal to zero.
-inline void Disassembler6502::setZero(State6502& state, const uint16_t& val) const {
+inline void Disassembler6502::setZero(State6502& state, const uint16_t& val) const noexcept {
     state.status.z = val == 0;
 }
 
 // Negative flag is set if value's bit 7 is set
-inline void Disassembler6502::setNegative(State6502& state, const uint16_t& val) const {
+inline void Disassembler6502::setNegative(State6502& state, const uint16_t& val) const noexcept {
     state.status.n = (val >> 7) & 1;
 }
 
@@ -162,7 +162,7 @@ inline void Disassembler6502::setNegative(State6502& state, const uint16_t& val)
 
 
 // Immediate: The data to be obtained is simply the next byte
-uint16_t Disassembler6502::ADR_IMMEDIATE(State6502& state) {
+uint16_t Disassembler6502::ADR_IMMEDIATE(State6502& state) const noexcept {
     uint16_t address = state.pc + 1;
     state.pc += 2;
     return address;
@@ -170,7 +170,7 @@ uint16_t Disassembler6502::ADR_IMMEDIATE(State6502& state) {
 
 // ZeroPage: The data is in the location of the address of the next byte
 // Limits the address from 0-256
-uint16_t Disassembler6502::ADR_ZEROPAGE(State6502& state) {
+uint16_t Disassembler6502::ADR_ZEROPAGE(State6502& state) const {
     uint8_t address = state.memory.read(state.pc + 1);
     state.pc += 2;
     return address;
@@ -178,14 +178,14 @@ uint16_t Disassembler6502::ADR_ZEROPAGE(State6502& state) {
 }
 // ZeroPageX: Similar to ZeroPage, but address is added with register X
 // Number will wrap around if address >= 256
-uint16_t Disassembler6502::ADR_ZEROPAGEX(State6502& state) {
+uint16_t Disassembler6502::ADR_ZEROPAGEX(State6502& state) const {
     uint8_t address = (state.memory.read(state.pc + 1) + state.x) % 256;
     state.pc += 2;
     return address;
 }
 
 // ZeroPageY: Same as X, but add Y instead
-uint16_t Disassembler6502::ADR_ZEROPAGEY(State6502& state) {
+uint16_t Disassembler6502::ADR_ZEROPAGEY(State6502& state) const {
     uint8_t address = (state.memory.read(state.pc + 1) + state.y) % 256;
     state.pc += 2;
     return address;
@@ -194,7 +194,7 @@ uint16_t Disassembler6502::ADR_ZEROPAGEY(State6502& state) {
 // Absolute: A full 16 bit address is used to identify target location
 // Note that this system uses little endian architecture
 // lowest bits @ 0, highest @ 1
-uint16_t Disassembler6502::ADR_ABS(State6502& state) {
+uint16_t Disassembler6502::ADR_ABS(State6502& state) const {
     uint16_t address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(state.pc + 2)) << 8) | state.memory.read(state.pc + 1) );
     state.pc += 3;
     return address;
@@ -202,7 +202,7 @@ uint16_t Disassembler6502::ADR_ABS(State6502& state) {
 
 // AbsoluteX: Similar to Absolute, but address is added with register X
 // Assumption that no wrapping occurs
-uint16_t Disassembler6502::ADR_ABSX(State6502& state) {
+uint16_t Disassembler6502::ADR_ABSX(State6502& state) const {
     uint16_t address = static_cast<uint16_t>( ((static_cast<uint16_t>(state.memory.read(state.pc + 2)) << 8) | state.memory.read(state.pc + 1)) + state.x );
     state.pc += 3;
     return address;
@@ -210,7 +210,7 @@ uint16_t Disassembler6502::ADR_ABSX(State6502& state) {
 
 // AbsoluteX: Similar to Absolute, but address is added with register Y
 // Assumption that no wrapping occurs
-uint16_t Disassembler6502::ADR_ABSY(State6502& state) {
+uint16_t Disassembler6502::ADR_ABSY(State6502& state) const {
     uint16_t address = static_cast<uint16_t>( ((static_cast<uint16_t>(state.memory.read(state.pc + 2)) << 8) | state.memory.read(state.pc + 1)) + state.y );
     state.pc += 3;
     return address;
@@ -220,7 +220,7 @@ uint16_t Disassembler6502::ADR_ABSY(State6502& state) {
 // The next byte refers to a location in memory within range 0-255, p for simplicity
 // p and p+1 is a full 16 bit location address, the address is then added with register Y to get the final address
 // The byte is then that full location
-uint16_t Disassembler6502::ADR_INDRECTINDEX(State6502& state) {
+uint16_t Disassembler6502::ADR_INDRECTINDEX(State6502& state) const {
     uint8_t p = state.memory.read(state.pc + 1);
     uint16_t address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(p + 1)) << 8) | state.memory.read(p) );
     address += state.y;
@@ -231,7 +231,7 @@ uint16_t Disassembler6502::ADR_INDRECTINDEX(State6502& state) {
 // IndexedIndirect/Indirect,X:
 // Similar to above, but X is not added to the full address, rather it is added to p to specifiy where the low and high bits are
 // Instead of p and p+1, it is p+x and p+x+1
-uint16_t Disassembler6502::ADR_INDEXINDIRECT(State6502& state) {
+uint16_t Disassembler6502::ADR_INDEXINDIRECT(State6502& state) const {
     uint8_t p = state.memory.read(state.pc + 1);
     uint16_t address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(p + state.x + 1)) << 8) | state.memory.read(p + state.x) );
     state.pc += 2;
@@ -239,7 +239,7 @@ uint16_t Disassembler6502::ADR_INDEXINDIRECT(State6502& state) {
 }
 
 // Implicit/Implied: No address is returned, its needed address is implied via the instruction
-uint16_t Disassembler6502::ADR_IMPLICIT(State6502& state) {
+uint16_t Disassembler6502::ADR_IMPLICIT(State6502& state) const noexcept {
     ++state.pc;
     return 0;
 }
@@ -249,7 +249,7 @@ uint16_t Disassembler6502::ADR_IMPLICIT(State6502& state) {
 // Note that if the lowest bits are at the end of the page boundary, then it should
 // wrap around back.
 // EX jmp 0xC1FF, should wrap to 0xC100 ONLY if low bits is 0xFF
-uint16_t Disassembler6502::ADR_INDIRECT(State6502& state) {
+uint16_t Disassembler6502::ADR_INDIRECT(State6502& state) const {
     uint8_t lowByte = state.memory.read(state.pc + 1);
     uint8_t highByte = state.memory.read(state.pc + 2);
 
@@ -271,7 +271,7 @@ uint16_t Disassembler6502::ADR_INDIRECT(State6502& state) {
 // Relative : Similar to immediate however the byte is a signed number rather than unsigned
 // Relative is only used by branching operations
 // The byte determines from where the pc should move in the range of -128 to +127
-uint16_t Disassembler6502::ADR_RELATIVE(State6502& state) {
+uint16_t Disassembler6502::ADR_RELATIVE(State6502& state) const {
 
     if (!canBranch) return state.pc + 2;
 
