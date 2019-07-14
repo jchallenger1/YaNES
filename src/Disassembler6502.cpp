@@ -38,7 +38,14 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0x99] = {&Disassembler6502::OP_STA, &Disassembler6502::ADR_ABSY};
     opcodeTable[0x81] = {&Disassembler6502::OP_STA, &Disassembler6502::ADR_INDEXINDIRECT};
     opcodeTable[0x91] = {&Disassembler6502::OP_STA, &Disassembler6502::ADR_INDRECTINDEX};
-
+    // STX
+    opcodeTable[0x86] = {&Disassembler6502::OP_STX, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0x96] = {&Disassembler6502::OP_STX, &Disassembler6502::ADR_ZEROPAGEY};
+    opcodeTable[0x8E] = {&Disassembler6502::OP_STX, &Disassembler6502::ADR_ABS};
+    // STY
+    opcodeTable[0x84] = {&Disassembler6502::OP_STY, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0x94] = {&Disassembler6502::OP_STY, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0x8C] = {&Disassembler6502::OP_STY, &Disassembler6502::ADR_ABS};
     /// ----- Math Instructions ------
     ///
     ///
@@ -308,6 +315,10 @@ inline void Disassembler6502::LD(State6502& state, AddressingPtr& adr, uint8_t& 
     setNegative(state, reg);
 }
 
+inline void Disassembler6502::ST(State6502& state, AddressingPtr& adr, uint8_t& reg) const {
+    uint16_t address = EXECADDRESSING(adr, state);
+    state.memory.write(address, reg);
+}
 ///
 ///
 /// ---------------- Opcode Functions ----------------
@@ -321,21 +332,23 @@ inline void Disassembler6502::LD(State6502& state, AddressingPtr& adr, uint8_t& 
 void Disassembler6502::OP_LDA(State6502& state, AddressingPtr& adr) {
     LD(state, adr, state.a);
 }
-
 void Disassembler6502::OP_LDX(State6502& state, AddressingPtr& adr) {
     LD(state, adr, state.x);
 }
-
 void Disassembler6502::OP_LDY(State6502& state, AddressingPtr& adr) {
     LD(state, adr, state.y);
 }
 
 // Store accumulator in memory
 void Disassembler6502::OP_STA(State6502& state, AddressingPtr& adr) {
-    uint16_t address = EXECADDRESSING(adr, state);
-    state.memory.write(address, state.a);
+    ST(state, adr, state.a);
 }
-
+void Disassembler6502::OP_STX(State6502& state, AddressingPtr& adr) {
+    ST(state, adr, state.x);
+}
+void Disassembler6502::OP_STY(State6502& state, AddressingPtr& adr) {
+    ST(state, adr, state.y);
+}
 
 /// ---- Math Instructions ----
 

@@ -31,6 +31,8 @@ private:
     void OP_LDX(State6502&, AddressingPtr&);
     void OP_LDY(State6502&, AddressingPtr&);
     void OP_STA(State6502&, AddressingPtr&);
+    void OP_STX(State6502&, AddressingPtr&);
+    void OP_STY(State6502&, AddressingPtr&);
     // Math Instructions
     void OP_ADC(State6502&, AddressingPtr&);
     void OP_SBC(State6502&, AddressingPtr&);
@@ -81,6 +83,7 @@ private:
 
     /// -- General CPU functions --
     inline void LD(State6502&, AddressingPtr&, uint8_t& reg) const;
+    inline void ST(State6502&, AddressingPtr&, uint8_t& reg) const;
 
 
 };
