@@ -77,6 +77,10 @@ private:
     inline void setZero(State6502&, const uint16_t&) const;
     inline void setNegative(State6502&, const uint16_t&) const;
 
+    /// -- General CPU functions --
+    inline void LDA(State6502&, AddressingPtr& adr, uint8_t& reg);
+
+
 };
 
 #endif // DISASSEMBLER6502_HPP

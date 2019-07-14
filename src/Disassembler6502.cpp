@@ -284,6 +284,20 @@ uint16_t Disassembler6502::ADR_RELATIVE(State6502& state) {
 
 ///
 ///
+/// ---------------- General CPU Functions ----------------
+///
+///
+
+// Load register reg from memory
+inline void Disassembler6502::LD(State6502& state, AddressingPtr& adr, uint8_t& reg) {
+    uint16_t address = EXECADDRESSING(adr, state);
+    reg = state.memory.read(address);
+    setZero(state, reg);
+    setNegative(state, reg);
+}
+
+///
+///
 /// ---------------- Opcode Functions ----------------
 ///
 ///
@@ -293,10 +307,7 @@ uint16_t Disassembler6502::ADR_RELATIVE(State6502& state) {
 
 // Load accumulator from memory
 void Disassembler6502::OP_LDA(State6502& state, AddressingPtr& adr) {
-    uint16_t address = EXECADDRESSING(adr, state);
-    state.a = state.memory.read(address);
-    setZero(state, state.a);
-    setNegative(state, state.a);
+    LD(state, adr, state.a);
 }
 
 // Store accumulator in memory
