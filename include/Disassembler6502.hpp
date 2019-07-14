@@ -53,6 +53,10 @@ private:
     void OP_ORA(State6502&, AddressingPtr&);
     void OP_EOR(State6502&, AddressingPtr&);
     void OP_BIT(State6502&, AddressingPtr&);
+    void OP_ASL(State6502&, AddressingPtr&);
+    void OP_LSR(State6502&, AddressingPtr&);
+    void OP_ROL(State6502&, AddressingPtr&);
+    void OP_ROR(State6502&, AddressingPtr&);
     // Branch Instructions
     void OP_BMI(State6502&, AddressingPtr&);
     void OP_BPL(State6502&, AddressingPtr&);

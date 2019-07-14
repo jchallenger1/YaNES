@@ -121,7 +121,30 @@ Disassembler6502::Disassembler6502() {
     // BIT
     opcodeTable[0x24] = {&Disassembler6502::OP_BIT, &Disassembler6502::ADR_ZEROPAGE};
     opcodeTable[0x2C] = {&Disassembler6502::OP_BIT, &Disassembler6502::ADR_ABS};
-
+    // ASL
+    opcodeTable[0x0A] = {&Disassembler6502::OP_ASL, &Disassembler6502::ADR_ACCUM};
+    opcodeTable[0x06] = {&Disassembler6502::OP_ASL, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0x16] = {&Disassembler6502::OP_ASL, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0x0E] = {&Disassembler6502::OP_ASL, &Disassembler6502::ADR_ABS};
+    opcodeTable[0x1E] = {&Disassembler6502::OP_ASL, &Disassembler6502::ADR_ABSX};
+    // LSR
+    opcodeTable[0x4A] = {&Disassembler6502::OP_LSR, &Disassembler6502::ADR_ACCUM};
+    opcodeTable[0x46] = {&Disassembler6502::OP_LSR, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0x56] = {&Disassembler6502::OP_LSR, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0x4E] = {&Disassembler6502::OP_LSR, &Disassembler6502::ADR_ABS};
+    opcodeTable[0x5E] = {&Disassembler6502::OP_LSR, &Disassembler6502::ADR_ABSX};
+    // ROL
+    opcodeTable[0x2A] = {&Disassembler6502::OP_ROL, &Disassembler6502::ADR_ACCUM};
+    opcodeTable[0x26] = {&Disassembler6502::OP_ROL, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0x36] = {&Disassembler6502::OP_ROL, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0x2E] = {&Disassembler6502::OP_ROL, &Disassembler6502::ADR_ABS};
+    opcodeTable[0x3E] = {&Disassembler6502::OP_ROL, &Disassembler6502::ADR_ABSX};
+    // ROR
+    opcodeTable[0x6A] = {&Disassembler6502::OP_ROR, &Disassembler6502::ADR_ACCUM};
+    opcodeTable[0x66] = {&Disassembler6502::OP_ROR, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0x76] = {&Disassembler6502::OP_ROR, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0x6E] = {&Disassembler6502::OP_ROR, &Disassembler6502::ADR_ABS};
+    opcodeTable[0x7E] = {&Disassembler6502::OP_ROR, &Disassembler6502::ADR_ABSX};
     /// ----- Branch Instructions -----
     ///
     ///
@@ -320,6 +343,11 @@ uint16_t Disassembler6502::ADR_RELATIVE(State6502& state) const {
     return isPositive ? state.pc + offset : state.pc - offset;
 }
 
+// Accumulator : Same as implied, but its always accumulator(a) register.
+uint16_t Disassembler6502::ADR_ACCUM(State6502& state) const {
+    ++state.pc;
+    return 0;
+}
 
 ///
 ///
@@ -534,6 +562,73 @@ void Disassembler6502::OP_BIT(State6502& state, AddressingPtr& adr) {
     setZero(state, sum);
     setNegative(state, sum);
     state.status.o = (sum & 0x40) >> 6;
+}
+
+// Arithmetric Shift Left
+// Shift all bits left by 1, bit 0 is always 0
+// The original 7 bit is shifted into the carry status flag
+void Disassembler6502::OP_ASL(State6502& state, AddressingPtr& adr) {
+    uint16_t address = EXECADDRESSING(adr, state);
+    uint8_t byte = adr == &Disassembler6502::ADR_ACCUM ? state.a : state.memory.read(address);
+    state.status.c = (byte & 0x80) >> 7;
+    byte <<= 1;
+    setZero(state, byte);
+    setNegative(state, byte);
+    if (adr == &Disassembler6502::ADR_ACCUM)
+        state.a = byte;
+    else
+        state.memory.write(address, byte);
+}
+
+// Logical Shift Right
+// Shift all bits right one position bit 7 is always 0, original 0 bit shifted into carry
+void Disassembler6502::OP_LSR(State6502& state, AddressingPtr& adr) {
+    uint16_t address = EXECADDRESSING(adr, state);
+    uint8_t byte = adr == &Disassembler6502::ADR_ACCUM ? state.a : state.memory.read(address);
+    state.status.c = byte & 1;
+    byte >>= 1;
+    setZero(state, byte);
+    setNegative(state, byte);
+    if (adr == &Disassembler6502::ADR_ACCUM)
+        state.a = byte;
+    else
+        state.memory.write(address, byte);
+
+}
+
+// Rotate Left
+// Shift all bits left by 1
+// bit 0 is the carry flag and original bit 7 is now carry
+void Disassembler6502::OP_ROL(State6502& state, AddressingPtr& adr) {
+    uint16_t address = EXECADDRESSING(adr, state);
+    uint8_t byte = adr == &Disassembler6502::ADR_ACCUM ? state.a : state.memory.read(address);
+    uint8_t bit7 = (byte & 0x80) >> 7;
+    byte <<= 1;
+    byte |= state.status.c;
+    state.status.c = bit7;
+    setZero(state, byte);
+    setNegative(state, byte);
+    if (adr == &Disassembler6502::ADR_ACCUM)
+        state.a = byte;
+    else
+        state.memory.write(address, byte);
+}
+
+// Rotate Right
+// shfit right, carry bit goes into bit 7, original bit 0 is now carry
+void Disassembler6502::OP_ROR(State6502& state, AddressingPtr& adr) {
+    uint16_t address = EXECADDRESSING(adr, state);
+    uint8_t byte = adr == &Disassembler6502::ADR_ACCUM ? state.a : state.memory.read(address);
+    uint8_t bit0 = byte & 1;
+    byte >>= 1;
+    byte |= state.status.c << 7;
+    state.status.c = bit0;
+    setZero(state, byte);
+    setNegative(state, byte);
+    if (adr == &Disassembler6502::ADR_ACCUM)
+        state.a = byte;
+    else
+        state.memory.write(address, byte);
 }
 
 /// ----- Branching Instructions
