@@ -40,6 +40,16 @@ BOOST_AUTO_TEST_CASE( LDA_ADDRESSING_TESTS ) {
     passed = state.pc == 0x9 && state.a == 0xAA;
     if (!passed)
         BOOST_FAIL("ABS failure");
+
+    state.clear();
+    memory.write(0, 0x9A);
+    state.x = 0xFA;
+    state.sp = 022;
+    dis.runCycle(state);
+    passed = state.sp == 0xFA && state.x == 0xFA && state.pc == 0x1;
+    if (!passed)
+        BOOST_FAIL("Implicit/Implied failure");
+
 }
 
 // These tests are from the examples databook

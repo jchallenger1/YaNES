@@ -46,6 +46,13 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0x84] = {&Disassembler6502::OP_STY, &Disassembler6502::ADR_ZEROPAGE};
     opcodeTable[0x94] = {&Disassembler6502::OP_STY, &Disassembler6502::ADR_ZEROPAGEX};
     opcodeTable[0x8C] = {&Disassembler6502::OP_STY, &Disassembler6502::ADR_ABS};
+    // Transfer instr
+    opcodeTable[0xAA] = {&Disassembler6502::OP_TAX, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0xA8] = {&Disassembler6502::OP_TAY, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0xBA] = {&Disassembler6502::OP_TSX, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0x8A] = {&Disassembler6502::OP_TXA, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0x9A] = {&Disassembler6502::OP_TXS, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0x98] = {&Disassembler6502::OP_TYA, &Disassembler6502::ADR_IMPLICIT};
     /// ----- Math Instructions ------
     ///
     ///
@@ -315,10 +322,20 @@ inline void Disassembler6502::LD(State6502& state, AddressingPtr& adr, uint8_t& 
     setNegative(state, reg);
 }
 
+// Store a register into memory
 inline void Disassembler6502::ST(State6502& state, AddressingPtr& adr, uint8_t& reg) const {
     uint16_t address = EXECADDRESSING(adr, state);
     state.memory.write(address, reg);
 }
+
+// Transfer a regular or special register to another
+inline void Disassembler6502::TR(State6502& state, AddressingPtr& adr, uint8_t& src, uint8_t& dst) const {
+    EXECADDRESSING(adr, state);
+    setNegative(state, src);
+    setZero(state, src);
+    dst = src;
+}
+
 ///
 ///
 /// ---------------- Opcode Functions ----------------
@@ -350,6 +367,27 @@ void Disassembler6502::OP_STY(State6502& state, AddressingPtr& adr) {
     ST(state, adr, state.y);
 }
 
+// Transfer register to another register
+// in form TQP, T: Transfer opcode, Q: src, P: dst
+
+void Disassembler6502::OP_TAX(State6502& state, AddressingPtr& adr) {
+    TR(state, adr, state.a, state.x);
+}
+void Disassembler6502::OP_TAY(State6502& state, AddressingPtr& adr) {
+    TR(state, adr, state.a, state.y);
+}
+void Disassembler6502::OP_TSX(State6502& state, AddressingPtr& adr) {
+    TR(state, adr, state.sp, state.x);
+}
+void Disassembler6502::OP_TXA(State6502& state, AddressingPtr& adr) {
+    TR(state, adr, state.x, state.a);
+}
+void Disassembler6502::OP_TXS(State6502& state, AddressingPtr& adr) {
+    TR(state, adr, state.x, state.sp);
+}
+void Disassembler6502::OP_TYA(State6502& state, AddressingPtr& adr) {
+    TR(state, adr, state.y, state.a);
+}
 /// ---- Math Instructions ----
 
 

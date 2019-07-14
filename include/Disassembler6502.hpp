@@ -33,6 +33,12 @@ private:
     void OP_STA(State6502&, AddressingPtr&);
     void OP_STX(State6502&, AddressingPtr&);
     void OP_STY(State6502&, AddressingPtr&);
+    void OP_TAX(State6502&, AddressingPtr&);
+    void OP_TAY(State6502&, AddressingPtr&);
+    void OP_TSX(State6502&, AddressingPtr&);
+    void OP_TXA(State6502&, AddressingPtr&);
+    void OP_TXS(State6502&, AddressingPtr&);
+    void OP_TYA(State6502&, AddressingPtr&);
     // Math Instructions
     void OP_ADC(State6502&, AddressingPtr&);
     void OP_SBC(State6502&, AddressingPtr&);
@@ -82,8 +88,9 @@ private:
     inline void setNegative(State6502&, const uint16_t&) const noexcept;
 
     /// -- General CPU functions --
-    inline void LD(State6502&, AddressingPtr&, uint8_t& reg) const;
-    inline void ST(State6502&, AddressingPtr&, uint8_t& reg) const;
+    inline void LD(State6502&, AddressingPtr&, uint8_t& reg) const; // Load
+    inline void ST(State6502&, AddressingPtr&, uint8_t& reg) const; // Store
+    inline void TR(State6502&, AddressingPtr&, uint8_t& src, uint8_t& dst) const; // Transfer
 
 
 };
