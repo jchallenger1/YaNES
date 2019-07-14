@@ -25,23 +25,19 @@ private:
     std::array<Instr, 0xFF> opcodeTable;
     bool canBranch; // used by branching instructions
 
+    /// -- Opcode Instructions --
+    // Storage Instructions
     void OP_LDA(State6502&, AddressingPtr&);
     void OP_STA(State6502&, AddressingPtr&);
+    // Math Instructions
     void OP_ADC(State6502&, AddressingPtr&);
     void OP_SBC(State6502&, AddressingPtr&);
+    // Bitwise Instructions
     void OP_AND(State6502&, AddressingPtr&);
     void OP_ORA(State6502&, AddressingPtr&);
     void OP_EOR(State6502&, AddressingPtr&);
-
-    void OP_SEC(State6502&, AddressingPtr&);
-    void OP_CLC(State6502&, AddressingPtr&);
-    void OP_SEI(State6502&, AddressingPtr&);
-    void OP_CLI(State6502&, AddressingPtr&);
-    void OP_SED(State6502&, AddressingPtr&);
-    void OP_CLD(State6502&, AddressingPtr&);
-    void OP_CLV(State6502&, AddressingPtr&);
-
-    void OP_JMP(State6502&, AddressingPtr&);
+    void OP_BIT(State6502&, AddressingPtr&);
+    // Branch Instructions
     void OP_BMI(State6502&, AddressingPtr&);
     void OP_BPL(State6502&, AddressingPtr&);
     void OP_BCC(State6502&, AddressingPtr&);
@@ -50,11 +46,19 @@ private:
     void OP_BNE(State6502&, AddressingPtr&);
     void OP_BVS(State6502&, AddressingPtr&);
     void OP_BVC(State6502&, AddressingPtr&);
-
+    // Jump Instructions
+    void OP_JMP(State6502&, AddressingPtr&);
+    // Register Instrucitons
+    void OP_SEC(State6502&, AddressingPtr&);
+    void OP_CLC(State6502&, AddressingPtr&);
+    void OP_SEI(State6502&, AddressingPtr&);
+    void OP_CLI(State6502&, AddressingPtr&);
+    void OP_SED(State6502&, AddressingPtr&);
+    void OP_CLD(State6502&, AddressingPtr&);
+    void OP_CLV(State6502&, AddressingPtr&);
     void OP_CMP(State6502&, AddressingPtr&);
-    void OP_BIT(State6502&, AddressingPtr&);
 
-
+    /// -- Addressing Mode Instructions --
     uint16_t ADR_IMPLICIT(State6502&);
     uint16_t ADR_ACCUM(State6502&);
     uint16_t ADR_IMMEDIATE(State6502&);
@@ -69,7 +73,7 @@ private:
     uint16_t ADR_INDEXINDIRECT(State6502&);
     uint16_t ADR_INDRECTINDEX(State6502&);
 
-
+    /// -- Flagging Operations --
     inline void setZero(State6502&, const uint16_t&) const;
     inline void setNegative(State6502&, const uint16_t&) const;
 

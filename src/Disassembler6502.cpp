@@ -6,7 +6,9 @@
 
 Disassembler6502::Disassembler6502() {
 
-    /// ----- Group 1 Instructions also chapter 2 of the data book instructions ------
+    /// ----- Storage Instructions ------
+    ///
+    ///
     // LDA
     opcodeTable[0xA9] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_IMMEDIATE};
     opcodeTable[0xA5] = {&Disassembler6502::OP_LDA, &Disassembler6502::ADR_ZEROPAGE};
@@ -24,6 +26,10 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0x99] = {&Disassembler6502::OP_STA, &Disassembler6502::ADR_ABSY};
     opcodeTable[0x81] = {&Disassembler6502::OP_STA, &Disassembler6502::ADR_INDEXINDIRECT};
     opcodeTable[0x91] = {&Disassembler6502::OP_STA, &Disassembler6502::ADR_INDRECTINDEX};
+
+    /// ----- Math Instructions ------
+    ///
+    ///
     // ADC
     opcodeTable[0x69] = {&Disassembler6502::OP_ADC, &Disassembler6502::ADR_IMMEDIATE};
     opcodeTable[0x65] = {&Disassembler6502::OP_ADC, &Disassembler6502::ADR_ZEROPAGE};
@@ -42,6 +48,10 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0xF9] = {&Disassembler6502::OP_SBC, &Disassembler6502::ADR_ABSY};
     opcodeTable[0xE1] = {&Disassembler6502::OP_SBC, &Disassembler6502::ADR_INDEXINDIRECT};
     opcodeTable[0xF1] = {&Disassembler6502::OP_SBC, &Disassembler6502::ADR_INDRECTINDEX};
+
+    /// ----- Bitwise Instructions -----
+    ///
+    ///
     // AND
     opcodeTable[0x29] = {&Disassembler6502::OP_AND, &Disassembler6502::ADR_IMMEDIATE};
     opcodeTable[0x25] = {&Disassembler6502::OP_AND, &Disassembler6502::ADR_ZEROPAGE};
@@ -69,22 +79,13 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0x59] = {&Disassembler6502::OP_EOR, &Disassembler6502::ADR_ABSY};
     opcodeTable[0x41] = {&Disassembler6502::OP_EOR, &Disassembler6502::ADR_INDEXINDIRECT};
     opcodeTable[0x51] = {&Disassembler6502::OP_EOR, &Disassembler6502::ADR_INDRECTINDEX};
+    // BIT
+    opcodeTable[0x24] = {&Disassembler6502::OP_BIT, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0x2C] = {&Disassembler6502::OP_BIT, &Disassembler6502::ADR_ABS};
 
-    /// ----- Flag (Processor Status) Instructions ------
-
-    opcodeTable[0x18] = {&Disassembler6502::OP_CLC, &Disassembler6502::ADR_IMPLICIT};
-    opcodeTable[0x38] = {&Disassembler6502::OP_SEC, &Disassembler6502::ADR_IMPLICIT};
-    opcodeTable[0x58] = {&Disassembler6502::OP_CLI, &Disassembler6502::ADR_IMPLICIT};
-    opcodeTable[0x78] = {&Disassembler6502::OP_SEI, &Disassembler6502::ADR_IMPLICIT};
-    opcodeTable[0xB8] = {&Disassembler6502::OP_CLV, &Disassembler6502::ADR_IMPLICIT};
-    opcodeTable[0xD8] = {&Disassembler6502::OP_CLD, &Disassembler6502::ADR_IMPLICIT};
-    opcodeTable[0xF8] = {&Disassembler6502::OP_SED, &Disassembler6502::ADR_IMPLICIT};
-
-
-    /// --- Branching and Jumping Instructions -----
-    opcodeTable[0x4C] = {&Disassembler6502::OP_JMP, &Disassembler6502::ADR_ABS};
-    opcodeTable[0x6C] = {&Disassembler6502::OP_JMP, &Disassembler6502::ADR_INDIRECT};
-
+    /// ----- Branch Instructions -----
+    ///
+    ///
     opcodeTable[0x10] = {&Disassembler6502::OP_BPL, &Disassembler6502::ADR_RELATIVE};
     opcodeTable[0x30] = {&Disassembler6502::OP_BMI, &Disassembler6502::ADR_RELATIVE};
     opcodeTable[0x50] = {&Disassembler6502::OP_BVC, &Disassembler6502::ADR_RELATIVE};
@@ -94,6 +95,23 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0xD0] = {&Disassembler6502::OP_BNE, &Disassembler6502::ADR_RELATIVE};
     opcodeTable[0xF0] = {&Disassembler6502::OP_BEQ, &Disassembler6502::ADR_RELATIVE};
 
+    /// ----- Jump Instructions ------
+    ///
+    ///
+    opcodeTable[0x4C] = {&Disassembler6502::OP_JMP, &Disassembler6502::ADR_ABS};
+    opcodeTable[0x6C] = {&Disassembler6502::OP_JMP, &Disassembler6502::ADR_INDIRECT};
+
+    /// ----- Register Instructions ------
+    ///
+    ///
+    opcodeTable[0x18] = {&Disassembler6502::OP_CLC, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0x38] = {&Disassembler6502::OP_SEC, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0x58] = {&Disassembler6502::OP_CLI, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0x78] = {&Disassembler6502::OP_SEI, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0xB8] = {&Disassembler6502::OP_CLV, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0xD8] = {&Disassembler6502::OP_CLD, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0xF8] = {&Disassembler6502::OP_SED, &Disassembler6502::ADR_IMPLICIT};
+    // CMP
     opcodeTable[0xC9] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_IMMEDIATE};
     opcodeTable[0xC5] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_ZEROPAGE};
     opcodeTable[0xD5] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_ZEROPAGEX};
@@ -102,10 +120,8 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0xD9] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_ABSY};
     opcodeTable[0xC1] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_INDEXINDIRECT};
     opcodeTable[0xD1] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_INDRECTINDEX};
-
-    opcodeTable[0x24] = {&Disassembler6502::OP_BIT, &Disassembler6502::ADR_ZEROPAGE};
-    opcodeTable[0x2C] = {&Disassembler6502::OP_BIT, &Disassembler6502::ADR_ABS};
-
+    /// ----- Stack Instructions -------
+    /// ----- System Instructions ------
 }
 
 
@@ -115,10 +131,15 @@ void Disassembler6502::runCycle(State6502& state) {
     EXECOPCODE(instruction.instr, instruction.addr, state);
 }
 
+
+
 ///
-/// \ Flagging Operations
+///
+/// \ ---------------- Flagging Operations ----------------
 ///
 ///
+
+
 
 // zero flag is set if value is equal to zero.
 inline void Disassembler6502::setZero(State6502& state, const uint16_t& val) const {
@@ -130,9 +151,15 @@ inline void Disassembler6502::setNegative(State6502& state, const uint16_t& val)
     state.status.n = (val >> 7) & 1;
 }
 
+
+
 ///
-/// \ Addressing Operations
 ///
+/// \ ---------------- Addressing Operations ----------------
+///
+///
+
+
 
 // Immediate: The data to be obtained is simply the next byte
 uint16_t Disassembler6502::ADR_IMMEDIATE(State6502& state) {
@@ -254,6 +281,16 @@ uint16_t Disassembler6502::ADR_RELATIVE(State6502& state) {
     return isPositive ? state.pc + offset : state.pc - offset;
 }
 
+
+///
+///
+/// ---------------- Opcode Functions ----------------
+///
+///
+
+
+/// ---- Storage Instructions ----
+
 // Load accumulator from memory
 void Disassembler6502::OP_LDA(State6502& state, AddressingPtr& adr) {
     uint16_t address = EXECADDRESSING(adr, state);
@@ -267,6 +304,10 @@ void Disassembler6502::OP_STA(State6502& state, AddressingPtr& adr) {
     uint16_t address = EXECADDRESSING(adr, state);
     state.memory.write(address, state.a);
 }
+
+
+/// ---- Math Instructions ----
+
 
 // Add with carry from memory (A + M + C -> A)
 // https://stackoverflow.com/questions/29193303/6502-emulation-proper-way-to-implement-adc-and-sbc  and
@@ -313,6 +354,11 @@ void Disassembler6502::OP_SBC(State6502& state, AddressingPtr& adr) {
     state.a = sum & 0xFF;
 }
 
+
+/// ----- Bitwise Instructions
+
+
+
 // Binary AND w/ accumulator ( A & M -> A)
 void Disassembler6502::OP_AND(State6502& state, AddressingPtr& adr) {
     uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
@@ -337,59 +383,19 @@ void Disassembler6502::OP_EOR(State6502& state, AddressingPtr& adr) {
     setNegative(state, state.a);
 }
 
-
-
-
- // Set Carry bit
-void Disassembler6502::OP_SEC(State6502& state, AddressingPtr& adr) {
-    EXECADDRESSING(adr, state);
-    state.status.c = 1;
+// Test bits in memory with accumulator by using binary AND
+// -> A & M, no registers modified
+void Disassembler6502::OP_BIT(State6502& state, AddressingPtr& adr) {
+    uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
+    uint8_t sum = byte & state.a;
+    setZero(state, sum);
+    setNegative(state, sum);
+    state.status.o = (sum & 0x40) >> 6;
 }
 
-// Clear Carry bit
-void Disassembler6502::OP_CLC(State6502& state, AddressingPtr& adr) {
-    EXECADDRESSING(adr, state);
-    state.status.c = 0;
-}
-
-// Set interrupt
-void Disassembler6502::OP_SEI(State6502& state, AddressingPtr& adr) {
-    EXECADDRESSING(adr, state);
-    state.status.i = 1;
-}
-
-// Clear Interrupt
-void Disassembler6502::OP_CLI(State6502& state, AddressingPtr& adr) {
-    EXECADDRESSING(adr, state);
-    state.status.i = 0;
-}
-
-// Set Decimal
-void Disassembler6502::OP_SED(State6502& state, AddressingPtr& adr) {
-    EXECADDRESSING(adr, state);
-    state.status.d = 1;
-}
-
-// Clear Decimal
-void Disassembler6502::OP_CLD(State6502& state, AddressingPtr& adr) {
-    EXECADDRESSING(adr, state);
-    state.status.d = 0;
-}
-
-// Clear Overflow
-void Disassembler6502::OP_CLV(State6502& state, AddressingPtr& adr) {
-    EXECADDRESSING(adr, state);
-    state.status.o = 0;
-}
+/// ----- Branching Instructions
 
 
-
-
-// Jump to a new location
-void Disassembler6502::OP_JMP(State6502& state, AddressingPtr& adr) {
-    uint16_t address = EXECADDRESSING(adr, state);
-    state.pc = address;
-}
 
 // The next BXX instructions:
 // Branch/Jump if condition, specified in canBranch otherwise skip
@@ -435,6 +441,60 @@ void Disassembler6502::OP_BVC(State6502& state, AddressingPtr& adr) {
 }
 
 
+/// ----- Jump Instructions
+
+
+// Jump to a new location
+void Disassembler6502::OP_JMP(State6502& state, AddressingPtr& adr) {
+    uint16_t address = EXECADDRESSING(adr, state);
+    state.pc = address;
+}
+
+
+/// ------- Register Instructions
+
+ // Set Carry bit
+void Disassembler6502::OP_SEC(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.status.c = 1;
+}
+
+// Clear Carry bit
+void Disassembler6502::OP_CLC(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.status.c = 0;
+}
+
+// Set interrupt
+void Disassembler6502::OP_SEI(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.status.i = 1;
+}
+
+// Clear Interrupt
+void Disassembler6502::OP_CLI(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.status.i = 0;
+}
+
+// Set Decimal
+void Disassembler6502::OP_SED(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.status.d = 1;
+}
+
+// Clear Decimal
+void Disassembler6502::OP_CLD(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.status.d = 0;
+}
+
+// Clear Overflow
+void Disassembler6502::OP_CLV(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.status.o = 0;
+}
+
 // Compare a byte with the accumulator by subtracting it from the accumulator
 // Effectively A - M, note that it does not modify any registers only status flags
 void Disassembler6502::OP_CMP(State6502& state, AddressingPtr& adr) {
@@ -446,12 +506,4 @@ void Disassembler6502::OP_CMP(State6502& state, AddressingPtr& adr) {
 
 }
 
-// Test bits in memory with accumulator by using binary AND
-// -> A & M, no registers modified
-void Disassembler6502::OP_BIT(State6502& state, AddressingPtr& adr) {
-    uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
-    uint8_t sum = byte & state.a;
-    setZero(state, sum);
-    setNegative(state, sum);
-    state.status.o = (sum & 0x40) >> 6;
-}
+
