@@ -71,6 +71,7 @@ private:
     void OP_JMP(State6502&, AddressingPtr&);
     void OP_JSR(State6502&, AddressingPtr&);
     void OP_RTS(State6502&, AddressingPtr&);
+    void OP_RTI(State6502&, AddressingPtr&);
     // Register Instrucitons
     void OP_SEC(State6502&, AddressingPtr&);
     void OP_CLC(State6502&, AddressingPtr&);

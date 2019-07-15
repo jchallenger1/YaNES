@@ -164,6 +164,7 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0x6C] = {&Disassembler6502::OP_JMP, &Disassembler6502::ADR_INDIRECT};
     opcodeTable[0x20] = {&Disassembler6502::OP_JSR, &Disassembler6502::ADR_ABS};
     opcodeTable[0x60] = {&Disassembler6502::OP_RTS, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0x40] = {&Disassembler6502::OP_RTI, &Disassembler6502::ADR_IMPLICIT};
 
     /// ----- Register Instructions ------
     ///
@@ -749,6 +750,16 @@ void Disassembler6502::OP_RTS(State6502& state, AddressingPtr& adr) {
     uint8_t low = POP(state, adr), high = POP(state, adr);
     uint16_t address = static_cast<uint16_t>( (static_cast<uint16_t>(high) << 8) | low );
     state.pc = address + 1;
+}
+
+// Return from Interrupt:
+// get flags then pc from the stack, the pc is actual address, not address -1
+void Disassembler6502::OP_RTI(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.status.fromByte(POP(state, adr));
+    uint8_t low = POP(state, adr), high = POP(state, adr);
+    uint16_t address = static_cast<uint16_t>( (static_cast<uint16_t>(high) << 8) | low );
+    state.pc = address;
 }
 
 
