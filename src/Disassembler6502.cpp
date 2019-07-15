@@ -162,6 +162,8 @@ Disassembler6502::Disassembler6502() {
     ///
     opcodeTable[0x4C] = {&Disassembler6502::OP_JMP, &Disassembler6502::ADR_ABS};
     opcodeTable[0x6C] = {&Disassembler6502::OP_JMP, &Disassembler6502::ADR_INDIRECT};
+    opcodeTable[0x20] = {&Disassembler6502::OP_JSR, &Disassembler6502::ADR_ABS};
+    opcodeTable[0x60] = {&Disassembler6502::OP_RTS, &Disassembler6502::ADR_IMPLICIT};
 
     /// ----- Register Instructions ------
     ///
@@ -728,6 +730,25 @@ void Disassembler6502::OP_BVC(State6502& state, AddressingPtr& adr) {
 void Disassembler6502::OP_JMP(State6502& state, AddressingPtr& adr) {
     uint16_t address = EXECADDRESSING(adr, state);
     state.pc = address;
+}
+
+// Jumps to subroutine:
+// pushes address - 1 of the next operation before transfering pc
+void Disassembler6502::OP_JSR(State6502& state, AddressingPtr& adr) {
+    uint16_t transferAdr = EXECADDRESSING(adr, state);
+    uint16_t address = state.pc - 1;
+    PUSH(state, adr, (address & 0xFF00) >> 8); // push high bits FIRST
+    PUSH(state, adr, (address & 0xFF)); // push low bits LAST (sp now points to low bits)
+    state.pc = transferAdr;
+}
+
+// Return from Subroutine:
+// sets pc to the popped stack's address + 1
+void Disassembler6502::OP_RTS(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    uint8_t low = POP(state, adr), high = POP(state, adr);
+    uint16_t address = static_cast<uint16_t>( (static_cast<uint16_t>(high) << 8) | low );
+    state.pc = address + 1;
 }
 
 

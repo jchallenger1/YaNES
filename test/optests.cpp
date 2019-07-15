@@ -310,7 +310,7 @@ BOOST_AUTO_TEST_CASE( stack_tests) {
     auto& memory = state.memory;
 
     state.sp = 0x56;
-
+    // General stack tests
     state.status.z = state.status.n = state.status.o = 1;
     // write a 3 times, write status once
     state.a = 0xA4;
@@ -345,5 +345,31 @@ BOOST_AUTO_TEST_CASE( stack_tests) {
     ckPassFail(state.a == 0xA4, "PLA failure 1");
     ckPassErr(state.sp == 0x56, "sp failure in stack");
 
+
+    // Function stack tests
+    state.clear();
+
+
+    state.sp = 0x10;
+    state.pc = 0x10;
+    state.memory.write(0x10, 0x20);
+    state.memory.write(0x11, 0xF5);
+    state.memory.write(0x12, 0xC4);
+    dis.runCycle(state);
+    ckPassFail(state.sp == 0x12 && state.pc == 0xC4F5, "JSR failure, cannot continue");
+
+    state.memory[0xC4F5] = 0xA9;
+    state.memory[0xC4F5 + 1] = 0xEA;
+    dis.runCycle(state);
+    ckPassErr(state.a == 0xEA, "partial failure in jumped address");
+
+    state.memory[0xC4F5 + 2] = 0x60;
+    dis.runCycle(state);
+    ckPassFail(state.sp == 0x10 && state.pc == 0x13, "RST failure");
+
+    state.memory.write(0x13, 0xA9);
+    state.memory.write(0x14, 0x55);
+    dis.runCycle(state);
+    ckPassErr(state.a == 0x55, "partial failure in returned address");
 
 }

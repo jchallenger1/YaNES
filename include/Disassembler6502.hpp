@@ -69,6 +69,8 @@ private:
     void OP_BVC(State6502&, AddressingPtr&);
     // Jump Instructions
     void OP_JMP(State6502&, AddressingPtr&);
+    void OP_JSR(State6502&, AddressingPtr&);
+    void OP_RTS(State6502&, AddressingPtr&);
     // Register Instrucitons
     void OP_SEC(State6502&, AddressingPtr&);
     void OP_CLC(State6502&, AddressingPtr&);
