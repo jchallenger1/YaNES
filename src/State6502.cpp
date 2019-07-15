@@ -27,3 +27,12 @@ uint8_t State6502::Status::asByte() const noexcept {
     byte |= n << 7;
     return byte;
 }
+
+void State6502::Status::fromByte(const uint8_t& byte) noexcept {
+    c = byte & 1;
+    z = (byte & 2) >> 1;
+    i = (byte & 4) >> 2;
+    d = (byte & 0xF) >> 3;
+    o = (byte & 0x40) >> 6;
+    n = (byte & 0x80) >> 7;
+}

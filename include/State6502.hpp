@@ -28,6 +28,7 @@ struct State6502 {
 
         void clear() noexcept;
         uint8_t asByte() const noexcept;
+        void fromByte(const uint8_t&) noexcept;
     };
     Status status{};
 

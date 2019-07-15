@@ -303,3 +303,47 @@ BOOST_AUTO_TEST_CASE (compareTests) {
     dis.runCycle(state);
     ckPassErr(state.status.z == 0 && state.status.n == 1 && state.status.o == 1, "BIT failure 2");
 }
+
+BOOST_AUTO_TEST_CASE( stack_tests) {
+    State6502 state;
+    Disassembler6502 dis;
+    auto& memory = state.memory;
+
+    state.sp = 0x56;
+
+    state.status.z = state.status.n = state.status.o = 1;
+    // write a 3 times, write status once
+    state.a = 0xA4;
+    memory.write(0, 0x48);
+    dis.runCycle(state);
+    state.a = 0xF5;
+    memory.write(1, 0x48);
+    memory.write(2, 0x08);
+    dis.runN(state, 2);
+    state.a = 0x78;
+    memory.write(3, 0x48);
+    dis.runCycle(state);
+    ckPassFail(state.sp == 0x56 + 4, "PHP/PHA failure, cannot continue");
+    // Pop all of them off
+    state.a = 0;
+    state.status.clear();
+
+    memory.write(4, 0x68);
+    dis.runCycle(state);
+    ckPassFail(state.a == 0x78, "PLA failure 3, cannot continue");
+
+    memory.write(5, 0x28);
+    dis.runCycle(state);
+    ckPassFail(state.status.z && state.status.n && state.status.o && !state.status.c && !state.status.i, "PLP failure, cannot continue");
+
+    memory.write(6, 0x68);
+    dis.runCycle(state);
+    ckPassFail(state.a == 0xF5, "PLA failure 2");
+
+    memory.write(7, 0x68);
+    dis.runCycle(state);
+    ckPassFail(state.a == 0xA4, "PLA failure 1");
+    ckPassErr(state.sp == 0x56, "sp failure in stack");
+
+
+}

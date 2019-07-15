@@ -191,6 +191,10 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0xC4] = {&Disassembler6502::OP_CPY, &Disassembler6502::ADR_ZEROPAGE};
     opcodeTable[0xCC] = {&Disassembler6502::OP_CPY, &Disassembler6502::ADR_ABS};
     /// ----- Stack Instructions -------
+    opcodeTable[0x48] = {&Disassembler6502::OP_PHA, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0x68] = {&Disassembler6502::OP_PLA, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0x08] = {&Disassembler6502::OP_PHP, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0x28] = {&Disassembler6502::OP_PLP, &Disassembler6502::ADR_IMPLICIT};
     /// ----- System Instructions ------
 }
 
@@ -413,6 +417,23 @@ inline void Disassembler6502::CMP(State6502& state, AddressingPtr& adr, const ui
     setNegative(state, sum);
     state.status.c = byte <= reg;
 }
+
+inline void Disassembler6502::PUSH(State6502& state, AddressingPtr&, const uint8_t& val) const {
+    state.memory.write(0x1FF - state.sp, val);
+    ++state.sp;
+    if (0x1FF - state.sp < 0x100)
+        std::cerr << "6502 stack pushing overflow\n";
+}
+
+inline uint8_t Disassembler6502::POP(State6502& state, AddressingPtr&) const {
+    --state.sp;
+    if (0x100 + state.sp > 0x1FF)
+        std::cerr << "6502 stack popping overflow\n";
+    uint8_t val = state.memory.read(0x1FF - state.sp);
+    return val;
+}
+
+
 
 ///
 ///
@@ -759,9 +780,42 @@ void Disassembler6502::OP_CLV(State6502& state, AddressingPtr& adr) {
 void Disassembler6502::OP_CMP(State6502& state, AddressingPtr& adr) {
     CMP(state, adr, state.a);
 }
+// comp with x register
 void Disassembler6502::OP_CPX(State6502& state, AddressingPtr& adr) {
     CMP(state, adr, state.x);
 }
+// comp with y register
 void Disassembler6502::OP_CPY(State6502& state, AddressingPtr& adr) {
     CMP(state, adr, state.y);
 }
+
+
+/// --- Stack Instructions
+// Stack works from top to bottom, usually from first page 0x100 - 0x1FF
+// All stack operations are implied
+// Stack pointer always points to the next available byte to be pushed
+
+// Push A to the stack
+void Disassembler6502::OP_PHA(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    PUSH(state, adr, state.a);
+}
+
+// Push Processor Status onto Stack
+void Disassembler6502::OP_PHP(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    PUSH(state, adr, state.status.asByte());
+}
+
+// Pull A from Stack
+void Disassembler6502::OP_PLA(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.a = POP(state, adr);
+}
+
+// Pull Processor Status from Stack
+void Disassembler6502::OP_PLP(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.status.fromByte(POP(state, adr));
+}
+
