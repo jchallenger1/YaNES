@@ -182,6 +182,14 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0xD9] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_ABSY};
     opcodeTable[0xC1] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_INDEXINDIRECT};
     opcodeTable[0xD1] = {&Disassembler6502::OP_CMP, &Disassembler6502::ADR_INDRECTINDEX};
+    // CPX
+    opcodeTable[0xE0] = {&Disassembler6502::OP_CPX, &Disassembler6502::ADR_IMMEDIATE};
+    opcodeTable[0xE4] = {&Disassembler6502::OP_CPX, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0xEC] = {&Disassembler6502::OP_CPX, &Disassembler6502::ADR_ABS};
+    // CPY
+    opcodeTable[0xC0] = {&Disassembler6502::OP_CPY, &Disassembler6502::ADR_IMMEDIATE};
+    opcodeTable[0xC4] = {&Disassembler6502::OP_CPY, &Disassembler6502::ADR_ZEROPAGE};
+    opcodeTable[0xCC] = {&Disassembler6502::OP_CPY, &Disassembler6502::ADR_ABS};
     /// ----- Stack Instructions -------
     /// ----- System Instructions ------
 }
@@ -375,7 +383,7 @@ inline void Disassembler6502::ST(State6502& state, AddressingPtr& adr, uint8_t& 
 }
 
 // Transfer a regular or special register to another
-inline void Disassembler6502::TR(State6502& state, AddressingPtr& adr, uint8_t& src, uint8_t& dst) const {
+inline void Disassembler6502::TR(State6502& state, AddressingPtr& adr, const uint8_t& src, uint8_t& dst) const {
     EXECADDRESSING(adr, state);
     setNegative(state, src);
     setZero(state, src);
@@ -396,6 +404,14 @@ inline void Disassembler6502::DEC(State6502& state, AddressingPtr&, uint8_t& reg
     --reg;
     setNegative(state, reg);
     setZero(state, reg);
+}
+
+inline void Disassembler6502::CMP(State6502& state, AddressingPtr& adr, const uint8_t& reg) const {
+    uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
+    uint8_t sum = reg + (~byte + 1);
+    setZero(state, sum);
+    setNegative(state, sum);
+    state.status.c = byte <= reg;
 }
 
 ///
@@ -741,12 +757,11 @@ void Disassembler6502::OP_CLV(State6502& state, AddressingPtr& adr) {
 // Compare a byte with the accumulator by subtracting it from the accumulator
 // Effectively A - M, note that it does not modify any registers only status flags
 void Disassembler6502::OP_CMP(State6502& state, AddressingPtr& adr) {
-    uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
-    uint8_t sum = state.a + (~byte + 1);
-    setZero(state, sum);
-    setNegative(state, sum);
-    state.status.c = byte <= state.a;
-
+    CMP(state, adr, state.a);
 }
-
-
+void Disassembler6502::OP_CPX(State6502& state, AddressingPtr& adr) {
+    CMP(state, adr, state.x);
+}
+void Disassembler6502::OP_CPY(State6502& state, AddressingPtr& adr) {
+    CMP(state, adr, state.y);
+}

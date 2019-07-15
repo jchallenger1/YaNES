@@ -78,6 +78,8 @@ private:
     void OP_CLD(State6502&, AddressingPtr&);
     void OP_CLV(State6502&, AddressingPtr&);
     void OP_CMP(State6502&, AddressingPtr&);
+    void OP_CPX(State6502&, AddressingPtr&);
+    void OP_CPY(State6502&, AddressingPtr&);
 
     /// -- Addressing Mode Instructions --
     uint16_t ADR_IMPLICIT(State6502&) const noexcept;
@@ -101,9 +103,10 @@ private:
     /// -- General CPU functions --
     inline void LD(State6502&, AddressingPtr&, uint8_t& reg) const; // Load
     inline void ST(State6502&, AddressingPtr&, uint8_t& reg) const; // Store
-    inline void TR(State6502&, AddressingPtr&, uint8_t& src, uint8_t& dst) const; // Transfer
+    inline void TR(State6502&, AddressingPtr&, const uint8_t& src, uint8_t& dst) const; // Transfer
     inline void INC(State6502&, AddressingPtr&, uint8_t& reg) const;
     inline void DEC(State6502&, AddressingPtr&, uint8_t& reg) const;
+    inline void CMP(State6502&, AddressingPtr&, const uint8_t& reg) const;
 
 
 };
