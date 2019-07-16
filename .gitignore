@@ -37,3 +37,7 @@
 Makefile*
 *_resource.rc
 *.autosave
+
+#Qt build folder
+build-testing-Desktop_Qt_5_12_3_GCC_64bit-Debug/*
+
