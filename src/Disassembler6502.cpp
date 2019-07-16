@@ -4,6 +4,12 @@
 #define EXECOPCODE(instrPtr, adringPtr, state) (this->*(instrPtr))((state), (adringPtr))
 #define EXECADDRESSING(adringPtr, state) (this->*(adringPtr))(state)
 
+//constexpr uint16_t Disassembler6502::vectorNMI = 0xFFFA;
+
+constexpr uint16_t Disassembler6502::vectorNMI;
+constexpr uint16_t Disassembler6502::vectorRESET;
+constexpr uint16_t Disassembler6502::vectorIRQ;
+
 Disassembler6502::Disassembler6502() {
 
     /// ----- Storage Instructions ------
@@ -199,6 +205,8 @@ Disassembler6502::Disassembler6502() {
     opcodeTable[0x08] = {&Disassembler6502::OP_PHP, &Disassembler6502::ADR_IMPLICIT};
     opcodeTable[0x28] = {&Disassembler6502::OP_PLP, &Disassembler6502::ADR_IMPLICIT};
     /// ----- System Instructions ------
+    opcodeTable[0xEA] = {&Disassembler6502::OP_NOP, &Disassembler6502::ADR_IMPLICIT};
+    opcodeTable[0x00] = {&Disassembler6502::OP_BRK, &Disassembler6502::ADR_IMPLICIT};
 }
 
 
@@ -869,6 +877,7 @@ void Disassembler6502::OP_PHA(State6502& state, AddressingPtr& adr) {
 // Push Processor Status onto Stack
 void Disassembler6502::OP_PHP(State6502& state, AddressingPtr& adr) {
     EXECADDRESSING(adr, state);
+    state.status.b = 1;
     PUSH(state, state.status.asByte());
 }
 
@@ -882,5 +891,19 @@ void Disassembler6502::OP_PLA(State6502& state, AddressingPtr& adr) {
 void Disassembler6502::OP_PLP(State6502& state, AddressingPtr& adr) {
     EXECADDRESSING(adr, state);
     state.status.fromByte(POP(state));
+}
+
+
+/// --- System Instructions
+
+
+void Disassembler6502::OP_NOP(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+}
+
+void Disassembler6502::OP_BRK(State6502& state, AddressingPtr& adr) {
+    EXECADDRESSING(adr, state);
+    state.status.b = 1;
+    generateInterrupt(state, vectorIRQ); // BRK uses same as IRQ
 }
 

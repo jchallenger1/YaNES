@@ -97,6 +97,9 @@ private:
     void OP_PHP(State6502&, AddressingPtr&);
     void OP_PLA(State6502&, AddressingPtr&);
     void OP_PLP(State6502&, AddressingPtr&);
+    // System
+    void OP_NOP(State6502&, AddressingPtr&);
+    void OP_BRK(State6502&, AddressingPtr&);
 
     /// -- Addressing Mode Instructions --
     uint16_t ADR_IMPLICIT(State6502&) const noexcept;
