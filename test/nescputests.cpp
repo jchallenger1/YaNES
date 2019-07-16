@@ -11,5 +11,7 @@
 
 
 void nesCpuTest() {
+    Memory memory;
+    memory.fromFile("../rsc/tests/nestest.nes");
 
 }
