@@ -17,6 +17,7 @@ struct State6502 {
     uint32_t cycleCount = 0;
     // Struct bitfield for status registers
     struct Status {
+        Status();
         uint8_t c : 1; // Carry flag
         uint8_t z : 1; // Zero flag
         uint8_t i : 1; // Interrupt Disable
@@ -30,7 +31,7 @@ struct State6502 {
         uint8_t asByte() const noexcept;
         void fromByte(const uint8_t&) noexcept;
     };
-    Status status{};
+    Status status;
 
     Memory memory;
 

@@ -12,6 +12,12 @@ void State6502::clear() {
 }
 
 
+
+State6502::Status::Status() {
+    i = z = 1;
+    n = o = b = d = c = 0;
+}
+
 void State6502::Status::clear() noexcept {
     c = z = i = d = b = pad = o = n = 0;
 }
@@ -22,7 +28,8 @@ uint8_t State6502::Status::asByte() const noexcept {
     byte |= z << 1;
     byte |= i << 2;
     byte |= d << 3;
-    // 4 & 5 are the B(not break) flag that has no CPU effect. https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
+    // 4 is the B flag, but doesn't have any affect https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
+    // 5 is padding
     byte |= o << 6;
     byte |= n << 7;
     return byte;

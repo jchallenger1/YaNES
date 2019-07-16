@@ -213,6 +213,24 @@ void Disassembler6502::runN(State6502& state, const int& num) {
         runCycle(state);
 }
 
+// A vector is a 'vector pointer' that consists of two parts a low and a high
+// Both parts cretae a program counter high and low value to where the pc should point
+//http://users.telenet.be/kim1-6502/6502/proman.html#90
+//https://www.pagetable.com/?p=410
+
+// Non Maskable Interrupt: an interrupt that cannot be ignored
+void Disassembler6502::signalNMI() {
+
+}
+
+void Disassembler6502::signalRESET() {
+
+}
+
+// Interrupt Request:
+void Disassembler6502::signalIRQ() {
+
+}
 
 
 ///

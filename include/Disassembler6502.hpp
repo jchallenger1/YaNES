@@ -16,6 +16,10 @@ public:
     
     void runCycle(State6502&);
     void runN(State6502&, const int& num);
+
+    void signalNMI();
+    void signalRESET();
+    void signalIRQ();
 private:
 
     struct Instr {
