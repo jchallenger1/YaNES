@@ -9,7 +9,6 @@ SOURCES += \
         ../src/State6502.cpp \
         optests.cpp \
         mastertestsuite.cpp
-#SOURCES += mastertestsuite.cpp
 
 
 INCLUDEPATH += ../include/
@@ -19,4 +18,3 @@ HEADERS += \
     ../include/Memory.hpp \
     ../include/State6502.hpp \
     tests.hpp
-#HEADERS += tests.hpp
