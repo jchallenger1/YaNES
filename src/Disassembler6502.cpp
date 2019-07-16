@@ -221,6 +221,7 @@ void Disassembler6502::runN(State6502& state, const int& num) {
 // Non Maskable Interrupt: an interrupt that cannot be ignored
 void Disassembler6502::signalNMI() {
 
+
 }
 
 void Disassembler6502::signalRESET() {
@@ -417,7 +418,7 @@ inline void Disassembler6502::TR(State6502& state, AddressingPtr& adr, const uin
 
 // Increment a register or memory byte
 // Addressing is put to the opcode function
-inline void Disassembler6502::INC(State6502& state, AddressingPtr&, uint8_t& reg) const {
+inline void Disassembler6502::INC(State6502& state, uint8_t& reg) const {
     ++reg;
     setNegative(state, reg);
     setZero(state, reg);
@@ -425,7 +426,7 @@ inline void Disassembler6502::INC(State6502& state, AddressingPtr&, uint8_t& reg
 
 // Decrement a register or memory byte
 // Addressing is put to the opcode function
-inline void Disassembler6502::DEC(State6502& state, AddressingPtr&, uint8_t& reg) const {
+inline void Disassembler6502::DEC(State6502& state, uint8_t& reg) const {
     --reg;
     setNegative(state, reg);
     setZero(state, reg);
@@ -439,14 +440,14 @@ inline void Disassembler6502::CMP(State6502& state, AddressingPtr& adr, const ui
     state.status.c = byte <= reg;
 }
 
-inline void Disassembler6502::PUSH(State6502& state, AddressingPtr&, const uint8_t& val) const {
+inline void Disassembler6502::PUSH(State6502& state, const uint8_t& val) const {
     state.memory.write(0x1FF - state.sp, val);
     ++state.sp;
     if (0x1FF - state.sp < 0x100)
         std::cerr << "6502 stack pushing overflow\n";
 }
 
-inline uint8_t Disassembler6502::POP(State6502& state, AddressingPtr&) const {
+inline uint8_t Disassembler6502::POP(State6502& state) const {
     --state.sp;
     if (0x100 + state.sp > 0x1FF)
         std::cerr << "6502 stack popping overflow\n";
@@ -559,32 +560,32 @@ void Disassembler6502::OP_SBC(State6502& state, AddressingPtr& adr) {
 void Disassembler6502::OP_DEC(State6502& state, AddressingPtr& adr) {
     uint16_t address = EXECADDRESSING(adr, state);
     uint8_t byte = state.memory.read(address);
-    DEC(state, adr, byte);
+    DEC(state, byte);
     state.memory.write(address, byte);
 }
 void Disassembler6502::OP_DEX(State6502& state, AddressingPtr& adr) {
     EXECADDRESSING(adr, state);
-    DEC(state, adr, state.x);
+    DEC(state, state.x);
 }
 void Disassembler6502::OP_DEY(State6502& state, AddressingPtr& adr) {
     EXECADDRESSING(adr, state);
-    DEC(state, adr, state.y);
+    DEC(state, state.y);
 }
 
 
 void Disassembler6502::OP_INC(State6502& state, AddressingPtr& adr) {
     uint16_t address = EXECADDRESSING(adr, state);
     uint8_t byte = state.memory.read(address);
-    INC(state, adr, byte);
+    INC(state, byte);
     state.memory.write(address, byte);
 }
 void Disassembler6502::OP_INX(State6502& state, AddressingPtr& adr) {
     EXECADDRESSING(adr, state);
-    INC(state, adr, state.x);
+    INC(state, state.x);
 }
 void Disassembler6502::OP_INY(State6502& state, AddressingPtr& adr) {
     EXECADDRESSING(adr, state);
-    INC(state, adr, state.y);
+    INC(state, state.y);
 }
 
 
@@ -756,8 +757,8 @@ void Disassembler6502::OP_JMP(State6502& state, AddressingPtr& adr) {
 void Disassembler6502::OP_JSR(State6502& state, AddressingPtr& adr) {
     uint16_t transferAdr = EXECADDRESSING(adr, state);
     uint16_t address = state.pc - 1;
-    PUSH(state, adr, (address & 0xFF00) >> 8); // push high bits FIRST
-    PUSH(state, adr, (address & 0xFF)); // push low bits LAST (sp now points to low bits)
+    PUSH(state, (address & 0xFF00) >> 8); // push high bits FIRST
+    PUSH(state, (address & 0xFF)); // push low bits LAST (sp now points to low bits)
     state.pc = transferAdr;
 }
 
@@ -765,7 +766,7 @@ void Disassembler6502::OP_JSR(State6502& state, AddressingPtr& adr) {
 // sets pc to the popped stack's address + 1
 void Disassembler6502::OP_RTS(State6502& state, AddressingPtr& adr) {
     EXECADDRESSING(adr, state);
-    uint8_t low = POP(state, adr), high = POP(state, adr);
+    uint8_t low = POP(state), high = POP(state);
     uint16_t address = static_cast<uint16_t>( (static_cast<uint16_t>(high) << 8) | low );
     state.pc = address + 1;
 }
@@ -774,8 +775,8 @@ void Disassembler6502::OP_RTS(State6502& state, AddressingPtr& adr) {
 // get flags then pc from the stack, the pc is actual address, not address -1
 void Disassembler6502::OP_RTI(State6502& state, AddressingPtr& adr) {
     EXECADDRESSING(adr, state);
-    state.status.fromByte(POP(state, adr));
-    uint8_t low = POP(state, adr), high = POP(state, adr);
+    state.status.fromByte(POP(state));
+    uint8_t low = POP(state), high = POP(state);
     uint16_t address = static_cast<uint16_t>( (static_cast<uint16_t>(high) << 8) | low );
     state.pc = address;
 }
@@ -848,24 +849,24 @@ void Disassembler6502::OP_CPY(State6502& state, AddressingPtr& adr) {
 // Push A to the stack
 void Disassembler6502::OP_PHA(State6502& state, AddressingPtr& adr) {
     EXECADDRESSING(adr, state);
-    PUSH(state, adr, state.a);
+    PUSH(state, state.a);
 }
 
 // Push Processor Status onto Stack
 void Disassembler6502::OP_PHP(State6502& state, AddressingPtr& adr) {
     EXECADDRESSING(adr, state);
-    PUSH(state, adr, state.status.asByte());
+    PUSH(state, state.status.asByte());
 }
 
 // Pull A from Stack
 void Disassembler6502::OP_PLA(State6502& state, AddressingPtr& adr) {
     EXECADDRESSING(adr, state);
-    state.a = POP(state, adr);
+    state.a = POP(state);
 }
 
 // Pull Processor Status from Stack
 void Disassembler6502::OP_PLP(State6502& state, AddressingPtr& adr) {
     EXECADDRESSING(adr, state);
-    state.status.fromByte(POP(state, adr));
+    state.status.fromByte(POP(state));
 }
 

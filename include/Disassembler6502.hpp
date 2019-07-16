@@ -21,6 +21,11 @@ public:
     void signalRESET();
     void signalIRQ();
 private:
+    // Vectors are vector pointers pointing to an address where the pc should be
+    // Each variable is where the signal's vector points to, the value is the low byte of the address
+    constexpr static uint16_t vectorNMI = 0xFFFA;
+    constexpr static uint16_t vectorRESET = 0xFFFC;
+    constexpr static uint16_t vectorIRQ = 0xFFFE;
 
     struct Instr {
         InstrFuncPtr instr;
@@ -116,11 +121,11 @@ private:
     inline void LD(State6502&, AddressingPtr&, uint8_t& reg) const; // Load
     inline void ST(State6502&, AddressingPtr&, uint8_t& reg) const; // Store
     inline void TR(State6502&, AddressingPtr&, const uint8_t& src, uint8_t& dst) const; // Transfer
-    inline void INC(State6502&, AddressingPtr&, uint8_t& reg) const;
-    inline void DEC(State6502&, AddressingPtr&, uint8_t& reg) const;
+    inline void INC(State6502&, uint8_t& reg) const;
+    inline void DEC(State6502&, uint8_t& reg) const;
     inline void CMP(State6502&, AddressingPtr&, const uint8_t& reg) const;
-    inline void PUSH(State6502&, AddressingPtr&, const uint8_t& val) const;
-    inline uint8_t POP(State6502&, AddressingPtr&) const;
+    inline void PUSH(State6502&, const uint8_t& val) const;
+    inline uint8_t POP(State6502&) const;
 
 };
 
