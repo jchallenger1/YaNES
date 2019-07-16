@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include "Disassembler6502.hpp"
 
 #define EXECOPCODE(instrPtr, adringPtr, state) (this->*(instrPtr))((state), (adringPtr))
@@ -11,6 +12,10 @@ constexpr uint16_t Disassembler6502::vectorRESET;
 constexpr uint16_t Disassembler6502::vectorIRQ;
 
 Disassembler6502::Disassembler6502() {
+
+
+    constexpr Instr illegalFunc = {&Disassembler6502::OP_ILLEGAL, &Disassembler6502::ADR_IMPLICIT};
+    std::fill(opcodeTable.begin(), opcodeTable.end(), illegalFunc);
 
     /// ----- Storage Instructions ------
     ///
@@ -488,6 +493,12 @@ inline uint8_t Disassembler6502::POP(State6502& state) const {
 ///
 ///
 
+
+void Disassembler6502::OP_ILLEGAL(State6502& state, AddressingPtr& adr) {
+    std::cerr << std::hex << "opcode " << static_cast<int>(state.memory.read(state.pc))
+              << " is ILLEGAL at address " << static_cast<int>(state.pc) << std::dec;
+    EXECADDRESSING(adr, state);
+}
 
 /// ---- Storage Instructions ----
 

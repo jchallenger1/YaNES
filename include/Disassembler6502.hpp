@@ -68,6 +68,7 @@ private:
     uint16_t ADR_INDRECTINDEX(State6502&) const;
 
     /// -- Opcode Instructions --
+    void OP_ILLEGAL(State6502&, AddressingPtr&);
     // Storage Instructions
     void OP_LDA(State6502&, AddressingPtr&);
     void OP_LDX(State6502&, AddressingPtr&);
