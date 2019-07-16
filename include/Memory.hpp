@@ -18,6 +18,8 @@ public:
     const uint8_t& operator[](const size_t&) const;
 
     void clear();
+
+    void fromFile(const std::string& fname);
 private:
     std::array<uint8_t, MAXBYTES> memory{};
 };

@@ -16,13 +16,23 @@ test_suite* createOpcodeTestSuite() {
     return opTests;
 }
 
+test_suite* createCpuDiagTestSuite() {
+    test_suite* cpuDiagTest = BOOST_TEST_SUITE("cpu diagnostic test");
+    cpuDiagTest->add(BOOST_TEST_CASE( &nesCpuTest ));
+    return cpuDiagTest;
+}
+
 test_suite* init_unit_test_suite(int argc, char* argv[]) {
     UNUSED(argc); UNUSED(argv);
-    test_suite* opTests = createOpcodeTestSuite();
-
-
-    framework::master_test_suite().add(opTests);
-
+    constexpr bool allowOp = false, allowDiag = true;
+    if (allowOp) {
+        test_suite* opTests = createOpcodeTestSuite();
+        framework::master_test_suite().add(opTests);
+    }
+    if (allowDiag) {
+        test_suite* cpuDiag = createCpuDiagTestSuite();
+        framework::master_test_suite().add(cpuDiag);
+    }
     return nullptr;
 }
 

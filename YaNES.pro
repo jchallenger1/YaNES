@@ -6,10 +6,7 @@ CONFIG -= qt
 SOURCES += \
         src/Disassembler6502.cpp \
         src/Memory.cpp \
-        src/State6502.cpp \
-        test/optests.cpp
-
-
+        src/State6502.cpp
 
 INCLUDEPATH += include/
 

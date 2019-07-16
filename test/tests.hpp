@@ -26,4 +26,6 @@ extern void cpuCompareTests();
 extern void cpuStackTests();
 
 
+extern void nesCpuTest();
+
 #endif // TESTS_HPP

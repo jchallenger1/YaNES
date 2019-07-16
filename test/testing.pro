@@ -7,6 +7,7 @@ SOURCES += \
         ../src/Disassembler6502.cpp \
         ../src/Memory.cpp \
         ../src/State6502.cpp \
+        nescputests.cpp \
         optests.cpp \
         mastertestsuite.cpp
 
