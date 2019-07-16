@@ -219,20 +219,34 @@ void Disassembler6502::runN(State6502& state, const int& num) {
 //https://www.pagetable.com/?p=410
 
 // Non Maskable Interrupt: an interrupt that cannot be ignored
-void Disassembler6502::signalNMI() {
-
-
+// Interrupts push the pc and the status to the stack and disables interrupts
+void Disassembler6502::signalNMI(State6502& state) {
+    state.status.b = 0;
+    generateInterrupt(state, vectorNMI);
 }
 
-void Disassembler6502::signalRESET() {
+// Reset Signal: An interrupt that sends the pc to the reset vector
+// note that no stack operations are done
+void Disassembler6502::signalRESET(State6502& state) {
 
 }
 
 // Interrupt Request:
-void Disassembler6502::signalIRQ() {
-
+void Disassembler6502::signalIRQ(State6502& state) {
+    if (state.status.i == 0) {// allow interrupt
+        state.status.b = 0;
+        generateInterrupt(state, vectorIRQ);
+    }
 }
 
+// Generates an interrupt by pushing the pc and stack and pointing pc to the new vector
+inline void Disassembler6502::generateInterrupt(State6502& state, const uint16_t& vector) const {
+    PUSH(state, (state.pc & 0xFF00) >> 8);
+    PUSH(state, state.pc & 0xFF);
+    PUSH(state, state.status.asByte());
+    state.status.i = 1;
+    state.pc =  static_cast<uint16_t>( (static_cast<uint16_t>(state.memory[vector + 1]) << 8) | state.memory[vector] );
+}
 
 ///
 ///

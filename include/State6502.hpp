@@ -22,7 +22,8 @@ struct State6502 {
         uint8_t z : 1; // Zero flag
         uint8_t i : 1; // Interrupt Disable
         uint8_t d : 1; // Decimal Mode
-        uint8_t b : 1; // Break Command
+        uint8_t b : 1; // Break Command, the flag is to identify from where an interrupt is coming from
+        // Either as an instruction PHP/BRK or a signal IRQ/NMI, otherwise not used, https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
         uint8_t pad : 1; // padding, non status
         uint8_t o : 1; // Overflow Flag
         uint8_t n : 1; // Negative Flag

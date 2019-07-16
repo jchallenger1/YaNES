@@ -32,7 +32,7 @@ uint8_t State6502::Status::asByte() const noexcept {
     byte |= z << 1;
     byte |= i << 2;
     byte |= d << 3;
-    // 4 is the B flag, but doesn't have any affect https://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
+    byte |= b << 4;
     // 5 is padding
     byte |= o << 6;
     byte |= n << 7;

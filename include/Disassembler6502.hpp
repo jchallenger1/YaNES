@@ -17,15 +17,15 @@ public:
     void runCycle(State6502&);
     void runN(State6502&, const int& num);
 
-    void signalNMI();
-    void signalRESET();
-    void signalIRQ();
+    void signalNMI(State6502&);
+    void signalRESET(State6502&);
+    void signalIRQ(State6502&);
 private:
     // Vectors are vector pointers pointing to an address where the pc should be
     // Each variable is where the signal's vector points to, the value is the low byte of the address
     constexpr static uint16_t vectorNMI = 0xFFFA;
     constexpr static uint16_t vectorRESET = 0xFFFC;
-    constexpr static uint16_t vectorIRQ = 0xFFFE;
+    constexpr static uint16_t vectorIRQ = 0xFFFE; // note that IRQ and BRK use the same vector
 
     struct Instr {
         InstrFuncPtr instr;
@@ -126,6 +126,8 @@ private:
     inline void CMP(State6502&, AddressingPtr&, const uint8_t& reg) const;
     inline void PUSH(State6502&, const uint8_t& val) const;
     inline uint8_t POP(State6502&) const;
+
+    inline void generateInterrupt(State6502&, const uint16_t& vector) const;
 
 };
 
