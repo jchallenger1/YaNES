@@ -1,25 +1,9 @@
-#define BOOST_TEST_MODULE OpcodeTests
-#include <boost/test/included/unit_test.hpp>
-
+#include "tests.hpp"
 #include "State6502.hpp"
 #include "Disassembler6502.hpp"
 
-#include <optional>
-
-inline constexpr void ckPassFail(const bool&& b, const std::string& str) {
-    if (!b) {
-        BOOST_FAIL(str);
-    }
-}
-
-inline constexpr void ckPassErr(const bool&& b, const std::string& str) noexcept {
-    if (!b) {
-        BOOST_ERROR(str);
-    }
-}
-
 // Test if all addressing modes work also check lda function
-BOOST_AUTO_TEST_CASE( LDA_ADDRESSING_TESTS ) {
+void cpuLdaAddressingTests() {
     State6502 state;
     Disassembler6502 dis;
     auto& memory = state.memory;
@@ -57,7 +41,7 @@ BOOST_AUTO_TEST_CASE( LDA_ADDRESSING_TESTS ) {
 
 // These tests are from the examples databook
 // Tests are important for these instructions as they are the hardest in the entire instruction set
-BOOST_AUTO_TEST_CASE( math_tests ) {
+void cpuMathTests() {
     State6502 state;
     Disassembler6502 dis;
     auto& memory = state.memory;
@@ -134,7 +118,8 @@ BOOST_AUTO_TEST_CASE( math_tests ) {
     ckPassErr(state.y == 0xFF && state.status.n == 1, "DEY failure");
 }
 
-BOOST_AUTO_TEST_CASE( Bitwise_tests ) {
+// Tests cpu's and/or/xor, also tests shifting ASL/LSR and rotating ROL/ROR
+void cpuBitwiseTests() {
     State6502 state;
     Disassembler6502 dis;
     auto& memory = state.memory;
@@ -185,7 +170,8 @@ BOOST_AUTO_TEST_CASE( Bitwise_tests ) {
     ckPassErr(state.a == 0x3F && state.status.c == 1 && state.status.z == 0 && state.status.n == 0 && state.pc == 7, "ROR ACC failure");
 }
 
-BOOST_AUTO_TEST_CASE( PROCESSOR_STATUS ) {
+// Tests cpu's clearing and setting status
+void cpuStatusTests() {
 
     State6502 state;
     Disassembler6502 dis;
@@ -223,7 +209,8 @@ BOOST_AUTO_TEST_CASE( PROCESSOR_STATUS ) {
 }
 
 
-BOOST_AUTO_TEST_CASE (JMP_BRANCH ) {
+// Tests Cpu's jumping and branching functions
+void cpuJumpBranchTests() {
     State6502 state;
     Disassembler6502 dis;
     auto& memory = state.memory;
@@ -265,7 +252,8 @@ BOOST_AUTO_TEST_CASE (JMP_BRANCH ) {
     ckPassErr(state.pc == 10 + 0x56 + 2, "branch/relative mode no branching failure");
 }
 
-BOOST_AUTO_TEST_CASE (compareTests) {
+// Tests Cpu's compare function w/accumulator, also tests BIT compare
+void cpuCompareTests() {
     State6502 state;
     Disassembler6502 dis;
     auto& memory = state.memory;
@@ -304,7 +292,8 @@ BOOST_AUTO_TEST_CASE (compareTests) {
     ckPassErr(state.status.z == 0 && state.status.n == 1 && state.status.o == 1, "BIT failure 2");
 }
 
-BOOST_AUTO_TEST_CASE( stack_tests) {
+// Tests Stack's pulling and pushing PHP/PHA/PLA/PLP, also calling and returning
+void cpuStackTests() {
     State6502 state;
     Disassembler6502 dis;
     auto& memory = state.memory;

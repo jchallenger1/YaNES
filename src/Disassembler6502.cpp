@@ -5,8 +5,6 @@
 #define EXECOPCODE(instrPtr, adringPtr, state) (this->*(instrPtr))((state), (adringPtr))
 #define EXECADDRESSING(adringPtr, state) (this->*(adringPtr))(state)
 
-//constexpr uint16_t Disassembler6502::vectorNMI = 0xFFFA;
-
 constexpr uint16_t Disassembler6502::vectorNMI;
 constexpr uint16_t Disassembler6502::vectorRESET;
 constexpr uint16_t Disassembler6502::vectorIRQ;
