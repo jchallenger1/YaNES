@@ -236,7 +236,10 @@ void Disassembler6502::signalNMI(State6502& state) {
 // Reset Signal: An interrupt that sends the pc to the reset vector
 // note that no stack operations are done
 void Disassembler6502::signalRESET(State6502& state) {
-
+    // Assumption that this also resets the state as well
+    state.pc =  static_cast<uint16_t>( (static_cast<uint16_t>(state.memory[vectorRESET + 1]) << 8) | state.memory[vectorRESET] );
+    state.status.reset();
+    state.sp = state.a = state.x = state.y = 0;
 }
 
 // Interrupt Request:
