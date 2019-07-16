@@ -311,6 +311,7 @@ BOOST_AUTO_TEST_CASE( stack_tests) {
 
     state.sp = 0x56;
     // General stack tests
+    state.status.clear();
     state.status.z = state.status.n = state.status.o = 1;
     // write a 3 times, write status once
     state.a = 0xA4;

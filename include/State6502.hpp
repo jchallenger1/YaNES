@@ -28,6 +28,7 @@ struct State6502 {
         uint8_t n : 1; // Negative Flag
 
         void clear() noexcept;
+        void reset() noexcept;
         uint8_t asByte() const noexcept;
         void fromByte(const uint8_t&) noexcept;
     };

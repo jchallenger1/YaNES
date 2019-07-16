@@ -14,16 +14,20 @@ void State6502::clear() {
 
 
 State6502::Status::Status() {
-    i = z = 1;
-    n = o = b = d = c = 0;
+    reset();
 }
 
 void State6502::Status::clear() noexcept {
     c = z = i = d = b = pad = o = n = 0;
 }
 
+void State6502::Status::reset() noexcept {
+    i = z = 1;
+    n = o = b = d = c = 0;
+}
+
 uint8_t State6502::Status::asByte() const noexcept {
-    uint8_t byte = 0;
+    uint8_t byte = 0x20; // set bit 5, always on
     byte |= c;
     byte |= z << 1;
     byte |= i << 2;
