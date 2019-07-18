@@ -38,11 +38,16 @@ const uint8_t& Memory::operator[](const size_t& index) const {
  // Refer to https://wiki.nesdev.com/w/index.php/CPU_memory_map and
 //  https://wiki.nesdev.com/w/index.php/INES
 void Memory::fromFile(const std::string& fname) {
-    std::ifstream ifs(fname, std::ios_base::binary | std::ios_base::in);
+    std::ifstream ifs(fname, std::ios_base::binary | std::ios_base::in | std::ios_base::ate);
     if (!ifs.good()) {
         std::cerr << "File not found" << std::endl;
         throw std::runtime_error("File not found, given path:" + fname);
     }
+
+    long sizeOfFile = ifs.tellg();
+    ifs.seekg( ifs.beg );
+    UNUSED(sizeOfFile);
+
     uint8_t byte;
     auto read = [&ifs, &byte]() -> uint8_t {
             ifs.read(reinterpret_cast<char*>(&byte), sizeof (uint8_t) );
@@ -56,6 +61,7 @@ void Memory::fromFile(const std::string& fname) {
 
     uint8_t PRG_ROM = read(); // in 16kb units
     uint8_t CHR_ROM = read(); // in 8 kb units
+    UNUSED(CHR_ROM);
     uint8_t flags6 = read();
     uint8_t mapperNum = (flags6 & 0xF0) >> 4;
 
@@ -73,15 +79,17 @@ void Memory::fromFile(const std::string& fname) {
 
     for (short i = 0; i != 5; i++) // skip padding of header
         read();
+
+    long startOfPROM = ifs.tellg();
+
     // Write PRG ROM @ 0x8000
     for (uint16_t index = 0x8000, times = 0; times != PRG_ROM * 16384; times++, index++) {
         memory[index] = read();
     }
-    // Write CHR ROM after PROM
-    for (uint16_t index = 0x8000 + PRG_ROM * 16384, times = 0; times != CHR_ROM * 8192; times++, index++) {
+    // In NROM 128, after 0xBFFF is just a mirror of the rom of 0x8000 - 0xBFFF
+    // For now most mirrors will actually write to memory
+    ifs.seekg(startOfPROM);
+    for (uint16_t index = 0xC000, times = 0; times != PRG_ROM * 16384; times++, index++) {
         memory[index] = read();
     }
-    std::cout << "";
-
-
 }
