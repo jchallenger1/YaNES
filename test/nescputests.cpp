@@ -61,20 +61,30 @@ void nesCpuTest() {
     std::ifstream ifsLog("../rsc/tests/nestest.log", std::ios_base::in);
     ckPassFail(ifsLog.good(), "Could not open log file to compare testsing");
 
-
+    Disassembler6502 dis;
     State6502 state;
+    state.pc = 0xC000;
+    state.sp = 0xFD;
+    state.a = state.x = state.y = 0;
+    state.status.reset();
 
     std::string cycleResults;
     while( std::getline(ifsLog, cycleResults) ) {
         std::string instrDesc;
         uint8_t a, x, y, p, sp;
         uint16_t pc;
+        uint8_t n = state.status.asByte();
         std::tie(pc, a, x, y, p, sp, instrDesc) = getTestState(cycleResults);
         ckPassFail(state.a == a, "Accumulator Register failure detected at " + instrDesc);
         ckPassFail(state.x == x || state.y == y, "X,Y Register failure detected at " + instrDesc);
         ckPassFail(state.status.asByte() == p, "Status failure detected at " + instrDesc);
         ckPassFail(state.sp == sp, "Stack pointer failure detected at " + instrDesc);
         ckPassFail(state.pc == pc, "Program Counter failure detected at " + instrDesc);
+
+        if (state.memory.read(0x02) != 0 || state.memory.read(0x03) != 0) {
+            ckPassErr(false, "Cpu has triggered an error at " + instrDesc);
+        }
+        dis.runCycle(state);
     }
 
 }
