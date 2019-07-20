@@ -469,17 +469,13 @@ inline void Disassembler6502::CMP(State6502& state, AddressingPtr& adr, const ui
 }
 
 inline void Disassembler6502::PUSH(State6502& state, const uint8_t& val) const {
-    state.memory.write(0x1FF - state.sp, val);
-    ++state.sp;
-    if (0x1FF - state.sp < 0x100)
-        std::cerr << "6502 stack pushing overflow\n";
+    state.memory.write(0x100 + state.sp, val);
+    --state.sp;
 }
 
 inline uint8_t Disassembler6502::POP(State6502& state) const {
-    --state.sp;
-    if (0x100 + state.sp > 0x1FF)
-        std::cerr << "6502 stack popping overflow\n";
-    uint8_t val = state.memory.read(0x1FF - state.sp);
+    ++state.sp;
+    uint8_t val = state.memory.read(0x100 + state.sp);
     return val;
 }
 
