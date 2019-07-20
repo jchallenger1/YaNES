@@ -74,7 +74,7 @@ void nesCpuTest() {
     int i = 0;
 
     while( std::getline(ifsLog, cycleResults) ) {
-        if (i == 5) {
+        if (i == 8) {
             std::cout << "";
         }
         std::string instrDesc;

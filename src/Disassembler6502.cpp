@@ -407,7 +407,7 @@ uint16_t Disassembler6502::ADR_RELATIVE(State6502& state) const {
     uint8_t byte = state.memory.read(state.pc + 1);
     bool isPositive = (0x80 & byte) >> 7 == 0;
     uint8_t offset = (~0x80) & byte;
-    return isPositive ? state.pc + offset : state.pc - offset;
+    return (isPositive ? state.pc + offset : state.pc - offset) + 2;
 }
 
 // Accumulator : Same as implied, but its always accumulator(a) register.
