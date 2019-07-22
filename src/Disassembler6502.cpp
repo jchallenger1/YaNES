@@ -534,7 +534,10 @@ void Disassembler6502::OP_TXA(State6502& state, AddressingPtr& adr) {
     TR(state, adr, state.x, state.a);
 }
 void Disassembler6502::OP_TXS(State6502& state, AddressingPtr& adr) {
+    // TXS does not modify processor state
+    State6502::Status s = state.status;
     TR(state, adr, state.x, state.sp);
+    std::swap(s, state.status);
 }
 void Disassembler6502::OP_TYA(State6502& state, AddressingPtr& adr) {
     TR(state, adr, state.y, state.a);
