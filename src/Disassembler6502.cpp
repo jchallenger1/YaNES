@@ -360,9 +360,15 @@ uint16_t Disassembler6502::ADR_INDRECTINDEX(State6502& state) const {
 // IndexedIndirect/Indirect,X:
 // Similar to above, but X is not added to the full address, rather it is added to p to specifiy where the low and high bits are
 // Instead of p and p+1, it is p+x and p+x+1
+// Wrapping does occur here
 uint16_t Disassembler6502::ADR_INDEXINDIRECT(State6502& state) const {
     uint8_t p = state.memory.read(state.pc + 1);
-    uint16_t address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(p + state.x + 1)) << 8) | state.memory.read(p + state.x) );
+    p += state.x;
+    uint16_t address = 0;
+    if (p == 0xFF) // wrapping occurs, write from 0 (where it wraps) for high bytes
+        address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(0)) << 8) | state.memory.read(p));
+    else
+        address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(p + 1)) << 8) | state.memory.read(p) );
     state.pc += 2;
     return address;
 }
