@@ -71,7 +71,7 @@ void nesCpuTest() {
     state.status.reset();
 
     std::string cycleResults;
-    int i = 0;
+    int i = 1;
 
     while( std::getline(ifsLog, cycleResults) ) {
         if (i == 8) {

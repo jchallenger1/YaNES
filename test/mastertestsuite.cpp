@@ -24,7 +24,7 @@ test_suite* createCpuDiagTestSuite() {
 
 test_suite* init_unit_test_suite(int argc, char* argv[]) {
     UNUSED(argc); UNUSED(argv);
-    constexpr bool allowOp = false, allowDiag = true;
+    constexpr bool allowOp = true, allowDiag = false;
     if (allowOp) {
         test_suite* opTests = createOpcodeTestSuite();
         framework::master_test_suite().add(opTests);
