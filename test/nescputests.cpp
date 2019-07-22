@@ -63,6 +63,9 @@ inline bool currentTestsPass() {
 }
 
 void nesCpuTest() {
+
+    std::cout << "\n--- Running CPU Diagnostics, Nestest ---\n";
+
     Memory memory;
     memory.fromFile("../rsc/tests/nestest.nes");
 
@@ -98,6 +101,11 @@ void nesCpuTest() {
         }
         dis.runCycle(state);
         ++i;
+
+        if (i == 5000) { // at around 5000, the tests reaches illegal opcodes which this project will not implement
+            std::cout << "NesTest passed with no errors + code(" << static_cast<int>(state.memory.read(0x2)) << ')';
+            break;
+        }
     }
 
 }

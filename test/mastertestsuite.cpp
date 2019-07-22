@@ -32,7 +32,6 @@ test_suite* init_unit_test_suite(int argc, char* argv[]) {
         std::cout << "\n";
     }
     if (allowDiag) {
-        std::cout << " --- Running CPU Diagnostics, Nestest ---\n";
         test_suite* cpuDiag = createCpuDiagTestSuite();
         framework::master_test_suite().add(cpuDiag);
         std::cout << "\n";
