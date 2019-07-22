@@ -539,7 +539,9 @@ void Disassembler6502::OP_TXS(State6502& state, AddressingPtr& adr) {
 void Disassembler6502::OP_TYA(State6502& state, AddressingPtr& adr) {
     TR(state, adr, state.y, state.a);
 }
+
 /// ---- Math Instructions ----
+
 
 
 // Add with carry from memory (A + M + C -> A)
@@ -548,7 +550,7 @@ void Disassembler6502::OP_TYA(State6502& state, AddressingPtr& adr) {
 void Disassembler6502::OP_ADC(State6502& state, AddressingPtr& adr) {
     uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
     uint16_t sum = state.a + byte + state.status.c;
-
+#ifdef ALLOW_DEC
     if (state.status.d) {
         if ( (state.a & 0xF) + (byte & 0xF) + state.status.c > 9)
             sum += 6;
@@ -558,7 +560,9 @@ void Disassembler6502::OP_ADC(State6502& state, AddressingPtr& adr) {
             sum += 96;
         state.status.c = sum > 0x99;
     }
-    else {
+    else
+#endif
+    {
         setNegative(state, sum);
         state.status.o = ((state.a ^ sum) & (byte ^ sum) & 0x80) == 0x80;
         state.status.c = sum > 0xFF;
@@ -568,22 +572,22 @@ void Disassembler6502::OP_ADC(State6502& state, AddressingPtr& adr) {
     setZero(state, state.a);
 }
 
-// Subtract memory from a (A - M - C -> A)
+// Subtract memory from a (A - M - (1-C) -> A)
 // Same sources used for ADC
 void Disassembler6502::OP_SBC(State6502& state, AddressingPtr& adr) {
     uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
-    uint16_t sum = state.a - byte - state.status.c;
+    uint16_t sum = state.a - byte - (1 - state.status.c);
     setNegative(state, sum);
     setZero(state, sum);
-    state.status.o = ((state.a ^ sum) & (byte ^ sum) & 0x80) == 0x80;
-
+    state.status.o = ((state.a ^ sum) & 0x80) && ((state.a ^ byte) & 0x80);
+#ifdef ALLOW_DEC
     if (state.status.d) {
         if ((state.a & 0x0F) - state.status.c < (byte & 0x0F))
             sum -= 6;
         if (sum >= 0x99)
             sum -= 0x60;
     }
-
+#endif
     state.status.c = sum < 0x100;
     state.a = sum & 0xFF;
 }
