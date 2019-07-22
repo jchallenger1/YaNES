@@ -87,7 +87,7 @@ void nesCpuTest() {
         uint8_t Statep = state.status.asByte();
         std::tie(pc, a, x, y, p, sp, instrDesc) = getTestState(cycleResults);
         ckPassErr(state.a == a, "(" + std::to_string(i) + ") Accumulator Register failure detected at " + instrDesc);
-        ckPassErr(state.x == x || state.y == y, "(" + std::to_string(i) + ") X,Y Register failure detected at " + instrDesc);
+        ckPassErr(state.x == x && state.y == y, "(" + std::to_string(i) + ") X,Y Register failure detected at " + instrDesc);
         ckPassErr(Statep == p, "(" + std::to_string(i) + ") Status failure detected at " + instrDesc);
         ckPassErr(state.sp == sp, "(" + std::to_string(i) +  ") Stack pointer failure detected at " + instrDesc);
         ckPassErr(state.pc == pc, "(" + std::to_string(i) + ") Program Counter failure detected at " + instrDesc);
@@ -96,7 +96,6 @@ void nesCpuTest() {
         if (!currentTestsPass()) {
             BOOST_FAIL(std::string("Cannot continue tests err msg: ") + std::to_string(static_cast<int>(state.memory.read(0x2))));
         }
-
         dis.runCycle(state);
         ++i;
     }

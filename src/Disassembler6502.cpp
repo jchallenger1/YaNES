@@ -30,9 +30,9 @@ Disassembler6502::Disassembler6502() {
     // LDX
     opcodeTable[0xA2] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_IMMEDIATE};
     opcodeTable[0xA6] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_ZEROPAGE};
-    opcodeTable[0xB6] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0xB6] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_ZEROPAGEY};
     opcodeTable[0xAE] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_ABS};
-    opcodeTable[0xBE] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_ABSX};
+    opcodeTable[0xBE] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_ABSY};
     // LDY
     opcodeTable[0xA0] = {&Disassembler6502::OP_LDY, &Disassembler6502::ADR_IMMEDIATE};
     opcodeTable[0xA4] = {&Disassembler6502::OP_LDY, &Disassembler6502::ADR_ZEROPAGE};
