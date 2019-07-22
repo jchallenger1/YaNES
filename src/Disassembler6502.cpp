@@ -565,6 +565,7 @@ void Disassembler6502::OP_ADC(State6502& state, AddressingPtr& adr) {
     }
 
     state.a = sum & 0xFF;
+    setZero(state, state.a);
 }
 
 // Subtract memory from a (A - M - C -> A)
