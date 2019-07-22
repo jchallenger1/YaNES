@@ -24,14 +24,18 @@ test_suite* createCpuDiagTestSuite() {
 
 test_suite* init_unit_test_suite(int argc, char* argv[]) {
     UNUSED(argc); UNUSED(argv);
-    constexpr bool allowOp = true, allowDiag = false;
+    constexpr bool allowOp = true, allowDiag = true;
     if (allowOp) {
+        std::cout << " --- Running Opcode Test Cases ---\n";
         test_suite* opTests = createOpcodeTestSuite();
         framework::master_test_suite().add(opTests);
+        std::cout << "\n";
     }
     if (allowDiag) {
+        std::cout << " --- Running CPU Diagnostics, Nestest ---\n";
         test_suite* cpuDiag = createCpuDiagTestSuite();
         framework::master_test_suite().add(cpuDiag);
+        std::cout << "\n";
     }
     return nullptr;
 }
