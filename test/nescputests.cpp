@@ -58,8 +58,8 @@ TupleState getTestState(const std::string& line) {
 inline bool currentTestsPass() {
     using namespace boost::unit_test;
     test_case::id_t id = framework::current_test_case().p_id;
-    test_results rez = results_collector.results(id);
-    return rez.passed();
+    test_results res = results_collector.results(id);
+    return res.passed();
 }
 
 void nesCpuTest() {
@@ -84,10 +84,11 @@ void nesCpuTest() {
         std::string instrDesc;
         uint8_t a, x, y, p, sp;
         uint16_t pc;
+        uint8_t Statep = state.status.asByte();
         std::tie(pc, a, x, y, p, sp, instrDesc) = getTestState(cycleResults);
         ckPassErr(state.a == a, "(" + std::to_string(i) + ") Accumulator Register failure detected at " + instrDesc);
         ckPassErr(state.x == x || state.y == y, "(" + std::to_string(i) + ") X,Y Register failure detected at " + instrDesc);
-        ckPassErr(state.status.asByte() == p, "(" + std::to_string(i) + ") Status failure detected at " + instrDesc);
+        ckPassErr(Statep == p, "(" + std::to_string(i) + ") Status failure detected at " + instrDesc);
         ckPassErr(state.sp == sp, "(" + std::to_string(i) +  ") Stack pointer failure detected at " + instrDesc);
         ckPassErr(state.pc == pc, "(" + std::to_string(i) + ") Program Counter failure detected at " + instrDesc);
         ckPassErr(state.memory.read(0x02) == 0 && state.memory.read(0x03) == 0, " CPU NesTest has triggered an error at " + instrDesc);

@@ -887,12 +887,15 @@ void Disassembler6502::OP_PHP(State6502& state, AddressingPtr& adr) {
     EXECADDRESSING(adr, state);
     state.status.b = 1;
     PUSH(state, state.status.asByte());
+    state.status.b = 0;
 }
 
 // Pull A from Stack
 void Disassembler6502::OP_PLA(State6502& state, AddressingPtr& adr) {
     EXECADDRESSING(adr, state);
     state.a = POP(state);
+    setZero(state, state.a);
+    setNegative(state, state.a);
 }
 
 // Pull Processor Status from Stack
