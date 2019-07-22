@@ -82,9 +82,7 @@ void nesCpuTest() {
     state.status.reset();
 
     std::string cycleResults;
-    int i = 1;
-
-    while( std::getline(ifsLog, cycleResults) ) {
+    for (int i = 1; std::getline(ifsLog, cycleResults); ++i) {
         std::string instrDesc;
         uint8_t a, x, y, p, sp;
         uint16_t pc;
@@ -101,7 +99,6 @@ void nesCpuTest() {
             BOOST_FAIL(std::string("Cannot continue tests err msg: ") + std::to_string(static_cast<int>(state.memory.read(0x2))));
         }
         dis.runCycle(state);
-        ++i;
 
         if (i == 5000) { // at around 5000, the tests reaches illegal opcodes which this project will not implement
             std::cout << "NesTest passed with no errors + code(" << static_cast<int>(state.memory.read(0x2)) << ')';
