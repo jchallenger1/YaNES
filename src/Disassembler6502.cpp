@@ -654,8 +654,8 @@ void Disassembler6502::OP_BIT(State6502& state, AddressingPtr& adr) {
     uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
     uint8_t sum = byte & state.a;
     setZero(state, sum);
-    setNegative(state, sum);
-    state.status.o = (sum & 0x40) >> 6;
+    setNegative(state, byte);
+    state.status.o = (byte & 0x40) >> 6;
 }
 
 // Arithmetric Shift Left
