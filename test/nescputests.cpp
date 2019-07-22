@@ -73,6 +73,7 @@ void nesCpuTest() {
     ckPassFail(ifsLog.good(), "Could not open log file to compare testsing");
 
     Disassembler6502 dis;
+    dis.cpuAllowDec = false;
     State6502 state;
     state.memory = memory;
     state.pc = 0xC000;

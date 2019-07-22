@@ -20,6 +20,8 @@ public:
     void signalNMI(State6502&);
     void signalRESET(State6502&);
     void signalIRQ(State6502&);
+
+    bool cpuAllowDec = true;
 private:
     // Vectors are vector pointers pointing to an address where the pc should be
     // Each variable is where the signal's vector points to, the value is the low byte of the address

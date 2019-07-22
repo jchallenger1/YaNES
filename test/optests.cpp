@@ -85,9 +85,11 @@ void cpuMathTests() {
     state.clear();
 
     // Sub 2 num w/ borrow w/ positive
+    state.status.c = 1;
+    state.a = 5;
     memory.write(0, 0xE9);
     memory.write(1, 3);
-    state.a = 5;
+
     dis.runCycle(state);
     ckPassErr(state.a == 2 && state.status.c == 1, "2.13 SBC failure");
 
