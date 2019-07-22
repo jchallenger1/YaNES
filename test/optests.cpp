@@ -223,21 +223,21 @@ void cpuJumpBranchTests() {
     ckPassErr(state.pc == 0xC956, "ABS JMP failure");
     state.clear();
 
-    memory.write(0xFA23, 0x65);
-    memory.write(0xFA23 + 1, 0xB3);
-    memory.write(0, 0x6C);
-    memory.write(1, 0x23);
-    memory.write(2, 0xFA);
+    memory[0xFA23] = 0x65;
+    memory[0xFA23 + 1] = 0xB3;
+    memory[0] = 0x6C;
+    memory[1] = 0x23;
+    memory[2] = 0xFA;
     dis.runCycle(state);
     ckPassErr(state.pc == 0xB365, "INDR JMP failure");
     state.clear();
 
-    memory.write(0x3000, 0x40);
-    memory.write(0x30FF, 0x80);
-    memory.write(0x3100, 0x50);
+    memory.write(0x8000, 0x40);
+    memory.write(0x80FF, 0x80);
+    memory.write(0x8100, 0x50);
     memory.write(0, 0x6C);
     memory.write(1, 0xFF);
-    memory.write(2, 0x30);
+    memory.write(2, 0x80);
     dis.runCycle(state);
     ckPassErr(state.pc == 0x4080, "INDR JMP page boundary failure");
 
