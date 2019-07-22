@@ -349,9 +349,14 @@ uint16_t Disassembler6502::ADR_ABSY(State6502& state) const {
 // The next byte refers to a location in memory within range 0-255, p for simplicity
 // p and p+1 is a full 16 bit location address, the address is then added with register Y to get the final address
 // The byte is then that full location
+// Wrapping does occur here
 uint16_t Disassembler6502::ADR_INDRECTINDEX(State6502& state) const {
     uint8_t p = state.memory.read(state.pc + 1);
-    uint16_t address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(p + 1)) << 8) | state.memory.read(p) );
+    uint16_t address = 0;
+    if (p == 0xFF) // wrapping occurs, write from 0 (where it wraps) for high bytes
+        address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(0)) << 8) | state.memory.read(p) );
+    else
+        address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(p + 1)) << 8) | state.memory.read(p) );
     address += state.y;
     state.pc += 2;
     return address;
@@ -365,7 +370,7 @@ uint16_t Disassembler6502::ADR_INDEXINDIRECT(State6502& state) const {
     uint8_t p = state.memory.read(state.pc + 1);
     p += state.x;
     uint16_t address = 0;
-    if (p == 0xFF) // wrapping occurs, write from 0 (where it wraps) for high bytes
+    if (p == 0xFF)
         address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(0)) << 8) | state.memory.read(p));
     else
         address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(p + 1)) << 8) | state.memory.read(p) );
