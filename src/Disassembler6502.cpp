@@ -30,9 +30,9 @@ Disassembler6502::Disassembler6502() {
     // LDX
     opcodeTable[0xA2] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_IMMEDIATE};
     opcodeTable[0xA6] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_ZEROPAGE};
-    opcodeTable[0xB6] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_ZEROPAGEX};
+    opcodeTable[0xB6] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_ZEROPAGEY};
     opcodeTable[0xAE] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_ABS};
-    opcodeTable[0xBE] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_ABSX};
+    opcodeTable[0xBE] = {&Disassembler6502::OP_LDX, &Disassembler6502::ADR_ABSY};
     // LDY
     opcodeTable[0xA0] = {&Disassembler6502::OP_LDY, &Disassembler6502::ADR_IMMEDIATE};
     opcodeTable[0xA4] = {&Disassembler6502::OP_LDY, &Disassembler6502::ADR_ZEROPAGE};
@@ -349,9 +349,14 @@ uint16_t Disassembler6502::ADR_ABSY(State6502& state) const {
 // The next byte refers to a location in memory within range 0-255, p for simplicity
 // p and p+1 is a full 16 bit location address, the address is then added with register Y to get the final address
 // The byte is then that full location
+// Wrapping does occur here
 uint16_t Disassembler6502::ADR_INDRECTINDEX(State6502& state) const {
     uint8_t p = state.memory.read(state.pc + 1);
-    uint16_t address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(p + 1)) << 8) | state.memory.read(p) );
+    uint16_t address = 0;
+    if (p == 0xFF) // wrapping occurs, write from 0 (where it wraps) for high bytes
+        address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(0)) << 8) | state.memory.read(p) );
+    else
+        address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(p + 1)) << 8) | state.memory.read(p) );
     address += state.y;
     state.pc += 2;
     return address;
@@ -360,9 +365,15 @@ uint16_t Disassembler6502::ADR_INDRECTINDEX(State6502& state) const {
 // IndexedIndirect/Indirect,X:
 // Similar to above, but X is not added to the full address, rather it is added to p to specifiy where the low and high bits are
 // Instead of p and p+1, it is p+x and p+x+1
+// Wrapping does occur here
 uint16_t Disassembler6502::ADR_INDEXINDIRECT(State6502& state) const {
     uint8_t p = state.memory.read(state.pc + 1);
-    uint16_t address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(p + state.x + 1)) << 8) | state.memory.read(p + state.x) );
+    p += state.x;
+    uint16_t address = 0;
+    if (p == 0xFF)
+        address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(0)) << 8) | state.memory.read(p));
+    else
+        address = static_cast<uint16_t>( (static_cast<uint16_t>(state.memory.read(p + 1)) << 8) | state.memory.read(p) );
     state.pc += 2;
     return address;
 }
@@ -407,7 +418,7 @@ uint16_t Disassembler6502::ADR_RELATIVE(State6502& state) const {
     uint8_t byte = state.memory.read(state.pc + 1);
     bool isPositive = (0x80 & byte) >> 7 == 0;
     uint8_t offset = (~0x80) & byte;
-    return isPositive ? state.pc + offset : state.pc - offset;
+    return (isPositive ? state.pc + offset : state.pc - offset) + 2;
 }
 
 // Accumulator : Same as implied, but its always accumulator(a) register.
@@ -469,17 +480,13 @@ inline void Disassembler6502::CMP(State6502& state, AddressingPtr& adr, const ui
 }
 
 inline void Disassembler6502::PUSH(State6502& state, const uint8_t& val) const {
-    state.memory.write(0x1FF - state.sp, val);
-    ++state.sp;
-    if (0x1FF - state.sp < 0x100)
-        std::cerr << "6502 stack pushing overflow\n";
+    state.memory.write(0x100 + state.sp, val);
+    --state.sp;
 }
 
 inline uint8_t Disassembler6502::POP(State6502& state) const {
-    --state.sp;
-    if (0x100 + state.sp > 0x1FF)
-        std::cerr << "6502 stack popping overflow\n";
-    uint8_t val = state.memory.read(0x1FF - state.sp);
+    ++state.sp;
+    uint8_t val = state.memory.read(0x100 + state.sp);
     return val;
 }
 
@@ -538,12 +545,17 @@ void Disassembler6502::OP_TXA(State6502& state, AddressingPtr& adr) {
     TR(state, adr, state.x, state.a);
 }
 void Disassembler6502::OP_TXS(State6502& state, AddressingPtr& adr) {
+    // TXS does not modify processor state
+    State6502::Status s = state.status;
     TR(state, adr, state.x, state.sp);
+    std::swap(s, state.status);
 }
 void Disassembler6502::OP_TYA(State6502& state, AddressingPtr& adr) {
     TR(state, adr, state.y, state.a);
 }
+
 /// ---- Math Instructions ----
+
 
 
 // Add with carry from memory (A + M + C -> A)
@@ -552,8 +564,7 @@ void Disassembler6502::OP_TYA(State6502& state, AddressingPtr& adr) {
 void Disassembler6502::OP_ADC(State6502& state, AddressingPtr& adr) {
     uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
     uint16_t sum = state.a + byte + state.status.c;
-
-    if (state.status.d) {
+    if (state.status.d && cpuAllowDec) {
         if ( (state.a & 0xF) + (byte & 0xF) + state.status.c > 9)
             sum += 6;
         setNegative(state, sum);
@@ -569,18 +580,19 @@ void Disassembler6502::OP_ADC(State6502& state, AddressingPtr& adr) {
     }
 
     state.a = sum & 0xFF;
+    setZero(state, state.a);
 }
 
-// Subtract memory from a (A - M - C -> A)
+// Subtract memory from a (A - M - (1-C) -> A)
 // Same sources used for ADC
 void Disassembler6502::OP_SBC(State6502& state, AddressingPtr& adr) {
     uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
-    uint16_t sum = state.a - byte - state.status.c;
+    uint16_t sum = state.a - byte - (1 - state.status.c);
     setNegative(state, sum);
     setZero(state, sum);
-    state.status.o = ((state.a ^ sum) & (byte ^ sum) & 0x80) == 0x80;
+    state.status.o = ((state.a ^ sum) & 0x80) && ((state.a ^ byte) & 0x80);
 
-    if (state.status.d) {
+    if (state.status.d && cpuAllowDec) {
         if ((state.a & 0x0F) - state.status.c < (byte & 0x0F))
             sum -= 6;
         if (sum >= 0x99)
@@ -658,8 +670,8 @@ void Disassembler6502::OP_BIT(State6502& state, AddressingPtr& adr) {
     uint8_t byte = state.memory.read(EXECADDRESSING(adr, state));
     uint8_t sum = byte & state.a;
     setZero(state, sum);
-    setNegative(state, sum);
-    state.status.o = (sum & 0x40) >> 6;
+    setNegative(state, byte);
+    state.status.o = (byte & 0x40) >> 6;
 }
 
 // Arithmetric Shift Left
@@ -891,12 +903,15 @@ void Disassembler6502::OP_PHP(State6502& state, AddressingPtr& adr) {
     EXECADDRESSING(adr, state);
     state.status.b = 1;
     PUSH(state, state.status.asByte());
+    state.status.b = 0;
 }
 
 // Pull A from Stack
 void Disassembler6502::OP_PLA(State6502& state, AddressingPtr& adr) {
     EXECADDRESSING(adr, state);
     state.a = POP(state);
+    setZero(state, state.a);
+    setNegative(state, state.a);
 }
 
 // Pull Processor Status from Stack

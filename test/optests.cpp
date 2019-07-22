@@ -85,9 +85,11 @@ void cpuMathTests() {
     state.clear();
 
     // Sub 2 num w/ borrow w/ positive
+    state.status.c = 1;
+    state.a = 5;
     memory.write(0, 0xE9);
     memory.write(1, 3);
-    state.a = 5;
+
     dis.runCycle(state);
     ckPassErr(state.a == 2 && state.status.c == 1, "2.13 SBC failure");
 
@@ -244,12 +246,12 @@ void cpuJumpBranchTests() {
     memory.write(10, 0x10);
     memory.write(11, 0x56);
     dis.runCycle(state);
-    ckPassFail(state.pc == 10 + 0x56, "Branch/Relative mode failure, can't test next one");
+    ckPassFail(state.pc == 10 + 0x56 + 2, "Branch/Relative mode failure, can't test next one");
 
-    memory.write(10 + 0x56, 0x70);
-    memory.write(10 + 0x56 + 1, 0xFF);
+    memory.write(10 + 0x56 + 2, 0x70);
+    memory.write(10 + 0x56 + 3, 0xFF);
     dis.runCycle(state);
-    ckPassErr(state.pc == 10 + 0x56 + 2, "branch/relative mode no branching failure");
+    ckPassErr(state.pc == 10 + 0x56 + 4, "branch/relative mode no branching failure");
 }
 
 // Tests Cpu's compare function w/accumulator, also tests BIT compare
@@ -313,7 +315,7 @@ void cpuStackTests() {
     state.a = 0x78;
     memory.write(3, 0x48);
     dis.runCycle(state);
-    ckPassFail(state.sp == 0x56 + 4, "PHP/PHA failure, cannot continue");
+    ckPassFail(state.sp == 0x56 - 4, "PHP/PHA failure, cannot continue");
     // Pop all of them off
     state.a = 0;
     state.status.clear();
@@ -346,7 +348,7 @@ void cpuStackTests() {
     state.memory.write(0x11, 0xF5);
     state.memory.write(0x12, 0xC4);
     dis.runCycle(state);
-    ckPassFail(state.sp == 0x12 && state.pc == 0xC4F5, "JSR failure, cannot continue");
+    ckPassFail(state.sp == 0x10 - 2 && state.pc == 0xC4F5, "JSR failure, cannot continue");
 
     state.memory[0xC4F5] = 0xA9;
     state.memory[0xC4F5 + 1] = 0xEA;
