@@ -2,6 +2,7 @@
 #define TESTS_HPP
 
 #include <string>
+#include <iostream>
 #include <boost/test/unit_test.hpp>
 
 inline constexpr void ckPassFail(const bool&& b, const std::string& str) {
@@ -24,8 +25,13 @@ extern void cpuStatusTests();
 extern void cpuJumpBranchTests();
 extern void cpuCompareTests();
 extern void cpuStackTests();
+extern void cpuMessage();
 
-
+// ---- NesTest Functions ----
 extern void nesCpuTest();
+
+extern void testenv();
+
+
 
 #endif // TESTS_HPP

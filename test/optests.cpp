@@ -2,6 +2,8 @@
 #include "State6502.hpp"
 #include "Disassembler6502.hpp"
 
+void cpuMessage() { std::cout << " --- Running Opcode Test Cases ---\n"; }
+
 // Test if all addressing modes work also check lda function
 void cpuLdaAddressingTests() {
     State6502 state;

@@ -9,7 +9,8 @@ SOURCES += \
         ../src/State6502.cpp \
         nescputests.cpp \
         optests.cpp \
-        mastertestsuite.cpp
+        mastertestsuite.cpp \
+        testenv.cpp
 
 
 INCLUDEPATH += ../include/

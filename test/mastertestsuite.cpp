@@ -6,6 +6,7 @@ using namespace boost::unit_test;
 
 test_suite* createOpcodeTestSuite() {
     test_suite* opTests = BOOST_TEST_SUITE("opcode_test_suite");
+    opTests->add(BOOST_TEST_CASE( &cpuMessage ));
     opTests->add(BOOST_TEST_CASE( &cpuLdaAddressingTests ));
     opTests->add(BOOST_TEST_CASE( &cpuMathTests ));
     opTests->add(BOOST_TEST_CASE( &cpuBitwiseTests ));
@@ -23,10 +24,13 @@ test_suite* createCpuDiagTestSuite() {
 }
 
 test_suite* init_unit_test_suite(int argc, char* argv[]) {
-    UNUSED(argc); UNUSED(argv);
-    constexpr bool allowOp = true, allowDiag = true;
+    UNUSED(argv);
+    bool allowOp = false, allowDiag = false;
+    if (argc == 1) {
+        testenv();
+        return nullptr;
+    }
     if (allowOp) {
-        std::cout << " --- Running Opcode Test Cases ---\n";
         test_suite* opTests = createOpcodeTestSuite();
         framework::master_test_suite().add(opTests);
         std::cout << "\n";
