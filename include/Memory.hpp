@@ -2,8 +2,10 @@
 #define MEMORY_HPP
 
 #include <array>
+#include "GamePak.hpp"
 
 class Memory {
+    friend struct GamePak;
     // Max amount of memory in bytes (64KB)
     static constexpr uint16_t MAXBYTES = 0xFFFF;
 public:
@@ -19,7 +21,6 @@ public:
 
     void clear();
 
-    void fromFile(const std::string& fname);
 private:
     std::array<uint8_t, MAXBYTES> memory{};
 };

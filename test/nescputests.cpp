@@ -1,7 +1,9 @@
+#include "GamePak.hpp"
 #include "tests.hpp"
 #include "Disassembler6502.hpp"
 #include "State6502.hpp"
 #include "Memory.hpp"
+
 
 #include <boost/test/results_collector.hpp>
 #include <fstream>
@@ -67,7 +69,7 @@ void nesCpuTest() {
     std::cout << "\n--- Running CPU Diagnostics, Nestest ---\n";
 
     Memory memory;
-    memory.fromFile("../rsc/tests/nestest.nes");
+    GamePak::load(memory, "../rsc/tests/nestest.nes");
 
     std::ifstream ifsLog("../rsc/tests/nestest.log", std::ios_base::in);
     ckPassFail(ifsLog.good(), "Could not open log file to compare testsing");

@@ -7,6 +7,7 @@ SOURCES += \
         ../src/Disassembler6502.cpp \
         ../src/Memory.cpp \
         ../src/State6502.cpp \
+        ../src/GamePak.cpp \
         nescputests.cpp \
         optests.cpp \
         mastertestsuite.cpp \
@@ -19,4 +20,5 @@ HEADERS += \
     ../include/Disassembler6502.hpp \
     ../include/Memory.hpp \
     ../include/State6502.hpp \
+    ../include/GamePak.hpp \
     tests.hpp
