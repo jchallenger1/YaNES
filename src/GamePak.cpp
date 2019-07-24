@@ -7,6 +7,11 @@
 
 #define UNUSED(x) (void)(x)
 
+constexpr uint16_t GamePak::KB4;
+constexpr uint16_t GamePak::KB8;
+constexpr uint16_t GamePak::KB16;
+
+
 // Refer to https://wiki.nesdev.com/w/index.php/CPU_memory_map and
 //  https://wiki.nesdev.com/w/index.php/INES
 GamePak cpuLoad(Memory& memory, std::ifstream& ifs) {
@@ -50,13 +55,13 @@ GamePak cpuLoad(Memory& memory, std::ifstream& ifs) {
     long startOfPROM = ifs.tellg();
 
     // Write PRG ROM @ 0x8000
-    for (uint16_t index = 0x8000, times = 0; times != gamepak.PRG_ROM_sz * 16384; times++, index++) {
+    for (uint16_t index = 0x8000, times = 0; times != gamepak.PRG_ROM_sz * GamePak::KB16; times++, index++) {
         memory[index] = read();
     }
     // In NROM 128, after 0xBFFF is just a mirror of the rom of 0x8000 - 0xBFFF
     // For now most mirrors will actually write to memory
     ifs.seekg(startOfPROM);
-    for (uint16_t index = 0xC000, times = 0; times != gamepak.PRG_ROM_sz * 16384; times++, index++) {
+    for (uint16_t index = 0xC000, times = 0; times != gamepak.PRG_ROM_sz * GamePak::KB16; times++, index++) {
         memory[index] = read();
     }
 
@@ -70,7 +75,20 @@ GamePak GamePak::load(Memory& memory, Ppu& ppu, const std::string& fname) {
         throw std::runtime_error("File not found, given path:" + fname);
     }
     GamePak pak = cpuLoad(memory, ifs);
-    UNUSED(ppu);
+    // Remaining bytes are CHR_ROM
+    uint8_t byte;
+    auto read = [&ifs, &byte]() -> uint8_t {
+            ifs.read(reinterpret_cast<char*>(&byte), sizeof (uint8_t) );
+            return byte;
+    };
+
+    for (unsigned index = 0; index != KB4; index++) {
+        ppu.leftPatternT.at(index) = read();
+    }
+    for (unsigned index = 0; index != KB4; index++) {
+        ppu.rightPatternT.at(index) = read();
+    }
+
     return pak;
 }
 

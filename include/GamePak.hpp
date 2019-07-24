@@ -8,6 +8,9 @@ class Memory;
 class Ppu;
 
 struct GamePak {
+    static constexpr uint16_t KB4 = 4096;
+    static constexpr uint16_t KB8 = 8192;
+    static constexpr uint16_t KB16 =
     uint8_t PRG_ROM_sz; // Program Read only memory in 16kb size
     uint8_t CHR_ROM_sz; // Character Read only memory in 8kb size
     uint8_t mapper; // Mapper number
