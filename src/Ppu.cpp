@@ -45,7 +45,7 @@ std::array<uint16_t, 8> Ppu::getTile(unsigned x, unsigned y) {
     std::array<uint16_t, 8> tile{};
     UNUSED(x); UNUSED(y);
     for (unsigned i = 0; i != 8; i++) {
-        tile[i] = createLine(rightPatternT[i], rightPatternT[i + 8]);
+        tile[i] = createLine(memory[0x1000 + i], memory[0x1000 + i + 8]);
     }
     printTile(tile);
     return tile;

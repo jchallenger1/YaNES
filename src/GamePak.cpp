@@ -82,11 +82,8 @@ GamePak GamePak::load(Memory& memory, Ppu& ppu, const std::string& fname) {
             return byte;
     };
 
-    for (unsigned index = 0; index != KB4; index++) {
-        ppu.leftPatternT.at(index) = read();
-    }
-    for (unsigned index = 0; index != KB4; index++) {
-        ppu.rightPatternT.at(index) = read();
+    for (unsigned index = 0; index != KB16; index++) {
+        ppu.memory.at(index) = read();
     }
 
     return pak;
