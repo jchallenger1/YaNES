@@ -6,30 +6,30 @@ using namespace boost::unit_test;
 
 test_suite* createOpcodeTestSuite() {
     test_suite* opTests = BOOST_TEST_SUITE("opcode_test_suite");
-    opTests->add(BOOST_TEST_CASE( &cpuMessage ));
-    opTests->add(BOOST_TEST_CASE( &cpuLdaAddressingTests ));
-    opTests->add(BOOST_TEST_CASE( &cpuMathTests ));
-    opTests->add(BOOST_TEST_CASE( &cpuBitwiseTests ));
-    opTests->add(BOOST_TEST_CASE( &cpuStatusTests ));
-    opTests->add(BOOST_TEST_CASE( &cpuJumpBranchTests ));
-    opTests->add(BOOST_TEST_CASE( &cpuCompareTests ));
-    opTests->add(BOOST_TEST_CASE( &cpuStackTests ));
+    opTests->add(BOOST_TEST_CASE( &Tests::cpuMessage ));
+    opTests->add(BOOST_TEST_CASE( &Tests::cpuLdaAddressingTests ));
+    opTests->add(BOOST_TEST_CASE( &Tests::cpuMathTests ));
+    opTests->add(BOOST_TEST_CASE( &Tests::cpuBitwiseTests ));
+    opTests->add(BOOST_TEST_CASE( &Tests::cpuStatusTests ));
+    opTests->add(BOOST_TEST_CASE( &Tests::cpuJumpBranchTests ));
+    opTests->add(BOOST_TEST_CASE( &Tests::cpuCompareTests ));
+    opTests->add(BOOST_TEST_CASE( &Tests::cpuStackTests ));
     return opTests;
 }
 
 test_suite* createCpuDiagTestSuite() {
     test_suite* cpuDiagTest = BOOST_TEST_SUITE("cpu diagnostic test");
-    cpuDiagTest->add(BOOST_TEST_CASE( &nesCpuTest ));
+    cpuDiagTest->add(BOOST_TEST_CASE( &Tests::nesCpuTest ));
     return cpuDiagTest;
 }
 
 test_suite* init_unit_test_suite(int argc, char* argv[]) {
     UNUSED(argv);
-    bool allowOp = false, allowDiag = false;
-    if (argc == 1) {
-        testenv();
+    bool allowOp = true, allowDiag = true;
+    /*if (argc == 1) {
+        Tests::testenv();
         return nullptr;
-    }
+    }*/
     if (allowOp) {
         test_suite* opTests = createOpcodeTestSuite();
         framework::master_test_suite().add(opTests);

@@ -16,22 +16,25 @@ inline constexpr void ckPassErr(const bool&& b, const std::string& str) noexcept
         BOOST_ERROR(str);
     }
 }
-// ---- Cpu Test Opcode Functions ----
-// Functions are defined in optests.cpp
-extern void cpuLdaAddressingTests();
-extern void cpuMathTests();
-extern void cpuBitwiseTests();
-extern void cpuStatusTests();
-extern void cpuJumpBranchTests();
-extern void cpuCompareTests();
-extern void cpuStackTests();
-extern void cpuMessage();
 
-// ---- NesTest Functions ----
-extern void nesCpuTest();
+struct Tests {
+    // ---- Cpu Test Opcode Functions ----
+    // Functions are defined in optests.cpp
+    static void cpuLdaAddressingTests();
+    static void cpuMathTests();
+    static void cpuBitwiseTests();
+    static void cpuStatusTests();
+    static void cpuJumpBranchTests();
+    static void cpuCompareTests();
+    static void cpuStackTests();
+    static void cpuMessage();
 
-extern void testenv();
+    // ---- NesTest Functions ----
+    static void nesCpuTest();
 
+    static void testenv();
+
+};
 
 
 #endif // TESTS_HPP

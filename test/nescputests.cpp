@@ -1,7 +1,6 @@
 #include "GamePak.hpp"
 #include "tests.hpp"
-#include "Disassembler6502.hpp"
-#include "State6502.hpp"
+#include "Cpu6502.hpp"
 #include "Memory.hpp"
 
 
@@ -64,7 +63,7 @@ inline bool currentTestsPass() {
     return res.passed();
 }
 
-void nesCpuTest() {
+void Tests::nesCpuTest() {
 
     std::cout << "\n--- Running CPU Diagnostics, Nestest ---\n";
 
@@ -74,36 +73,35 @@ void nesCpuTest() {
     std::ifstream ifsLog("../rsc/tests/nestest.log", std::ios_base::in);
     ckPassFail(ifsLog.good(), "Could not open log file to compare testsing");
 
-    Disassembler6502 dis;
-    dis.cpuAllowDec = false;
-    State6502 state;
-    state.memory = memory;
-    state.pc = 0xC000;
-    state.sp = 0xFD;
-    state.a = state.x = state.y = 0;
-    state.status.reset();
+    Cpu6502 cpu;
+    cpu.cpuAllowDec = false;
+    cpu.memory = memory;
+    cpu.pc = 0xC000;
+    cpu.sp = 0xFD;
+    cpu.a = cpu.x = cpu.y = 0;
+    cpu.status.reset();
 
     std::string cycleResults;
     for (int i = 1; std::getline(ifsLog, cycleResults); ++i) {
         std::string instrDesc;
         uint8_t a, x, y, p, sp;
         uint16_t pc;
-        uint8_t Statep = state.status.asByte();
+        uint8_t Statep = cpu.status.asByte();
         std::tie(pc, a, x, y, p, sp, instrDesc) = getTestState(cycleResults);
-        ckPassErr(state.a == a, "(" + std::to_string(i) + ") Accumulator Register failure detected at " + instrDesc);
-        ckPassErr(state.x == x && state.y == y, "(" + std::to_string(i) + ") X,Y Register failure detected at " + instrDesc);
+        ckPassErr(cpu.a == a, "(" + std::to_string(i) + ") Accumulator Register failure detected at " + instrDesc);
+        ckPassErr(cpu.x == x && cpu.y == y, "(" + std::to_string(i) + ") X,Y Register failure detected at " + instrDesc);
         ckPassErr(Statep == p, "(" + std::to_string(i) + ") Status failure detected at " + instrDesc);
-        ckPassErr(state.sp == sp, "(" + std::to_string(i) +  ") Stack pointer failure detected at " + instrDesc);
-        ckPassErr(state.pc == pc, "(" + std::to_string(i) + ") Program Counter failure detected at " + instrDesc);
-        ckPassErr(state.memory.read(0x02) == 0 && state.memory.read(0x03) == 0, " CPU NesTest has triggered an error at " + instrDesc);
+        ckPassErr(cpu.sp == sp, "(" + std::to_string(i) +  ") Stack pointer failure detected at " + instrDesc);
+        ckPassErr(cpu.pc == pc, "(" + std::to_string(i) + ") Program Counter failure detected at " + instrDesc);
+        ckPassErr(cpu.memory.read(0x02) == 0 && cpu.memory.read(0x03) == 0, " CPU NesTest has triggered an error at " + instrDesc);
 
         if (!currentTestsPass()) {
-            BOOST_FAIL(std::string("Cannot continue tests err msg: ") + std::to_string(static_cast<int>(state.memory.read(0x2))));
+            BOOST_FAIL(std::string("Cannot continue tests err msg: ") + std::to_string(static_cast<int>(cpu.memory.read(0x2))));
         }
-        dis.runCycle(state);
+        cpu.runCycle();
 
         if (i == 5000) { // at around 5000, the tests reaches illegal opcodes which this project will not implement
-            std::cout << "NesTest passed with no errors + code(" << static_cast<int>(state.memory.read(0x2)) << ')';
+            std::cout << "NesTest passed with no errors + code(" << static_cast<int>(cpu.memory.read(0x2)) << ')';
             break;
         }
     }
