@@ -3,6 +3,7 @@
 
 #include <array>
 #include "GamePak.hpp"
+#include "NES.hpp"
 
 class Memory {
     friend struct GamePak;

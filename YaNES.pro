@@ -7,6 +7,7 @@ SOURCES += \
         src/Cpu6502.cpp \
         src/GamePak.cpp \
         src/Memory.cpp \
+        src/NES.cpp \
         src/Ppu.cpp
 
 INCLUDEPATH += include/
@@ -15,4 +16,5 @@ HEADERS += \
     include/Cpu6502.hpp \
     include/GamePak.hpp \
     include/Memory.hpp \
+    include/NES.hpp \
     include/Ppu.hpp

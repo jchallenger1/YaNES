@@ -10,8 +10,12 @@ constexpr uint16_t Cpu6502::vectorRESET;
 constexpr uint16_t Cpu6502::vectorIRQ;
 
 Cpu6502::Cpu6502() {
+    fillOpTable();
+
+}
 
 
+void Cpu6502::fillOpTable() {
     constexpr Instr illegalFunc = {&Cpu6502::OP_ILLEGAL, &Cpu6502::ADR_IMPLICIT};
     std::fill(opcodeTable.begin(), opcodeTable.end(), illegalFunc);
 

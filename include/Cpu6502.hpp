@@ -63,6 +63,8 @@ private:
     // Allow Decimal mode of Cpu, uneeded for NES
     bool cpuAllowDec = true;
 
+    void fillOpTable();
+
     // Vectors are vector pointers pointing to an address where the pc should be
     // Each variable is where the signal's vector points to, the value is the low byte of the address
     constexpr static uint16_t vectorNMI = 0xFFFA;

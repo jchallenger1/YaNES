@@ -5,7 +5,7 @@
 
 #define UNUSED(x) (void)(x)
 
-inline bool inRange(const uint16_t& min, const uint16_t& max, const uint16_t& val) {
+constexpr inline bool inRange(const uint16_t& min, const uint16_t& max, const uint16_t& val) {
     return val <= max && val >= min;
 }
 
