@@ -12,6 +12,13 @@ public:
     std::array<uint16_t, 8> getTile(unsigned x, unsigned y);
 
 private:
+    int16_t scanline = -1;
+
+    uint16_t vAdr = 0;
+    uint16_t vTempAdr = 0;
+    uint16_t fineXScroll = 0;
+    uint16_t writeToggle = 0;
+
 
 
     // 8 Registers that are exposed to the cpu
