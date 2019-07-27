@@ -10,7 +10,7 @@ constexpr inline bool inRange(const uint16_t& min, const uint16_t& max, const ui
 
 
 Memory::Memory() {
-    ;
+    std::cerr << "Warning, Memory class does not have a NES handle\n";
 }
 
 Memory::Memory(NES& nes) {
