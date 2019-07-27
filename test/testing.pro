@@ -4,11 +4,11 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        ../src/Disassembler6502.cpp \
+        ../src/Cpu6502.cpp \
         ../src/Memory.cpp \
-        ../src/State6502.cpp \
         ../src/GamePak.cpp \
         ../src/Ppu.cpp \
+        ../src/NES.cpp \
         nescputests.cpp \
         optests.cpp \
         mastertestsuite.cpp \
@@ -18,9 +18,9 @@ SOURCES += \
 INCLUDEPATH += ../include/
 
 HEADERS += \
-    ../include/Disassembler6502.hpp \
+    ../include/Cpu6502.hpp \
     ../include/Memory.hpp \
-    ../include/State6502.hpp \
     ../include/GamePak.hpp \
     ../include/Ppu.hpp \
+    ../include/NES.hpp \
     tests.hpp

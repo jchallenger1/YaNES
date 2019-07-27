@@ -4,17 +4,17 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        src/Disassembler6502.cpp \
+        src/Cpu6502.cpp \
         src/GamePak.cpp \
         src/Memory.cpp \
-        src/Ppu.cpp \
-        src/State6502.cpp
+        src/NES.cpp \
+        src/Ppu.cpp
 
 INCLUDEPATH += include/
 
 HEADERS += \
-    include/Disassembler6502.hpp \
+    include/Cpu6502.hpp \
     include/GamePak.hpp \
     include/Memory.hpp \
-    include/Ppu.hpp \
-    include/State6502.hpp
+    include/NES.hpp \
+    include/Ppu.hpp

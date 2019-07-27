@@ -10,7 +10,8 @@ public:
     Ppu();
 
     std::array<uint16_t, 8> getTile(unsigned x, unsigned y);
-
+    uint8_t readRegister(const uint16_t& adr);
+    void writeRegister(const uint16_t& adr, const uint8_t& val);
 private:
     int16_t scanline = -1;
 
