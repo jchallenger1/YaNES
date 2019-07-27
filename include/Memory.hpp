@@ -3,7 +3,8 @@
 
 #include <array>
 #include "GamePak.hpp"
-#include "NES.hpp"
+
+class NES;
 
 class Memory {
     friend struct GamePak;
@@ -11,6 +12,7 @@ class Memory {
     static constexpr uint16_t MAXBYTES = 0xFFFF;
 public:
     Memory();
+    Memory(NES& nes);
 
     // These two read/write functions are necessary for later
     uint8_t read(const uint16_t& adr) const;
@@ -21,9 +23,11 @@ public:
     const uint8_t& operator[](const size_t&) const;
 
     void clear();
+    void setNESHandle(NES& nes);
 
 private:
     std::array<uint8_t, MAXBYTES> memory{};
+    NES* nes;
 };
 
 #endif // MEMORY_HPP

@@ -8,6 +8,7 @@ SOURCES += \
         ../src/Memory.cpp \
         ../src/GamePak.cpp \
         ../src/Ppu.cpp \
+        ../src/NES.cpp \
         nescputests.cpp \
         optests.cpp \
         mastertestsuite.cpp \
@@ -21,4 +22,5 @@ HEADERS += \
     ../include/Memory.hpp \
     ../include/GamePak.hpp \
     ../include/Ppu.hpp \
+    ../include/NES.hpp \
     tests.hpp

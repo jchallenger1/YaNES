@@ -50,3 +50,11 @@ std::array<uint16_t, 8> Ppu::getTile(unsigned x, unsigned y) {
     printTile(tile);
     return tile;
 }
+
+uint8_t Ppu::readRegister(const uint16_t& adr) {
+    return 0; UNUSED(adr);
+}
+
+void Ppu::writeRegister(const uint16_t& adr, const uint8_t& val) {
+    UNUSED(adr); UNUSED(val);
+}
