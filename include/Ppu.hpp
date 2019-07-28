@@ -13,13 +13,15 @@ public:
     uint8_t readRegister(const uint16_t& adr);
     void writeRegister(const uint16_t& adr, const uint8_t& val);
 private:
-    int16_t scanline = -1;
+    // may or may not be needed, but added for now to easily know the scrolling that was set
+    uint16_t scrollPos = 0; // (0-0xFF) -> x scroll, (0x100-0xFFFF) -> y scroll
 
+    // Internal Registers
+    int16_t scanline = -1;
     uint16_t vAdr = 0;
     uint16_t vTempAdr = 0;
-    uint16_t fineXScroll = 0;
-    uint16_t writeToggle = 0;
-
+    uint8_t fineXScroll = 0; // only three bits
+    uint8_t writeToggle = 0; // 1 bit
 
     struct PPUCTRL {
         uint8_t nameTable : 4; // (NN) NameTable selector (0=0x2000, 1=0x2400, 2=0x2800, 3=0x2C00)

@@ -8,11 +8,11 @@ Ppu::Ppu() {
 
 }
 
-inline uint8_t getBit(const uint16_t& val, const uint8_t& bitNum) {
+constexpr inline uint8_t getBit(const uint16_t& val, const uint8_t& bitNum) {
     return static_cast<uint8_t>((val & (1 << bitNum)) >> bitNum);
 }
 
-inline void setBit(uint16_t& val, const uint8_t& bitNum) {
+constexpr inline void setBit(uint16_t& val, const uint8_t& bitNum) {
     val |= (1 << bitNum);
 }
 
@@ -51,12 +51,71 @@ std::array<uint16_t, 8> Ppu::getTile(unsigned x, unsigned y) {
     return tile;
 }
 
+
+// https://wiki.nesdev.com/w/index.php/PPU_registers
+// https://wiki.nesdev.com/w/index.php/PPU_scrolling
 uint8_t Ppu::readRegister(const uint16_t& adr) {
-    return 0; UNUSED(adr);
+    switch(adr) {
+        case 0x2002: {
+            uint8_t stat = PpuStatus.asByte();
+            PpuStatus.sOverflow = 0;
+            writeToggle = 0;
+            /* TODO :
+             * Set at dot 1 of line 241 (the line *after* the post-render
+             * line); cleared after reading $2002 and at dot 1 of the
+             * pre-render line.
+             */
+            return stat;
+        }
+        case 0x2004:
+            return OAM[OamAddr];
+        default:
+            std::cerr << "Error Read to address " << std::hex << "0x" << adr << " was detected\n";
+            throw std::runtime_error("Attempted read to non PPU register or to a writeonly register of (dec) " + std::to_string(adr));
+    }
 }
 
+// Same sources as readRegister
 void Ppu::writeRegister(const uint16_t& adr, const uint8_t& val) {
-    UNUSED(adr); UNUSED(val);
+    switch(adr) {
+        case 0x2000: {
+            PpuCtrl.fromByte(val);
+            // t: ...xx.. ........ = d: ......xx
+            uint8_t bits2 = val & 0b11;
+            vTempAdr &= ~0xC00; // clear the spot where these bits will go
+            vTempAdr |= static_cast<uint16_t>(bits2) << 10; // move the bits into bit 10, 11
+            break;
+        }
+        case 0x2001:
+            PpuMask.fromByte(val);
+            break;
+        case 0x2003:
+            OamAddr = val;
+            break;
+        case 0x2004:
+            OAM[OamAddr++] = val;
+            break;
+        case 2005:
+            if (writeToggle == 0) { // first write is X
+                vTempAdr &= ~0x1F; // clear and set the first 5 bits of tempVram to the byte
+                vTempAdr |= val >> 3;
+                fineXScroll = val & 0b111;
+                writeToggle = 1;
+                scrollPos = (~0x00FF & scrollPos) | val;
+            }
+            else { // second write is Y
+                vTempAdr &= ~0x73E0; // fill in order of CBA..HG FED...., d=HGFEDCBA
+                vTempAdr |= static_cast<uint16_t>(val & 0b111) << 12; // fil CBA
+                vTempAdr |= static_cast<uint16_t>(val & 0xC0) << 2; // fill HG
+                vTempAdr |= static_cast<uint16_t>(val & 0x38) << 2; // fill FED
+                writeToggle = 0;
+                scrollPos = static_cast<uint16_t>( (~0xFF00 & scrollPos) | static_cast<uint16_t>(val) << 8 );
+            }
+            break;
+        default:
+            std::cerr << "Error Write to address " << std::hex << "0x" << adr << " was detected\n";
+            throw std::runtime_error("Attempted write to non PPU register or to a readonly register of (dec) " + std::to_string(adr));
+    }
 }
 
 
