@@ -56,7 +56,7 @@ std::array<uint16_t, 8> Ppu::getTile(unsigned x, unsigned y) {
 // https://wiki.nesdev.com/w/index.php/PPU_scrolling
 uint8_t Ppu::readRegister(const uint16_t& adr) {
     switch(adr) {
-        case 0x2002: {
+        case 0x2002: { // Status < read
             uint8_t stat = PpuStatus.asByte();
             PpuStatus.sOverflow = 0;
             writeToggle = 0;
@@ -67,7 +67,7 @@ uint8_t Ppu::readRegister(const uint16_t& adr) {
              */
             return stat;
         }
-        case 0x2004:
+        case 0x2004: // OAM data <> Read/Write
             return OAM[OamAddr];
         default:
             std::cerr << "Error Read to address " << std::hex << "0x" << adr << " was detected\n";
@@ -78,7 +78,7 @@ uint8_t Ppu::readRegister(const uint16_t& adr) {
 // Same sources as readRegister
 void Ppu::writeRegister(const uint16_t& adr, const uint8_t& val) {
     switch(adr) {
-        case 0x2000: {
+        case 0x2000: { // Controller > Write
             PpuCtrl.fromByte(val);
             // t: ...xx.. ........ = d: ......xx
             uint8_t bits2 = val & 0b11;
@@ -86,16 +86,16 @@ void Ppu::writeRegister(const uint16_t& adr, const uint8_t& val) {
             vTempAdr |= static_cast<uint16_t>(bits2) << 10; // move the bits into bit 10, 11
             break;
         }
-        case 0x2001:
+        case 0x2001: // Mask > Write
             PpuMask.fromByte(val);
             break;
-        case 0x2003:
+        case 0x2003: // OAM address > Write
             OamAddr = val;
             break;
-        case 0x2004:
+        case 0x2004: // OAM data <> Read/Write
             OAM[OamAddr++] = val;
             break;
-        case 2005:
+        case 2005: // Scroll >> write x2
             if (writeToggle == 0) { // first write is X
                 vTempAdr &= ~0x1F; // clear and set the first 5 bits of tempVram to the byte
                 vTempAdr |= val >> 3;
@@ -110,6 +110,17 @@ void Ppu::writeRegister(const uint16_t& adr, const uint8_t& val) {
                 vTempAdr |= static_cast<uint16_t>(val & 0x38) << 2; // fill FED
                 writeToggle = 0;
                 scrollPos = static_cast<uint16_t>( (~0xFF00 & scrollPos) | static_cast<uint16_t>(val) << 8 );
+            }
+            break;
+        case 2006: // Address >> write x2
+            if (writeToggle == 0) { // load high byte of address
+                vTempAdr = static_cast<uint16_t>( (vTempAdr & ~0x3F00) | (static_cast<uint16_t>(val & 0x3F) << 8) );
+                writeToggle = 1;
+            }
+            else {
+                vTempAdr = (vTempAdr & ~0xFF) | val;
+                vAdr = vTempAdr;
+                writeToggle = 0;
             }
             break;
         default:

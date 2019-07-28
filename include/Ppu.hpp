@@ -19,7 +19,7 @@ private:
     // Internal Registers
     int16_t scanline = -1;
     uint16_t vAdr = 0;
-    uint16_t vTempAdr = 0;
+    uint16_t vTempAdr = 0; // note that last bit (15th bit) is not used
     uint8_t fineXScroll = 0; // only three bits
     uint8_t writeToggle = 0; // 1 bit
 
