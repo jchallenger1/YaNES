@@ -1,11 +1,17 @@
 #include "Ppu.hpp"
+#include "NES.hpp"
 #include <bitset>
 #include <iostream>
+#include <memory>
 
 #define UNUSED(x) (void)(x)
 
 Ppu::Ppu() {
 
+}
+
+void Ppu::setNESHandle(NES& nes) & {
+    this->nes = std::make_shared<NES>(nes);
 }
 
 constexpr inline bool inRange(const uint16_t& min, const uint16_t& max, const uint16_t& val) {
@@ -152,9 +158,15 @@ void Ppu::writeRegister(const uint16_t& adr, const uint8_t& val) {
             vRamWrite(vAdr, val);
             vAdr += PpuCtrl.increment == 0 ? 1 : 32;
             break;
-        case 0x4014: // OAM DMA > Write
-
-            break;
+        case 0x4014: {// OAM DMA > Write
+                // Read/Write from cpu's XX00-XXFF, XX=val, to OAM
+                uint16_t start = static_cast<uint16_t>(static_cast<uint16_t>(val) << 8),
+                        end = start | 0xFF;
+                while (start != end) {
+                    OAM[OamAddr++] = nes->cpu.memory.read(start++);
+                }
+                break;
+            }
         default:
             std::cerr << "Error Write to address " << std::hex << "0x" << adr << " was detected\n";
             throw std::runtime_error("Attempted write to non PPU register or to a readonly register of (dec) " + std::to_string(adr));

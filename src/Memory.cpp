@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <memory>
 
 constexpr inline bool inRange(const uint16_t& min, const uint16_t& max, const uint16_t& val) {
     return val <= max && val >= min;
@@ -18,7 +19,7 @@ Memory::Memory(NES& nes) {
 }
 
 void Memory::setNESHandle(NES& nes) {
-    this->nes = &nes;
+    this->nes = std::make_shared<NES>(&nes);
 }
 
 uint8_t Memory::read(const uint16_t& adr) const {

@@ -2,6 +2,7 @@
 #define MEMORY_HPP
 
 #include <array>
+#include <memory>
 #include "GamePak.hpp"
 
 class NES;
@@ -27,7 +28,7 @@ public:
 
 private:
     std::array<uint8_t, MAXBYTES> memory{};
-    NES* nes;
+    std::shared_ptr<NES> nes;
 };
 
 #endif // MEMORY_HPP

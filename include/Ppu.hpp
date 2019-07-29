@@ -3,11 +3,16 @@
 
 #include "GamePak.hpp"
 #include <array>
+#include <memory>
+
+class NES;
 
 class Ppu {
     friend struct GamePak;
+    friend struct Tests;
 public:
     Ppu();
+    Ppu(NES&);
 
     std::array<uint16_t, 8> getTile(unsigned x, unsigned y);
     uint8_t readRegister(const uint16_t& adr);
@@ -15,15 +20,15 @@ public:
 
     void vRamWrite(const uint16_t& adr, const uint8_t& val);
     uint8_t vRamRead(const uint16_t& adr) const;
+    void setNESHandle(NES&) &;
 private:
+    std::shared_ptr<NES> nes;
 
 
-    // may or may not be needed, but added for now to easily know the scrolling that was set
-    uint16_t scrollPos = 0; // (0-0xFF) -> x scroll, (0x100-0xFFFF) -> y scroll
 
     // Internal Registers
     int16_t scanline = -1;
-    uint16_t vAdr = 0;
+    uint16_t vAdr = 0; // VRAM address pointer
     uint16_t vTempAdr = 0; // note that last bit (15th bit) is not used
     uint8_t fineXScroll = 0; // only three bits
     uint8_t writeToggle = 0; // 1 bit
@@ -66,12 +71,8 @@ private:
     PPUMASK PpuMask;
     PPUSTATUS PpuStatus;
     uint8_t OamAddr = 0;
-    uint8_t OamData = 0;
-    uint8_t PpuScroll = 0;
-    uint8_t PpuAddr = 0;
-    uint8_t PpuData = 0;
-    uint8_t OamDma = 0;
-
+    // may or may not be needed, but added for now to easily know the scrolling that was set
+    uint16_t scrollPos = 0; // (0-0xFF) -> x scroll, (0x100-0xFFFF) -> y scroll
 
     std::array<uint8_t, GamePak::KB16> memory{};
     // Oam is list of 64 sprites, each having info of 4 bytes
