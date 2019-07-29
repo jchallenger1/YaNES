@@ -23,13 +23,22 @@ test_suite* createCpuDiagTestSuite() {
     return cpuDiagTest;
 }
 
+test_suite* createPpuTestSuite() {
+    test_suite* ppuTest = BOOST_TEST_SUITE(" ppu tests");
+    ppuTest->add(BOOST_TEST_CASE(&Tests::ppuRegisterTests));
+    return ppuTest;
+}
+
 test_suite* init_unit_test_suite(int argc, char* argv[]) {
     UNUSED(argv);
-    bool allowOp = true, allowDiag = true;
+    bool allowOp = false, allowDiag = false, allowPpu = true;
     /*if (argc == 1) {
         Tests::testenv();
         return nullptr;
     }*/
+    if (allowPpu) {
+        framework::master_test_suite().add(createPpuTestSuite());
+    }
     if (allowOp) {
         test_suite* opTests = createOpcodeTestSuite();
         framework::master_test_suite().add(opTests);

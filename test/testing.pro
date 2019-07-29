@@ -12,6 +12,7 @@ SOURCES += \
         nescputests.cpp \
         optests.cpp \
         mastertestsuite.cpp \
+        ppuregistertests.cpp \
         testenv.cpp
 
 

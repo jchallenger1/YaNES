@@ -11,7 +11,9 @@ constexpr inline bool inRange(const uint16_t& min, const uint16_t& max, const ui
 
 
 Memory::Memory() {
-    std::cerr << "Warning, Memory class does not have a NES handle\n";
+    static constexpr bool warn = false;
+    if (warn)
+        std::cerr << "Warning, Memory class does not have a NES handle\n";
 }
 
 Memory::Memory(NES& nes) {
@@ -19,7 +21,7 @@ Memory::Memory(NES& nes) {
 }
 
 void Memory::setNESHandle(NES& nes) {
-    this->nes = std::make_shared<NES>(&nes);
+    this->nes = std::make_shared<NES>(nes);
 }
 
 uint8_t Memory::read(const uint16_t& adr) const {

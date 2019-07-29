@@ -32,6 +32,8 @@ struct Tests {
     // ---- NesTest Functions ----
     static void nesCpuTest();
 
+    static void ppuRegisterTests();
+
     static void testenv();
 
 };
