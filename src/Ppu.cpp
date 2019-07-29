@@ -8,6 +8,10 @@ Ppu::Ppu() {
 
 }
 
+constexpr inline bool inRange(const uint16_t& min, const uint16_t& max, const uint16_t& val) {
+    return val <= max && val >= min;
+}
+
 constexpr inline uint8_t getBit(const uint16_t& val, const uint8_t& bitNum) {
     return static_cast<uint8_t>((val & (1 << bitNum)) >> bitNum);
 }
@@ -52,6 +56,24 @@ std::array<uint16_t, 8> Ppu::getTile(unsigned x, unsigned y) {
 }
 
 
+void Ppu::vRamWrite(const uint16_t& adr, const uint8_t& val) {
+    if (inRange(0x3000, 0x3EFF, adr))
+        memory[0x2000 + adr % 1000] = val;
+    else if (inRange(0x3F20, 0x3FFF, adr))
+        memory[0x3F00 + adr % 0x20] = val;
+    else
+        memory[adr] = val;
+}
+
+uint8_t Ppu::vRamRead(const uint16_t& adr) const {
+    if (inRange(0x3000, 0x3EFF, adr))
+        return memory[0x2000 + adr % 3000];
+    else if (inRange(0x3F20, 0x3FFF, adr))
+        return memory[0x3F00 + adr % 0x20];
+    else
+        return memory[adr];
+}
+
 // https://wiki.nesdev.com/w/index.php/PPU_registers
 // https://wiki.nesdev.com/w/index.php/PPU_scrolling
 uint8_t Ppu::readRegister(const uint16_t& adr) {
@@ -69,6 +91,8 @@ uint8_t Ppu::readRegister(const uint16_t& adr) {
         }
         case 0x2004: // OAM data <> Read/Write
             return OAM[OamAddr];
+        case 0x2007: // Data <> Read/Write
+            return vRamRead(vAdr);
         default:
             std::cerr << "Error Read to address " << std::hex << "0x" << adr << " was detected\n";
             throw std::runtime_error("Attempted read to non PPU register or to a writeonly register of (dec) " + std::to_string(adr));
@@ -95,7 +119,7 @@ void Ppu::writeRegister(const uint16_t& adr, const uint8_t& val) {
         case 0x2004: // OAM data <> Read/Write
             OAM[OamAddr++] = val;
             break;
-        case 2005: // Scroll >> write x2
+        case 0x2005: // Scroll >> write x2
             if (writeToggle == 0) { // first write is X
                 vTempAdr &= ~0x1F; // clear and set the first 5 bits of tempVram to the byte
                 vTempAdr |= val >> 3;
@@ -112,7 +136,7 @@ void Ppu::writeRegister(const uint16_t& adr, const uint8_t& val) {
                 scrollPos = static_cast<uint16_t>( (~0xFF00 & scrollPos) | static_cast<uint16_t>(val) << 8 );
             }
             break;
-        case 2006: // Address >> write x2
+        case 0x2006: // Address >> write x2
             if (writeToggle == 0) { // load high byte of address
                 vTempAdr = static_cast<uint16_t>( (vTempAdr & ~0x3F00) | (static_cast<uint16_t>(val & 0x3F) << 8) );
                 writeToggle = 1;
@@ -122,6 +146,14 @@ void Ppu::writeRegister(const uint16_t& adr, const uint8_t& val) {
                 vAdr = vTempAdr;
                 writeToggle = 0;
             }
+            break;
+        case 0x2007: // Data <> Read/Write
+            // Note that the scrolling details are not implemented
+            vRamWrite(vAdr, val);
+            vAdr += PpuCtrl.increment == 0 ? 1 : 32;
+            break;
+        case 0x4014: // OAM DMA > Write
+
             break;
         default:
             std::cerr << "Error Write to address " << std::hex << "0x" << adr << " was detected\n";

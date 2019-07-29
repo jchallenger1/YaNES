@@ -12,7 +12,12 @@ public:
     std::array<uint16_t, 8> getTile(unsigned x, unsigned y);
     uint8_t readRegister(const uint16_t& adr);
     void writeRegister(const uint16_t& adr, const uint8_t& val);
+
+    void vRamWrite(const uint16_t& adr, const uint8_t& val);
+    uint8_t vRamRead(const uint16_t& adr) const;
 private:
+
+
     // may or may not be needed, but added for now to easily know the scrolling that was set
     uint16_t scrollPos = 0; // (0-0xFF) -> x scroll, (0x100-0xFFFF) -> y scroll
 
