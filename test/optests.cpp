@@ -304,7 +304,7 @@ void Tests::cpuStackTests() {
     cpu.a = 0xF5;
     memory.write(1, 0x48);
     memory.write(2, 0x08);
-    cpu.runN(2);
+    cpu.runCycle(2);
     cpu.a = 0x78;
     memory.write(3, 0x48);
     cpu.runCycle();

@@ -31,7 +31,7 @@ test_suite* createPpuTestSuite() {
 
 test_suite* init_unit_test_suite(int argc, char* argv[]) {
     UNUSED(argv);
-    bool allowOp = false, allowDiag = false, allowPpu = true;
+    bool allowOp = true, allowDiag = true, allowPpu = true;
     /*if (argc == 1) {
         Tests::testenv();
         return nullptr;

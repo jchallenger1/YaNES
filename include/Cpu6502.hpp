@@ -38,8 +38,7 @@ public:
 
     Memory memory;
 
-    void runCycle();
-    void runN(const int& num);
+    void runCycle(const uint64_t& num = 1);
 
     void signalNMI();
     void signalRESET();
@@ -58,7 +57,7 @@ private:
     uint8_t sp = 0; // Stack Pointer
     uint16_t pc = 0; // Program Counter
 
-    uint32_t cycleCount = 0;
+    uint64_t cycleCount = 0;
 
     // Allow Decimal mode of Cpu, uneeded for NES
     bool cpuAllowDec = true;

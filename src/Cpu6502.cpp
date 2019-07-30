@@ -217,15 +217,12 @@ void Cpu6502::fillOpTable() {
 }
 
 
-void Cpu6502::runCycle() {
-    uint8_t opcode = memory.read(pc);
-    Instr instruction = opcodeTable[opcode];
-    EXECOPCODE(instruction.instr, instruction.addr);
-}
-
-void Cpu6502::runN(const int& num) {
-    for (int i = 0; i != num; i++)
-        runCycle();
+void Cpu6502::runCycle(const uint64_t& num) {
+    for (uint64_t i = num; i != 0; --i) {
+        uint8_t opcode = memory.read(pc);
+        Instr instruction = opcodeTable[opcode];
+        EXECOPCODE(instruction.instr, instruction.addr);
+    }
 }
 
 // A vector is a 'vector pointer' that consists of two parts a low and a high
