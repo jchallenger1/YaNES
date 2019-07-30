@@ -9,6 +9,7 @@ class NES;
 
 class Memory {
     friend struct GamePak;
+    friend struct Tests;
     // Max amount of memory in bytes (64KB)
     static constexpr uint16_t MAXBYTES = 0xFFFF;
 public:

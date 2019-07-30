@@ -7,7 +7,7 @@
 #define UNUSED(x) (void)(x)
 
 Ppu::Ppu() {
-
+    clear();
 }
 
 void Ppu::setNESHandle(NES& nes) & {
@@ -174,6 +174,19 @@ void Ppu::writeRegister(const uint16_t& adr, const uint8_t& val) {
 }
 
 
+void Ppu::clear() {
+    PpuCtrl.clear();
+    PpuMask.clear();
+    PpuStatus.clear();
+    std::fill(memory.begin(), memory.end(), 0);
+    std::fill(OAM.begin(), OAM.end(), 0);
+    OamAddr = scrollPos = 0;
+    scanline = vAdr = vTempAdr = fineXScroll = writeToggle = 0;
+}
+
+
+
+
 
 
 
@@ -205,6 +218,10 @@ void Ppu::PPUCTRL::fromByte(const uint8_t& byte) noexcept {
     NMI = (byte & 0x80) >> 7;
 }
 
+void Ppu::PPUCTRL::clear() noexcept {
+    nameTable = increment = spriteTile = bkgrdTile = spriteSz = masterSlave = NMI = 0;
+}
+
 uint8_t Ppu::PPUMASK::asByte() const noexcept {
     uint8_t byte = 0;
     byte |= greyScale;
@@ -229,6 +246,10 @@ void Ppu::PPUMASK::fromByte(const uint8_t& byte) noexcept {
     blue = (byte & 0x80) >> 7;
 }
 
+void Ppu::PPUMASK::clear() noexcept {
+    greyScale = bkgrdLeftEnable = spriteLeftEnable = bkgrdEnable = spriteEnable = red = green = blue = 0;
+}
+
 uint8_t Ppu::PPUSTATUS::asByte() const noexcept {
     uint8_t byte = 0;
     byte |= sOverflow << 5;
@@ -241,4 +262,8 @@ void Ppu::PPUSTATUS::fromByte(const uint8_t& byte) noexcept {
     sOverflow = (byte & 0x20) >> 5;
     sprite0Hit = (byte & 0x40) >> 6;
     vblank = (byte & 0x80) >> 7;
+}
+
+void Ppu::PPUSTATUS::clear() noexcept {
+    sOverflow = sprite0Hit = vblank = 0;
 }

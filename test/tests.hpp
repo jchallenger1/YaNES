@@ -5,13 +5,13 @@
 #include <iostream>
 #include <boost/test/unit_test.hpp>
 
-inline constexpr void ckPassFail(const bool&& b, const std::string& str) {
+inline constexpr void ckPassFail(const bool& b, const std::string& str) {
     if (!b) {
         BOOST_FAIL(str);
     }
 }
 
-inline constexpr void ckPassErr(const bool&& b, const std::string& str) noexcept {
+inline constexpr void ckPassErr(const bool& b, const std::string& str) noexcept {
     if (!b) {
         BOOST_ERROR(str);
     }

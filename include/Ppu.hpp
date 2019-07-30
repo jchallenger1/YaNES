@@ -21,6 +21,7 @@ public:
     void vRamWrite(const uint16_t& adr, const uint8_t& val);
     uint8_t vRamRead(const uint16_t& adr) const;
     void setNESHandle(NES&) &;
+    void clear();
 private:
     std::shared_ptr<NES> nes;
 
@@ -43,6 +44,7 @@ private:
         uint8_t NMI : 1; // (V) Generate NMi @ start of vblank (0=off,1=on)
         uint8_t asByte() const noexcept;
         void fromByte(const uint8_t&) noexcept;
+        void clear() noexcept;
     };
     struct PPUMASK {
         uint8_t greyScale : 1; // (G) Produce a greyscale display (0=normal, 1=greyscale)
@@ -56,6 +58,7 @@ private:
         uint8_t blue : 1;
         uint8_t asByte() const noexcept;
         void fromByte(const uint8_t&) noexcept;
+        void clear() noexcept;
     };
     struct PPUSTATUS {
         uint8_t sOverflow : 1; // (O) Sprite Overflow
@@ -63,6 +66,7 @@ private:
         uint8_t vblank : 1; // (V) Vertical Blank has Started
         uint8_t asByte() const noexcept;
         void fromByte(const uint8_t&) noexcept;
+        void clear() noexcept;
     };
 
     // 8 Registers that are exposed to the cpu

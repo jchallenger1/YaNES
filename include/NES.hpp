@@ -15,6 +15,8 @@ public:
     NES(Cpu6502& cpu, Ppu& ppu);
     Cpu6502& cpu;
     Ppu& ppu;
+
+    void clear();
 };
 
 #endif // NES_HPP
