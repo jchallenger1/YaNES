@@ -27,10 +27,12 @@ private:
 
 
 
-    // Internal Registers
-    int16_t scanline = -1;
+    uint16_t scanline = 0;
+    uint16_t cycle = 0;
+
+    // Four Internal Registers
     uint16_t vAdr = 0; // VRAM address pointer
-    uint16_t vTempAdr = 0; // note that last bit (15th bit) is not used
+    uint16_t vTempAdr = 0; // Temporary vram addressing pointer, note that last bit (15th bit) is not used
     uint8_t fineXScroll = 0; // only three bits
     uint8_t writeToggle = 0; // 1 bit
 
@@ -82,6 +84,16 @@ private:
     // Oam is list of 64 sprites, each having info of 4 bytes
     // Description of each byte : https://wiki.nesdev.com/w/index.php/PPU_OAM
     std::array<uint8_t, 0xFF> OAM{};
+    // Secondary OAM is the oam that is used during the next scanline, only 8 sprites are in this.
+    // During rendering secondary oam is the sprites that are on the current scanline
+    std::array<uint8_t, 0x20> secondOAM{};
+
+    // Temporary variables (Internal Latches) used during rendering and evaluation
+    // These are wrote to every 8 cycles in the visible frame of the ppu
+    uint8_t nameTable;
+    uint8_t attrTable;
+    uint8_t patternTableLow;
+    uint8_t patternTableHigh;
 };
 
 #endif // PPU_HPP
