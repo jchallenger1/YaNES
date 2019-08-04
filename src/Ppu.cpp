@@ -173,6 +173,32 @@ void Ppu::writeRegister(const uint16_t& adr, const uint8_t& val) {
     }
 }
 
+// Both these functions address finding comes from here:
+// https://wiki.nesdev.com/w/index.php/PPU_scrolling#Tile_and_attribute_fetching
+
+void Ppu::fetchNameTableByte() {
+    uint16_t tileAddress = 0x2000 | (vAdr & 0x0FFF);
+    nameTable = vRamRead(tileAddress);
+}
+
+void Ppu::fetchAttrTableByte() {
+    uint16_t attrAddress = 0x23C0 | (vAdr & 0x0C00) | ((vAdr >> 4) & 0x38) | ((vAdr >> 2) & 0x07);
+    attrTable = vRamRead(attrAddress);
+}
+
+// Refer to https://wiki.nesdev.com/w/index.php/PPU_pattern_tables on left/right bit planes
+
+void Ppu::fetchTableLowByte() {
+    // TODO : Scroll Y from first 3 bits in vAdr to use in scrolling
+    uint16_t address = PpuCtrl.bkgrdTile * 0x1000 + // Which pattern table to use
+            + nameTable * 16; // which specific 8x8 CHR to use in the table, * 16 because both left and right tables are 8 bytes, 16 bytes to skip to next one.
+    patternTableLow = vRamRead(address);
+}
+void Ppu::fetchTableHighByte() {
+    uint16_t address = PpuCtrl.bkgrdTile * 0x1000 + nameTable * 16;
+    patternTableHigh = vRamRead(address + 8); // high pattern table is 8 bytes after the low
+}
+
 
 void Ppu::clear() {
     PpuCtrl.clear();
@@ -185,8 +211,26 @@ void Ppu::clear() {
 }
 
 
+void Ppu::runCycle() {
 
+    if (inRange(0, 256, cycle)) { // Data for the current scanline, note that the first 2 tiles are already filled
+        switch (cycle % 8) {
+            case 1:
+                fetchNameTableByte();
+                break;
+            case 3:
+                fetchAttrTableByte();
+                break;
+            case 5:
+                fetchTableLowByte();
+                break;
+            case 7:
+                fetchTableHighByte();
+                break;
+        }
+    }
 
+}
 
 
 

@@ -22,6 +22,7 @@ public:
     uint8_t vRamRead(const uint16_t& adr) const;
     void setNESHandle(NES&) &;
     void clear();
+    void runCycle();
 private:
     std::shared_ptr<NES> nes;
 
@@ -94,6 +95,11 @@ private:
     uint8_t attrTable;
     uint8_t patternTableLow;
     uint8_t patternTableHigh;
+
+    void fetchNameTableByte();
+    void fetchAttrTableByte();
+    void fetchTableLowByte();
+    void fetchTableHighByte();
 };
 
 #endif // PPU_HPP
