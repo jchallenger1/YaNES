@@ -15,7 +15,6 @@ class DrawWidget : public QWidget
 public:
     explicit DrawWidget(QWidget *parent = nullptr);
     ~DrawWidget();
-    QPainter* painter;
 private:
     Ui::DrawWidget *ui;
 };

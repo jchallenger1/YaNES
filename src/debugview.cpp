@@ -1,6 +1,7 @@
 #include <memory>
 #include <iostream>
 #include <cmath>
+#include <bitset>
 #include <QTimer>
 #include <QPainter>
 #include "include/debugview.h"
@@ -39,7 +40,7 @@ void DebugView::timeClick() {
 }
 
 void DebugView::paintEvent(QPaintEvent *) {
-    //paint();
+    paint();
 }
 
 typename DebugView::tileT DebugView::getTile(const unsigned& tileAddress) const {
@@ -64,10 +65,21 @@ typename DebugView::tileT DebugView::getTile(const unsigned& tileAddress) const 
 
 }
 
-void DebugView::paint() {
-    DrawWidget* d = dynamic_cast<DrawWidget*>(ui->stackedWidget->currentWidget());
-    QPainter * painter = d->painter;
+void DebugView::stdDrawTile(const unsigned int &tileAddress) const {
+    tileT tile = getTile(tileAddress);
+    for (auto begin = tile.cbegin(); begin != tile.cend(); begin++) {
+        std::bitset<16> p(*begin);
+        std::cout << p << "\n";
+    }
+}
 
+void DebugView::paint() {
+    stdDrawTile(0);
+    DrawWidget* d = dynamic_cast<DrawWidget*>(ui->stackedWidget->currentWidget());
+    QPainter * painter = new QPainter(this);
+    painter->setBrush(Qt::black);
+    painter->setPen(Qt::black);
+    painter->drawRect(100,100,100,100);
     auto getColor = [](const uint8_t& n) -> auto {
         switch(n) {
             case 0: return Qt::blue;
@@ -89,9 +101,9 @@ void DebugView::paint() {
             for (unsigned x = 0; x != 8; x++) {
                 uint8_t pixel = ( line >> (x * 2) ) & 0b11;
                 setColor(getColor(pixel));
-                int pixelX = static_cast<int>( (tileAddr % 16) * 8 + x );
+                int pixelX = static_cast<int>( (tileAddr % 16) * 8 + x ) * 2;
                 int pixelY = static_cast<int>( static_cast<int>(tileAddr / 0xFF) + static_cast<int>(y) );
-                //painter->drawRect(pixelX, pixelY, 1, 1);
+                painter->drawRect(pixelX, pixelY, 1, 1);
             }
         }
     }
