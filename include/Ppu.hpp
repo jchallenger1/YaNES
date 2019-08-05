@@ -10,6 +10,7 @@ class NES;
 class Ppu {
     friend struct GamePak;
     friend struct Tests;
+    friend class DebugView;
 public:
     Ppu();
     Ppu(NES&);

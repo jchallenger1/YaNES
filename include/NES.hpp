@@ -17,6 +17,7 @@ public:
     Ppu& ppu;
 
     void clear();
+    void step();
 };
 
 #endif // NES_HPP

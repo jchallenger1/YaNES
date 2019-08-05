@@ -11,3 +11,9 @@ void NES::clear() {
     cpu.clear();
 }
 
+void NES::step() {
+    cpu.runCycle();
+    //ppu.runCycle();
+    //ppu.runCycle();
+    //ppu.runCycle();
+}
