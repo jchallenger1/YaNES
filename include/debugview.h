@@ -24,8 +24,8 @@ private:
     void paintEvent(QPaintEvent*) override;
     void paint();
 
-    std::array<uint16_t, 8> getTile(const unsigned& tileNum) const;
 
+    tileT getTile(const unsigned& tileAddress) const;
     std::shared_ptr<NES> nes;
     Ui::DebugView *ui;
     QTimer* timer;
