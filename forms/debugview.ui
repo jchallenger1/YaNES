@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>722</width>
-    <height>460</height>
+    <width>256</width>
+    <height>240</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,6 +16,15 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="baseSize">
+      <size>
+       <width>256</width>
+       <height>240</height>
+      </size>
+     </property>
      <property name="currentIndex">
       <number>1</number>
      </property>

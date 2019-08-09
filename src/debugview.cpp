@@ -31,12 +31,10 @@ void DebugView::init() {
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &DebugView::timeClick);
     timer->start(0);
-    // Painter
-    //painter = new QPainter(this);
 }
 
 void DebugView::timeClick() {
-    nes->step();
+    //nes->step();
 }
 
 void DebugView::paintEvent(QPaintEvent *) {
@@ -74,12 +72,7 @@ void DebugView::stdDrawTile(const unsigned int &tileAddress) const {
 }
 
 void DebugView::paint() {
-    stdDrawTile(0);
-    DrawWidget* d = dynamic_cast<DrawWidget*>(ui->stackedWidget->currentWidget());
-    QPainter * painter = new QPainter(this);
-    painter->setBrush(Qt::black);
-    painter->setPen(Qt::black);
-    painter->drawRect(100,100,100,100);
+    QPainter painter(this);
     auto getColor = [](const uint8_t& n) -> auto {
         switch(n) {
             case 0: return Qt::blue;
@@ -89,25 +82,27 @@ void DebugView::paint() {
         }
     };
     auto setColor = [&painter](const auto& color) {
-        painter->setPen(color);
-        painter->setBrush(color);
+        painter.setPen(color);
+        painter.setBrush(color);
     };
 
+    constexpr uint8_t resizeFac = 2;
+
     // Draw Left Pattern Table
-    for (unsigned tileAddr = 0 ; tileAddr < 0x1000; tileAddr += 16) {
+    for (unsigned tileAddr = 0x1000, tileCount = 0 ; tileAddr < 0x2000; tileAddr += 16, ++tileCount) {
         tileT tile = getTile(tileAddr);
-        for (unsigned y = 0; y != 8; y++) {
+        for (uint8_t y = 0; y != 8; y++) {
             uint16_t line = tile[y];
-            for (unsigned x = 0; x != 8; x++) {
+            for (uint8_t x = 0; x != 8; x++) {
                 uint8_t pixel = ( line >> (x * 2) ) & 0b11;
                 setColor(getColor(pixel));
-                int pixelX = static_cast<int>( (tileAddr % 16) * 8 + x ) * 2;
-                int pixelY = static_cast<int>( static_cast<int>(tileAddr / 0xFF) + static_cast<int>(y) );
-                painter->drawRect(pixelX, pixelY, 1, 1);
+                int pixelX = static_cast<int>( (tileCount % 16) * 8 + x ) * resizeFac;
+                int pixelY = static_cast<int>( y + static_cast<int>(tileCount / 16) * 8) * resizeFac;
+                painter.drawRect(pixelX, pixelY, resizeFac, resizeFac);
             }
         }
     }
-
+    std::cerr << "finish paint\n";
 }
 
 DebugView::~DebugView() {

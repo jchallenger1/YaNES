@@ -60,7 +60,7 @@ private:
     uint64_t cycleCount = 0;
 
     // Allow Decimal mode of Cpu, uneeded for NES
-    bool cpuAllowDec = true;
+    bool cpuAllowDec = false;
 
     void fillOpTable();
 
