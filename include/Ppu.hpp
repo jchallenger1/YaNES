@@ -12,18 +12,22 @@ class Ppu {
     friend struct Tests;
     friend class DebugView;
 public:
+    using PatternTableT = std::array<uint16_t, 8>;
+
     Ppu();
     Ppu(NES&);
+    void setNESHandle(NES&) &;
 
-    std::array<uint16_t, 8> getTile(unsigned x, unsigned y);
     uint8_t readRegister(const uint16_t& adr);
     void writeRegister(const uint16_t& adr, const uint8_t& val);
-
     void vRamWrite(const uint16_t& adr, const uint8_t& val);
     uint8_t vRamRead(const uint16_t& adr) const;
-    void setNESHandle(NES&) &;
+
     void clear();
     void runCycle();
+
+    PatternTableT getPatternTile(const uint16_t& tileAddress) const;
+    void stdDrawPatternTile(const uint16_t& tileAddress) const;
 private:
     std::shared_ptr<NES> nes;
 

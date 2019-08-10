@@ -3,6 +3,7 @@
 #include <bitset>
 #include <iostream>
 #include <memory>
+#include <cmath>
 
 #define UNUSED(x) (void)(x)
 
@@ -18,47 +19,42 @@ constexpr inline bool inRange(const uint16_t& min, const uint16_t& max, const ui
     return val <= max && val >= min;
 }
 
-constexpr inline uint8_t getBit(const uint16_t& val, const uint8_t& bitNum) {
-    return static_cast<uint8_t>((val & (1 << bitNum)) >> bitNum);
-}
+typename Ppu::PatternTableT Ppu::getPatternTile(const uint16_t& tileAddress) const {
+    if (tileAddress >= 0x2000 - 0xF) throw std::runtime_error("Given tile address it not a pattern table address");
 
-constexpr inline void setBit(uint16_t& val, const uint8_t& bitNum) {
-    val |= (1 << bitNum);
-}
+    PatternTableT tile{};
+    // Create a line of a tile
+    // For every bit position of left and right, set it to the two bits equivalent position
+    // in a 16 bit field, ex if left -> 0 , right -> 1, then bitPos(line) = 10 in the u16 type
+    // But note that setting left to right immeditely to 0 and 1 reverses the line, instead set to bits 16 and 15
+    auto createLine = [](const uint8_t& left, const uint8_t& right) -> uint16_t {
+            uint16_t line = 0;
+            for (short bitPos = 0, topBitLoc = 0; bitPos != 8; bitPos++, topBitLoc+=2) {
+                const uint16_t pow2 = static_cast<uint16_t>(std::pow(2, bitPos)); // select which bit to choose
+                // Take the bit and move to 1's position, then move it to the line's bits bottom down
+                line |= ( (static_cast<uint16_t>(right) & pow2) >> bitPos) << (15 - topBitLoc);
+                line |= ( (static_cast<uint16_t>(left) & pow2) >> bitPos) << (15 - topBitLoc - 1);
+            }
+            return line;
+    };
 
-uint16_t createLine(uint8_t left, uint8_t right) {
-    uint16_t line = 0;
-    for (uint8_t i = 0; i != 8; i++) {
-        if (!getBit(left, i) && !getBit(right, i))
-            setBit(line, 2 * i);
-        if (getBit(left, i) && getBit(right, i)) {
-            setBit(line, 2 * i);
-            setBit(line, 2 * i + 1);
-        }
-        if (getBit(left, i) == 1 && !getBit(right,i))
-            setBit(line, 2 * i);
-        else
-            setBit(line, 2 * i + 1);
+    for (unsigned i = 0; i != 8; i++) {
+        tile[i % 8] = createLine(nes->ppu.memory[tileAddress + i], nes->ppu.memory[tileAddress + i + 8]);
     }
-    return line;
+    return tile;
 }
 
-void printTile(std::array<uint16_t, 8>& tile) {
-    for (auto begin = tile.cbegin(); begin != tile.cend(); begin++) {
-        std::bitset<16> p(*begin);
-        std::cout << p << "\n";
+void Ppu::stdDrawPatternTile(const uint16_t& tileAddress) const {
+    PatternTableT tile = getPatternTile(tileAddress);
+    for (uint8_t y = 0; y != 8; y++) {
+        uint16_t line = tile[y];
+        for (uint8_t x = 0; x != 8; x++) {
+            uint8_t pixel = ( line >> (x * 2) ) & 0b11;
+            std::cout << static_cast<int>(pixel);
+        }
+        std::cout << "\n";
     }
     std::cout << std::endl;
-}
-
-std::array<uint16_t, 8> Ppu::getTile(unsigned x, unsigned y) {
-    std::array<uint16_t, 8> tile{};
-    UNUSED(x); UNUSED(y);
-    for (unsigned i = 0; i != 8; i++) {
-        tile[i] = createLine(memory[0x1000 + i], memory[0x1000 + i + 8]);
-    }
-    printTile(tile);
-    return tile;
 }
 
 
