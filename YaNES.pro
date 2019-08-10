@@ -13,8 +13,7 @@ SOURCES += \
         src/Ppu.cpp \
         src/debugview.cpp \
         src/main.cpp \
-        src/mainwindow.cpp \
-        src/drawwidget.cpp
+        src/mainwindow.cpp
 
 INCLUDEPATH += include/
 
@@ -25,13 +24,13 @@ HEADERS += \
     include/NES.hpp \
     include/Ppu.hpp \
     include/debugview.h \
-    include/drawwidget.hpp \
-    include/mainwindow.h
+    include/mainwindow.h \
+    include/patterntableview.hpp
 
 FORMS += \
     forms/debugview.ui \
     forms/mainwindow.ui \
-    forms/drawwidget.ui
+    forms/patterntableview.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

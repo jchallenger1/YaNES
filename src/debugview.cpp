@@ -6,7 +6,6 @@
 #include <QPainter>
 #include "include/debugview.h"
 #include "ui_debugview.h"
-#include "include/drawwidget.hpp"
 #include "NES.hpp"
 
 DebugView::DebugView(QWidget *parent) : QWidget(parent),  ui(new Ui::DebugView) {
@@ -21,12 +20,12 @@ DebugView::DebugView(NES& nes, QWidget* parent) : QWidget (parent), ui(new Ui::D
 void DebugView::init() {
     ui->setupUi(this);
     // Remove predefault widgets in stack and put in the one we want
-    DrawWidget* drawW = new DrawWidget();
+    pTableView = new PatternTableView(*nes);
     ui->stackedWidget->removeWidget(ui->page);
     ui->stackedWidget->removeWidget(ui->page_2);
     ui->page->deleteLater();
     ui->page_2->deleteLater();
-    ui->stackedWidget->addWidget(drawW);
+    ui->stackedWidget->addWidget(pTableView);
     // Timer
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &DebugView::timeClick);
@@ -38,58 +37,6 @@ void DebugView::timeClick() {
 }
 
 void DebugView::paintEvent(QPaintEvent *) {
-    paint();
-}
-
-void DebugView::paint() {
-    QPainter painter(this);
-    auto getColor = [](const uint8_t& n) -> auto {
-        switch(n) {
-            case 0: return Qt::black;
-            case 1: return Qt::red;
-            case 2: return Qt::yellow;
-            default: return Qt::blue;
-        }
-    };
-    auto setColor = [&painter](const auto& color) {
-        painter.setPen(color);
-        painter.setBrush(color);
-    };
-
-    static constexpr uint8_t resizeFac = 2;
-
-    // Draw Left Pattern Table
-    for (uint16_t tileAddr = 0x0, tileCount = 0 ; tileAddr < 0x1000; tileAddr += 16, ++tileCount) {
-        tileT tile = nes->ppu.getPatternTile(tileAddr);
-        for (uint8_t y = 0; y != 8; y++) {
-            uint16_t line = tile[y];
-            for (uint8_t x = 0; x != 8; x++) {
-                uint8_t pixel = ( line >> (x * 2) ) & 0b11;
-                setColor(getColor(pixel));
-                int pixelX = static_cast<int>( (tileCount % 16) * 8 + x ) * resizeFac;
-                int pixelY = static_cast<int>( y + static_cast<int>(tileCount / 16) * 8) * resizeFac;
-                painter.drawRect(pixelX, pixelY, resizeFac, resizeFac);
-            }
-        }
-    }
-
-    static constexpr uint16_t moveFac = 400;
-
-    for (uint16_t tileAddr = 0x1000, tileCount = 0 ; tileAddr < 0x2000; tileAddr += 16, ++tileCount) {
-        tileT tile = nes->ppu.getPatternTile(tileAddr);
-        for (uint8_t y = 0; y != 8; y++) {
-            uint16_t line = tile[y];
-            for (uint8_t x = 0; x != 8; x++) {
-                uint8_t pixel = ( line >> (x * 2) ) & 0b11;
-                setColor(getColor(pixel));
-                int pixelX = static_cast<int>( (tileCount % 16) * 8 + x ) * resizeFac + moveFac;
-                int pixelY = static_cast<int>( y + static_cast<int>(tileCount / 16) * 8) * resizeFac;
-                painter.drawRect(pixelX, pixelY, resizeFac, resizeFac);
-            }
-        }
-    }
-
-    std::cerr << "finish paint\n";
 }
 
 DebugView::~DebugView() {

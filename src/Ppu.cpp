@@ -55,8 +55,8 @@ void Ppu::stdDrawPatternTile(const uint16_t& tileAddress) const {
         std::cout << "\n";
     }
     std::cout << std::endl;
-}
 
+}
 
 void Ppu::vRamWrite(const uint16_t& adr, const uint8_t& val) {
     if (inRange(0x3000, 0x3EFF, adr))
