@@ -6,6 +6,7 @@
 #include <memory>
 #include "NES.hpp"
 #include "patterntableview.hpp"
+#include "nametableview.hpp"
 
 namespace Ui {
 class DebugView;
@@ -19,15 +20,13 @@ public:
     virtual ~DebugView() override;
 
 private:
-    using tileT = std::array<uint16_t, 8>;
-    void timeClick();
     void init();
-    void paintEvent(QPaintEvent*) override;
 
     std::shared_ptr<NES> nes;
     Ui::DebugView *ui;
     QTimer* timer;
     PatternTableView* pTableView;
+    NameTableView* nTableView;
 };
 
 #endif // DEBUGVIEW_H

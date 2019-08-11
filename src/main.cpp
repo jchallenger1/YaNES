@@ -12,6 +12,7 @@ int main(int argc, char *argv[]) {
     GamePak::load(cpu.memory, ppu, "../YaNES/rsc/roms/Donkey Kong (World) (Rev A).nes");
 
     NES nes(cpu, ppu);
+    nes.powerUp();
     QApplication a(argc, argv);
     //MainWindow w;
     //w.show();

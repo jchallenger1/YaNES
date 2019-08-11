@@ -25,11 +25,13 @@ HEADERS += \
     include/Ppu.hpp \
     include/debugview.h \
     include/mainwindow.h \
+    include/nametableview.hpp \
     include/patterntableview.hpp
 
 FORMS += \
     forms/debugview.ui \
     forms/mainwindow.ui \
+    forms/nametableview.ui \
     forms/patterntableview.ui
 
 # Default rules for deployment.

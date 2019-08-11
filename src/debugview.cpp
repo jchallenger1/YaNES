@@ -21,22 +21,14 @@ void DebugView::init() {
     ui->setupUi(this);
     // Remove predefault widgets in stack and put in the one we want
     pTableView = new PatternTableView(*nes);
+    nTableView = new NameTableView(*nes, true);
     ui->stackedWidget->removeWidget(ui->page);
     ui->stackedWidget->removeWidget(ui->page_2);
     ui->page->deleteLater();
     ui->page_2->deleteLater();
     ui->stackedWidget->addWidget(pTableView);
-    // Timer
-    timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &DebugView::timeClick);
-    timer->start(0);
-}
-
-void DebugView::timeClick() {
-    //nes->step();
-}
-
-void DebugView::paintEvent(QPaintEvent *) {
+    ui->stackedWidget->addWidget(nTableView);
+    ui->stackedWidget->setCurrentIndex(1);
 }
 
 DebugView::~DebugView() {
