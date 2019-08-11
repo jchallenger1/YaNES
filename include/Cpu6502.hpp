@@ -10,6 +10,7 @@
 
 class Cpu6502 {
     friend struct Tests;
+    friend class NES;
     // Status registers
     struct Status {
         Status();
@@ -58,6 +59,7 @@ private:
     uint16_t pc = 0; // Program Counter
 
     uint64_t cycleCount = 0;
+    uint64_t instrCount = 0;
 
     // Allow Decimal mode of Cpu, uneeded for NES
     bool cpuAllowDec = false;

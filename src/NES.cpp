@@ -17,3 +17,8 @@ void NES::step() {
     //ppu.runCycle();
     //ppu.runCycle();
 }
+
+void NES::powerUp() {
+    cpu.pc = 0x34;
+    cpu.a = cpu.x = cpu.y = 0;
+}

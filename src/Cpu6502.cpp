@@ -222,6 +222,7 @@ void Cpu6502::runCycle(const uint64_t& num) {
         uint8_t opcode = memory.read(pc);
         Instr instruction = opcodeTable[opcode];
         EXECOPCODE(instruction.instr, instruction.addr);
+        ++instrCount;
     }
 }
 
