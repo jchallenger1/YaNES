@@ -113,6 +113,7 @@ private:
     uint16_t ADR_INDRECTINDEX();
 
     /// -- Opcode Instructions --
+    [[ noreturn ]]
     void OP_ILLEGAL(AddressingPtr&);
     // Storage Instructions
     void OP_LDA(AddressingPtr&);

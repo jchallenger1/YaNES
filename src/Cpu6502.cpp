@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <sstream>
 #include "Cpu6502.hpp"
 
 #define EXECOPCODE(instrPtr, adringPtr) (this->*(instrPtr))((adringPtr))
@@ -242,9 +243,10 @@ void Cpu6502::signalNMI() {
 // note that no stack operations are done
 void Cpu6502::signalRESET() {
     // Assumption that this also resets the state as well
-    pc =  static_cast<uint16_t>( (static_cast<uint16_t>(memory[vectorRESET + 1]) << 8) | memory[vectorRESET] );
+    pc = static_cast<uint16_t>( (static_cast<uint16_t>(memory[vectorRESET + 1]) << 8) | memory[vectorRESET] );
     status.reset();
-    sp = a = x = y = 0;
+    sp = 0xFD;
+    a = x = y = 0;
 }
 
 // Interrupt Request:
@@ -500,11 +502,21 @@ inline uint8_t Cpu6502::POP() {
 ///
 ///
 
+template<typename T>
+std::string toHex(T&& num) {
+    static_assert (std::is_integral<typename std::decay<T>::type>::value, "must be an integral type");
+    std::stringstream stream;
+    stream << "0x" << std::hex << static_cast<int>(std::forward<T>(num));
+    return stream.str();
+}
 
-void Cpu6502::OP_ILLEGAL(AddressingPtr& adr) {
-    std::cerr << std::hex << "opcode " << static_cast<int>(memory.read(pc))
-              << " is ILLEGAL at address " << static_cast<int>(pc) << std::dec;
-    EXECADDRESSING(adr);
+[[ noreturn ]]
+void Cpu6502::OP_ILLEGAL(AddressingPtr&) {
+    std::cerr << " In " << __FILE__ << std::hex
+              << " opcode " << static_cast<int>(memory.read(pc))
+              << " is ILLEGAL at address " << static_cast<int>(pc) << std::dec << "\n";
+
+    throw std::runtime_error("Cpu illegal opcode failure, opcode : " + toHex(memory.read(pc)) + ", pc : " + toHex(pc));
 }
 
 /// ---- Storage Instructions ----
