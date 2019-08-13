@@ -34,7 +34,7 @@ void NES::step() {
         if (queue.size() >= stepMemory)
             queue.pop();
 
-        std::cerr << "opcode " + toHex(cpu.memory[cpu.pc]) + " pc " + toHex(cpu.pc) << "\n";
+        //std::cerr << "opcode " + toHex(cpu.memory[cpu.pc]) + " pc " + toHex(cpu.pc) << "\n";
         queue.emplace("opcode " + toHex(cpu.memory[cpu.pc]) + " pc " + toHex(cpu.pc));
     } catch (const std::exception& e) {
         std::cerr << "\n" << e.what() << std::endl;
@@ -50,5 +50,5 @@ void NES::step() {
 
 void NES::powerUp() {
     cpu.signalRESET();
-    cpu.pc = 0xC7AF;
+    //cpu.pc = 0xC7AF;
 }

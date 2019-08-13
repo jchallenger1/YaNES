@@ -56,7 +56,6 @@ void PatternTableView::paint()  {
         painter.setPen(color);
         painter.setBrush(color);
     };
-    setColor(Qt::black);
     // Draw Left Pattern Table
     for (uint16_t tileAddr = 0x0, tileCount = 0 ; tileAddr < 0x1000; tileAddr += 16, ++tileCount) {
         Ppu::PatternTableT tile = nes->ppu.getPatternTile(tileAddr);

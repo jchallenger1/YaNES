@@ -16,7 +16,11 @@ int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
     //MainWindow w;
     //w.show();
-    DebugView d(nes);
-    d.show();
+    //DebugView d(nes);
+    //d.show();
+    NameTableView view(nes, true);
+    view.show();
+    PatternTableView pview(nes);
+    pview.show();
     return a.exec();
 }
