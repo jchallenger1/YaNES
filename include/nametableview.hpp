@@ -48,8 +48,11 @@ NameTableView::~NameTableView() {
 }
 
 void NameTableView::timeTick() {
+    static int i = 0;
+    std::cerr << std::to_string(i++) << "\n";
     nes->step();
-    this->repaint();
+    if (i % 10000 == 0)
+        this->repaint();
 }
 
 void NameTableView::paintEvent(QPaintEvent *) {

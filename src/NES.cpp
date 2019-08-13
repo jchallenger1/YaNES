@@ -50,5 +50,4 @@ void NES::step() {
 
 void NES::powerUp() {
     cpu.signalRESET();
-    //cpu.pc = 0xC7AF;
 }
