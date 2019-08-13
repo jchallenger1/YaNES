@@ -419,10 +419,20 @@ uint16_t Cpu6502::ADR_RELATIVE() {
 
     if (!canBranch) return pc + 2;
 
-    uint8_t byte = memory.read(pc + 1);
+    // Original implementation did not work, using implementation from :
+    // https://github.com/gianlucag/mos6502/blob/master/mos6502.cpp
+    uint16_t offset = memory.read(++pc);
+    ++pc;
+    if (offset & 0x80)
+        offset |= 0xFF00;
+    return pc + offset;
+    /*
+    uint16_t byte = memory.read(pc + 1);
     bool isPositive = (0x80 & byte) >> 7 == 0;
     uint8_t offset = (~0x80) & byte;
     return (isPositive ? pc + offset : pc - offset) + 2;
+    */
+
 }
 
 // Accumulator : Same as implied, but its always accumulator(a) register.
