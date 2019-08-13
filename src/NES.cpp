@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <numeric>
 #include <queue>
 #include "NES.hpp"
 
@@ -27,11 +28,13 @@ void NES::step() {
     constexpr uint8_t stepMemory = 15;
     try {
         cpu.runCycle();
-        /* for (int i = 0; i != 3; i++)
-         *    ppu.runCycle();
-         */
+        for (int i = 0; i != 3; i++)
+            ppu.runCycle();
+
         if (queue.size() >= stepMemory)
             queue.pop();
+
+        std::cerr << "opcode " + toHex(cpu.memory[cpu.pc]) + " pc " + toHex(cpu.pc) << "\n";
         queue.emplace("opcode " + toHex(cpu.memory[cpu.pc]) + " pc " + toHex(cpu.pc));
     } catch (const std::exception& e) {
         std::cerr << "\n" << e.what() << std::endl;
@@ -47,4 +50,5 @@ void NES::step() {
 
 void NES::powerUp() {
     cpu.signalRESET();
+    cpu.pc = 0xC7AF;
 }

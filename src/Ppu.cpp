@@ -206,6 +206,19 @@ void Ppu::clear() {
     scanline = vAdr = vTempAdr = fineXScroll = writeToggle = 0;
 }
 
+// Vblanking Functions
+// TODO : When vblank is set and cleared, there is a delay in timing.
+
+// Sets VBlank
+void Ppu::setVBlank() {
+    PpuStatus.vblank = 1;
+    nes->cpu.signalNMI();
+}
+
+// Clear vblank, 0 sprite and overflow flags
+void Ppu::clearVBlank() {
+    PpuStatus.clear();
+}
 
 void Ppu::runCycle() {
 
@@ -225,6 +238,20 @@ void Ppu::runCycle() {
                 break;
         }
     }
+
+    if (scanline == 241 && cycle == 1) {
+        setVBlank();
+    }
+    if (scanline == 261 && cycle == 1) {
+        clearVBlank();
+    }
+
+    if (scanline == 261) scanline = 0;
+    if (cycle == 340) {
+        cycle = 0;
+        ++scanline;
+    }
+    ++cycle;
 
 }
 

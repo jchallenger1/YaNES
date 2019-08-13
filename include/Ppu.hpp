@@ -28,6 +28,9 @@ public:
 
     PatternTableT getPatternTile(const uint16_t& tileAddress) const;
     void stdDrawPatternTile(const uint16_t& tileAddress) const;
+
+    void setVBlank();
+    void clearVBlank();
 private:
     std::shared_ptr<NES> nes;
 

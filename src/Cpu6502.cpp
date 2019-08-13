@@ -245,7 +245,7 @@ void Cpu6502::signalRESET() {
     // Assumption that this also resets the state as well
     pc = static_cast<uint16_t>( (static_cast<uint16_t>(memory[vectorRESET + 1]) << 8) | memory[vectorRESET] );
     status.reset();
-    sp = 0xFD;
+    sp = 0xFD; // <- This is NES specific
     a = x = y = 0;
 }
 
