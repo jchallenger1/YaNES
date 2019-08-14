@@ -3,6 +3,7 @@
 #include <numeric>
 #include <queue>
 #include "NES.hpp"
+#include "functions.hpp" // toHex()
 
 NES::NES(Cpu6502& cpu, Ppu& ppu) : cpu(cpu), ppu(ppu) {
     ppu.setNESHandle(*this);
@@ -15,13 +16,6 @@ void NES::clear() {
     cpu.clear();
 }
 
-template<typename T>
-std::string toHex(T&& num) {
-    static_assert (std::is_integral<typename std::decay<T>::type>::value, "must be an integral type");
-    std::stringstream stream;
-    stream << "0x" << std::hex << static_cast<int>(std::forward<T>(num));
-    return stream.str();
-}
 
 void NES::step() {
     static std::queue<std::string> queue;

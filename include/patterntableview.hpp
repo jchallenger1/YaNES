@@ -11,23 +11,7 @@
 #include "ui_patterntableview.h"
 #include "NES.hpp"
 #include "Ppu.hpp"
-
-// from https://cpppatterns.com/patterns/apply-tuple-to-function.html
-// Website also includes an explantation
-// C++17 also includes std::apply, but assuming c++14 here.
-template<typename F, typename Tuple, size_t ...S >
-decltype(auto) apply_tuple_impl(F&& fn, Tuple&& t, std::index_sequence<S...>) {
-    return std::forward<F>(fn)(std::get<S>(std::forward<Tuple>(t))...);
-}
-
-template<typename F, typename Tuple>
-decltype(auto) apply_from_tuple(F&& fn, Tuple&& t) {
-    constexpr std::size_t tSize = std::tuple_size<
-                typename std::remove_reference<Tuple>::type
-            >::value;
-    return apply_tuple_impl(std::forward<F>(fn), std::forward<Tuple>(t),
-                            std::make_index_sequence<tSize>());
-}
+#include "functions.hpp" // apply_from_tuple()
 
 namespace Ui {
 class PatternTableView;
@@ -40,16 +24,17 @@ public:
     inline virtual ~PatternTableView() override;
 
     inline void paintEvent(QPaintEvent*) override;
-    inline void paint();
+
     static inline constexpr auto getColor(const uint8_t&);
-    inline void setColor(QPainter& painter, const QColor& color);
+    static inline void setColor(QPainter& painter, const QColor& color);
+
+private:
+    inline void paint();
+    inline void stepNES();
 
     inline void drawPatternTable(QPainter& painter, const uint16_t& startAdr, const int& originX, const int& originY);
     inline QColor getPalQColor(const uint16_t& address) const;
     inline void drawPalette(QPainter& painter, const uint16_t& startAdr, const int& originX, const int& originY, const bool& isGroup = true);
-private:
-
-    inline void stepNES();
 
     Ui::PatternTableView *ui;
     std::shared_ptr<NES> nes;

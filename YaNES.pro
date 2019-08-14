@@ -24,6 +24,7 @@ HEADERS += \
     include/NES.hpp \
     include/Ppu.hpp \
     include/debugview.h \
+    include/functions.hpp \
     include/mainwindow.h \
     include/nametableview.hpp \
     include/patterntableview.hpp
