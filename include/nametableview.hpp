@@ -50,7 +50,8 @@ NameTableView::~NameTableView() {
 void NameTableView::timeTick() {
     static int i = 0;
     std::cerr << std::to_string(i++) << "\n";
-    nes->step();
+    for (int n = 0; n != 20; ++n)
+        nes->step();
     if (i % 10000 == 0)
         this->repaint();
 }
@@ -82,6 +83,11 @@ void NameTableView::paint() {
         uint8_t addressX = tileNum % 32;
         uint8_t addressY = static_cast<uint8_t>(static_cast<int>(tileNum / 32));
         uint8_t byte = nes->ppu.vRamRead(address);
+        if (byte == 32) {
+            setColor(Qt::black);
+            painter.drawRect(addressX, addressY, 8, 8);
+            continue;
+        }
         Ppu::PatternTableT tile = nes->ppu.getPatternTile(byte);
         for (uint8_t tileY = 0; tileY != 8; tileY++) {
             uint16_t line = tile[tileY];
