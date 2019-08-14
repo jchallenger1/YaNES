@@ -7,7 +7,29 @@
 
 #define UNUSED(x) (void)(x)
 
+#define mT(...) std::make_tuple<uint8_t, uint8_t, uint8_t>(__VA_ARGS__) // Quick make tuple without the large syntax of uint8_t's...
+
+// Using 2C02 Palette Configuration : https://wiki.nesdev.com/w/index.php/PPU_palettes#2C02
+const std::array<const typename Ppu::PaletteT, 0x40 > Ppu::paletteTable = {
+    //     X0                X1              X2               X3               X4              X5               X6                X7
+/*0X:*/mT(84,84,84),    mT(0,30,116),    mT(8,16,144),    mT(48,0,136),    mT(68,0,100),    mT(92,0,48),      mT(84,4,0),      mT(60,24,0),
+    //     X8               X9               XA               XB               XC              XD               XE                XF
+       mT(32,42,0),     mT(8,58,0),      mT(0,64,0),      mT(0,60,0),      mT(0,50,60),     mT(0,0,0),        mT(0,0,0),       mT(0,0,0),
+/*1X:*/
+       mT(152,150,152), mT(8,76,197),    mT(48,50,236),   mT(92,30,228),   mT(136,20,176),  mT(160,20,100),   mT(152,34,32),   mT(120,60,0),
+       mT(84, 90, 0),   mT(40,114,0),    mT(8,124,0),     mT(0,118,40),    mT(0,102,120),   mT(0,0,0),        mT(0,0,0),       mT(0,0,0),
+/*2X:*/
+       mT(236,238,236), mT(76,154,236),  mT(120,124,236), mT(176,98,236),  mT(228,84,236),  mT(236, 88, 180), mT(236,106,100), mT(212,136,32),
+       mT(160,170,0),   mT(116,196,0),   mT(76,208,32),   mT(56,204,108),  mT(57,180,204),  mT(60,60,60),     mT(0,0,0),       mT(0,0,0),
+/*3X:*/
+       mT(236,238,236), mT(168,204,236), mT(188,188,236), mT(212,178,236), mT(236,174,236), mT(236,174,212),  mT(236,180,176), mT(228,196,144),
+       mT(204,210,120), mT(180,222,120), mT(168,226,144), mT(152,226,180), mT(160,214,228), mT(160,162,160),  mT(0,0,0),       mT(0,0,0)
+};
+
+#undef mT
+
 Ppu::Ppu() {
+
     clear();
 }
 

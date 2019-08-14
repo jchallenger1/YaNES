@@ -13,7 +13,7 @@ class Ppu {
     friend class DebugView;
 public:
     using PatternTableT = std::array<uint16_t, 8>;
-
+    using PaletteT = std::tuple<uint8_t, uint8_t, uint8_t>;
     Ppu();
     Ppu(NES&);
     void setNESHandle(NES&) &;
@@ -31,6 +31,9 @@ public:
 
     void setVBlank();
     void clearVBlank();
+
+    static const std::array<const PaletteT, 0x40 > paletteTable;
+
 private:
     std::shared_ptr<NES> nes;
 
@@ -109,5 +112,4 @@ private:
     void fetchTableLowByte();
     void fetchTableHighByte();
 };
-
 #endif // PPU_HPP
