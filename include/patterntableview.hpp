@@ -5,7 +5,9 @@
 #include <QBrush>
 #include <QPen>
 #include <QPainter>
+#include <QTimer>
 #include <memory>
+#include <iostream>
 #include "ui_patterntableview.h"
 #include "NES.hpp"
 #include "Ppu.hpp"
@@ -34,7 +36,7 @@ class PatternTableView;
 class PatternTableView : public QWidget {
     Q_OBJECT
 public:
-    inline explicit PatternTableView(NES& nes, QWidget *parent = nullptr);
+    inline explicit PatternTableView(NES& nes, bool stepNES, QWidget *parent = nullptr);
     inline virtual ~PatternTableView() override;
 
     inline void paintEvent(QPaintEvent*) override;
@@ -44,21 +46,38 @@ public:
 
     inline void drawPatternTable(QPainter& painter, const uint16_t& startAdr, const int& originX, const int& originY);
     inline QColor getPalQColor(const uint16_t& address) const;
+    inline void drawPalette(QPainter& painter, const uint16_t& startAdr, const int& originX, const int& originY, const bool& isGroup = true);
 private:
+
+    inline void stepNES();
+
     Ui::PatternTableView *ui;
     std::shared_ptr<NES> nes;
+    QTimer* timer;
     uint8_t resizeFactor = 2;
 };
 
-PatternTableView::PatternTableView(NES& nes, QWidget *parent) : QWidget(parent), ui(new Ui::PatternTableView) {
+PatternTableView::PatternTableView(NES& nes, bool stepNES, QWidget *parent) : QWidget(parent), ui(new Ui::PatternTableView) {
     ui->setupUi(this);
     this->nes = std::make_shared<NES>(nes);
+    if (stepNES) {
+        timer = new QTimer(this);
+        connect(timer, &QTimer::timeout, this, &PatternTableView::stepNES);
+        timer->start(0);
+    }
 }
 
 PatternTableView::~PatternTableView() {
     delete ui;
 }
 
+void PatternTableView::stepNES() {
+    for (int i = 0; i != 25; i++)
+        nes->step();
+    static int i = 0;
+    if (i++ % 10000 == 0)
+        repaint();
+}
 
 void PatternTableView::paintEvent(QPaintEvent *) {
     paint();
@@ -98,16 +117,40 @@ inline void PatternTableView::drawPatternTable(QPainter& painter, const uint16_t
 
 QColor PatternTableView::getPalQColor(const uint16_t &address) const {
     uint8_t colorByte = nes->ppu.vRamRead(address);
-    typename Ppu::PaletteT universalPalette = Ppu::getRGBPalette(colorByte);
+    typename Ppu::PaletteT universalPalette = Ppu::getRGBPalette(colorByte & 0x3F);
     return apply_from_tuple(qRgb, universalPalette);
+}
 
+inline void PatternTableView::drawPalette(QPainter& painter, const uint16_t& startAdr, const int& originX, const int& originY, const bool& isGroup) {
+    for (uint16_t colorAdr = startAdr, times = 0; times != (isGroup ? 3 : 1); ++colorAdr, ++times ) {
+        setColor(painter, getPalQColor(colorAdr));
+        int pixelX = originX + 16 * times;
+        int pixelY = originY;
+        painter.drawRect(pixelX, pixelY, 16, 16);
+    }
 }
 
 void PatternTableView::paint()  {
     QPainter painter(this);
-    drawPatternTable(painter, 0x0, 0, 0);
-    drawPatternTable(painter, 0x1000, 400, 0);
-    setColor(painter, getPalQColor(0x3F00));
+    drawPatternTable(painter, 0x0, 0, 0); // Left Pattern Table
+    drawPatternTable(painter, 0x1000, 400, 0); // Right Pattern Table
+
+    static constexpr int paletteY = 325;
+
+    // Background Palette Tables
+    drawPalette(painter, 0x3F00, 0, paletteY, false); // Universal Background Color
+    drawPalette(painter, 0x3F01, 40, paletteY); // Background palette 0
+    drawPalette(painter, 0x3f05, 100, paletteY); // Background palette 1
+    drawPalette(painter, 0x3f09, 170, paletteY); // ...
+    drawPalette(painter, 0x3f0d, 240, paletteY);
+
+    // Sprite Palette Tables
+    drawPalette(painter, 0x3F11, 400, paletteY); // Sprite Palette 0
+    drawPalette(painter, 0x3F15, 470, paletteY); // Sprite Palette 1
+    drawPalette(painter, 0x3F19, 540, paletteY); // ...
+    drawPalette(painter, 0x3F1D, 600, paletteY);
+
+
 
 }
 #endif // PATTERNTABLEVIEW_HPP
