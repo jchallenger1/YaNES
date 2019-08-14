@@ -80,7 +80,7 @@ void Ppu::stdDrawPatternTile(const uint16_t& tileAddress) const {
 
 }
 
-constexpr typename Ppu::PaletteT Ppu::getRGBPalette(const uint8_t &paletteNum) {
+typename Ppu::PaletteT Ppu::getRGBPalette(const uint8_t &paletteNum) {
     if (paletteNum > 0x40) {
         std::cerr << " In " << __FILE__ << " Palette Number is out of range of the table";
         throw std::out_of_range("Palette Number is out of range");
