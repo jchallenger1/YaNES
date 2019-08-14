@@ -32,11 +32,10 @@ public:
     void setVBlank();
     void clearVBlank();
 
-    static const std::array<const PaletteT, 0x40 > paletteTable;
-
+    static constexpr PaletteT getRGBPalette(const uint8_t& paletteNum);
 private:
     std::shared_ptr<NES> nes;
-
+    static const std::array<const PaletteT, 0x40 > RGBPaletteTable;
 
 
     uint16_t scanline = 0;
