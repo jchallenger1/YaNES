@@ -134,8 +134,5 @@ void PatternTableView::paint()  {
     drawPalette(painter, 0x3F15, 470, paletteY); // Sprite Palette 1
     drawPalette(painter, 0x3F19, 540, paletteY); // ...
     drawPalette(painter, 0x3F1D, 600, paletteY);
-
-
-
 }
 #endif // PATTERNTABLEVIEW_HPP
