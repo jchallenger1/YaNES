@@ -135,11 +135,11 @@ uint8_t Ppu::getPaletteFromNameTable(const uint16_t& nameTableRelativeAdr, const
         case 0:
             return byte & 0x3;
         case 2:
-            return byte & 0xC;
+            return (byte & 0xC) >> 2;
         case 4:
-            return byte & 0x30;
+            return (byte & 0x30) >> 4;
         case 6:
-            return byte & 0xC0;
+            return (byte & 0xC0) >> 6;
     }
 
     std::cerr << "In " << __FUNCTION__ << " in " << __FILE__ << " Reached end of function without a palett, Relative Address : " << nameTableRelativeAdr << "\n";
