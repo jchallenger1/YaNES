@@ -146,6 +146,24 @@ uint8_t Ppu::getPaletteFromNameTable(const uint16_t& nameTableRelativeAdr, const
     throw std::runtime_error("Could not get a shift from name table address");
 }
 
+// Assuming always background palette
+typename Ppu::ColorSetT Ppu::getColorSetFromAdr(const uint16_t& paletteAdr) const {
+    if (!inRange(0x3F00, 0x3F1F, paletteAdr)) {
+        std::cerr << "Palette Address is not a background or sprite palette address\n";
+        throw std::runtime_error("Palette Address is invalid");
+    }
+    else if (paletteAdr == 0x3F00) { // universal only
+        uint8_t u = vRamRead(0x3F00);
+        return std::make_tuple(u, u, u, u);
+    }
+
+    ColorSetT set;
+    std::get<0>(set) = vRamRead(0x3F00);
+    std::get<1>(set) = vRamRead(paletteAdr);
+    std::get<2>(set) = vRamRead(paletteAdr + 1);
+    std::get<3>(set) = vRamRead(paletteAdr + 2);
+    return set;
+}
 
 void Ppu::vRamWrite(const uint16_t& adr, const uint8_t& val) {
     if (inRange(0x3000, 0x3EFF, adr))

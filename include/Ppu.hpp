@@ -14,6 +14,7 @@ class Ppu {
 public:
     using PatternTableT = std::array<uint16_t, 8>;
     using PaletteT = std::tuple<uint8_t, uint8_t, uint8_t>;
+    using ColorSetT = std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>;
     Ppu();
     Ppu(NES&);
     void setNESHandle(NES&) &;
@@ -34,6 +35,7 @@ public:
 
     static PaletteT getRGBPalette(const uint8_t& paletteNum);
     uint8_t getPaletteFromNameTable(const uint16_t& nameTableRelativeAdr, const uint16_t& atrTableStart) const;
+    ColorSetT getColorSetFromAdr(const uint16_t& paletteAdr) const;
 private:
     std::shared_ptr<NES> nes;
     static const std::array<const PaletteT, 0x40 > RGBPaletteTable;
