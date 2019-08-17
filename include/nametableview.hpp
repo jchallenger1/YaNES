@@ -23,9 +23,10 @@ public:
     inline void timeTick();
     inline void paintEvent(QPaintEvent*) override;
     inline void paint();
-    inline QColor getPalQColor(const uint16_t& address) const;
+    inline QColor getPalQColor(const uint8_t& colorByte) const;
     inline QColor getColor(const uint8_t& n) const;
 private:
+    Ppu::ColorSetT colorSet;
     Ui::NameTableView *ui;
     std::shared_ptr<NES> nes;
     QTimer* timer;
@@ -63,19 +64,18 @@ void NameTableView::paintEvent(QPaintEvent *) {
     paint();
 }
 
-QColor NameTableView::getPalQColor(const uint16_t &address) const {
-    uint8_t colorByte = nes->ppu.vRamRead(address);
+QColor NameTableView::getPalQColor(const uint8_t& colorByte) const {
     typename Ppu::PaletteT universalPalette = Ppu::getRGBPalette(colorByte & 0x3F);
     return apply_from_tuple(qRgb, universalPalette);
 }
 
 QColor NameTableView::getColor(const uint8_t &n) const {
     switch(n) {
-        case 0: return Qt::black;
-        case 1: return Qt::red;
-        case 2: return Qt::yellow;
-        case 3: return Qt::blue;
-        default: return Qt::black;
+        case 0: return getPalQColor(std::get<0>(colorSet));
+        case 1: return getPalQColor(std::get<1>(colorSet));
+        case 2: return getPalQColor(std::get<2>(colorSet));
+        case 3: return getPalQColor(std::get<3>(colorSet));
+    default: std::cerr << "getColor(), no color"; return Qt::black;
     }
 }
 
@@ -91,7 +91,18 @@ void NameTableView::paint() {
         uint16_t tileNum = address - 0x2000;
 
         uint8_t paletteID = nes->ppu.getPaletteFromNameTable(tileNum, 0x23C0);
-
+        switch (paletteID) {
+            case 0:
+                colorSet = nes->ppu.getColorSetFromAdr(0x3F01); break;
+            case 1:
+                colorSet = nes->ppu.getColorSetFromAdr(0x3F05); break;
+            case 2:
+                colorSet = nes->ppu.getColorSetFromAdr(0x3F09); break;
+            case 3:
+                colorSet = nes->ppu.getColorSetFromAdr(0x3F0D); break;
+            default:
+                throw std::runtime_error("Could not get proper palette id");
+        }
         // Address X and Y determine where to put the tile
         // The screen is a 32x30 tile screen, so to put it on, 32*8 and 30*8 for 256x240 NES screen size
         uint8_t addressX = tileNum % 32;

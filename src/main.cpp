@@ -18,9 +18,9 @@ int main(int argc, char *argv[]) {
     //w.show();
     //DebugView d(nes);
     //d.show();
-    //NameTableView view(nes, true);
-    //view.show();
-    PatternTableView pview(nes, true);
-    pview.show();
+    NameTableView view(nes, true);
+    view.show();
+    //PatternTableView pview(nes, true);
+   // pview.show();
     return a.exec();
 }
