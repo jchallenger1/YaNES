@@ -7,6 +7,7 @@
 #include <iostream>
 #include "ui_nametableview.h"
 #include "NES.hpp"
+#include "functions.hpp"
 
 namespace Ui {
 class NameTableView;
@@ -22,6 +23,8 @@ public:
     inline void timeTick();
     inline void paintEvent(QPaintEvent*) override;
     inline void paint();
+    inline QColor getPalQColor(const uint16_t& address) const;
+    inline QColor getColor(const uint8_t& n) const;
 private:
     Ui::NameTableView *ui;
     std::shared_ptr<NES> nes;
@@ -60,16 +63,24 @@ void NameTableView::paintEvent(QPaintEvent *) {
     paint();
 }
 
+QColor NameTableView::getPalQColor(const uint16_t &address) const {
+    uint8_t colorByte = nes->ppu.vRamRead(address);
+    typename Ppu::PaletteT universalPalette = Ppu::getRGBPalette(colorByte & 0x3F);
+    return apply_from_tuple(qRgb, universalPalette);
+}
+
+QColor NameTableView::getColor(const uint8_t &n) const {
+    switch(n) {
+        case 0: return Qt::black;
+        case 1: return Qt::red;
+        case 2: return Qt::yellow;
+        case 3: return Qt::blue;
+        default: return Qt::black;
+    }
+}
+
 void NameTableView::paint() {
     QPainter painter(this);
-    static auto getColor = [](const uint8_t& n) -> auto {
-        switch(n) {
-            case 0: return Qt::black;
-            case 1: return Qt::red;
-            case 2: return Qt::yellow;
-            default: return Qt::blue;
-        }
-    };
     auto setColor = [&painter](const auto& color) {
         painter.setPen(color);
         painter.setBrush(color);
@@ -78,16 +89,14 @@ void NameTableView::paint() {
     // After 0x23C0 is the attribute table
     for (uint16_t address = 0x2000; address != 0x23C0; address++) {
         uint16_t tileNum = address - 0x2000;
+
+        uint8_t paletteID = nes->ppu.getPaletteFromNameTable(tileNum, 0x23C0);
+
         // Address X and Y determine where to put the tile
         // The screen is a 32x30 tile screen, so to put it on, 32*8 and 30*8 for 256x240 NES screen size
         uint8_t addressX = tileNum % 32;
         uint8_t addressY = static_cast<uint8_t>(static_cast<int>(tileNum / 32));
         uint8_t byte = nes->ppu.vRamRead(address);
-        if (byte == 32) {
-            setColor(Qt::black);
-            painter.drawRect(addressX, addressY, 8, 8);
-            continue;
-        }
         Ppu::PatternTableT tile = nes->ppu.getPatternTile(byte);
         for (uint8_t tileY = 0; tileY != 8; tileY++) {
             uint16_t line = tile[tileY];
