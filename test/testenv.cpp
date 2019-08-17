@@ -20,11 +20,8 @@ uint16_t getAtrAddress(const uint16_t& nameTableRelativeAdr, const uint16_t& atr
     return adr;
 }
 
-uint8_t getShift(const uint16_t& nameTableRelativeAdr, const uint16_t& atrTableStart) {
-    uint8_t hTableLevel = static_cast<uint8_t>( (nameTableRelativeAdr % 32) / 4);
-    uint8_t vTableLevel = static_cast<uint8_t>( nameTableRelativeAdr / 64);
-    uint16_t adr = hTableLevel + vTableLevel * 8 + atrTableStart;
-
+// Function gets the shift from a attribute table needed for the correct palette selection
+uint8_t getShift(const uint16_t& nameTableRelativeAdr) {
     // Compress all vertical tiles into one vertical tile (%64), if the address is divisable by 32 then it's in the upper half of tile, otherwise in lower half
     if (static_cast<int>( (nameTableRelativeAdr % 64) / 32) == 0) {
         switch(nameTableRelativeAdr % 4){ // Top Half
@@ -46,28 +43,22 @@ uint8_t getShift(const uint16_t& nameTableRelativeAdr, const uint16_t& atrTableS
     throw std::runtime_error("Could not get a shift from name table address");
 }
 
+// https://wiki.nesdev.com/w/index.php/PPU_attribute_tables
+// Gets Palette selection from a nametable address
 uint8_t getPaletteFromNameTable(const uint16_t& nameTableRelativeAdr, const uint16_t& atrTableStart) {
-    uint8_t hTableLevel = static_cast<uint8_t>( (nameTableRelativeAdr % 32) / 4);
-    uint8_t vTableLevel = static_cast<uint8_t>( nameTableRelativeAdr / 64);
-    uint16_t adr = hTableLevel + vTableLevel * 8 + atrTableStart;
-    uint8_t byte = /*VramRead*/(adr);
+    uint8_t byte = /*vRamRead*/(getAtrAddress(nameTableRelativeAdr, atrTableStart));
 
-    if (static_cast<int>( (nameTableRelativeAdr % 64) / 32) == 0) {
-        switch(nameTableRelativeAdr % 4){
-            case 0: case 1:
-                return byte & 0x3;
-            case 2: case 3:
-                return byte & 0xC;
-        }
+    switch(getShift(nameTableRelativeAdr)) {
+        case 0:
+            return byte & 0x3;
+        case 2:
+            return byte & 0xC;
+        case 4:
+            return byte & 0x30;
+        case 6:
+            return byte & 0xC0;
     }
-    else {
-        switch(nameTableRelativeAdr % 4) {
-            case 0: case 1:
-                return byte & 0x30;
-            case 2: case 3:
-                return byte & 0xC0;
-        }
-    }
+
     std::cerr << "In " << __FUNCTION__ << " in " << __FILE__ << " Reached end of function without a palett, Relative Address : " << nameTableRelativeAdr << "\n";
     throw std::runtime_error("Could not get a shift from name table address");
 }
