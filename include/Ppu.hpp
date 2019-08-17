@@ -33,6 +33,7 @@ public:
     void clearVBlank();
 
     static PaletteT getRGBPalette(const uint8_t& paletteNum);
+    uint8_t getPaletteFromNameTable(const uint16_t& nameTableRelativeAdr, const uint16_t& atrTableStart) const;
 private:
     std::shared_ptr<NES> nes;
     static const std::array<const PaletteT, 0x40 > RGBPaletteTable;
@@ -110,5 +111,9 @@ private:
     void fetchAttrTableByte();
     void fetchTableLowByte();
     void fetchTableHighByte();
+
+    // Helper functions for getPalette
+    uint8_t getShift(const uint16_t& nameTableRelativeAdr) const;
+    uint16_t getAtrAddress(const uint16_t& nameTableRelativeAdr, const uint16_t& atrTableStart) const;
 };
 #endif // PPU_HPP
