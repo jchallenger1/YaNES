@@ -65,7 +65,7 @@ void NameTableView::paintEvent(QPaintEvent *) {
 }
 
 QColor NameTableView::getPalQColor(const uint8_t& colorByte) const {
-    typename Ppu::PaletteT universalPalette = Ppu::getRGBPalette(colorByte & 0x3F);
+    Ppu::PaletteT universalPalette = Ppu::getRGBPalette(colorByte & 0x3F);
     return apply_from_tuple(qRgb, universalPalette);
 }
 

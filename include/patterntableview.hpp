@@ -102,7 +102,7 @@ inline void PatternTableView::drawPatternTable(QPainter& painter, const uint16_t
 
 QColor PatternTableView::getPalQColor(const uint16_t &address) const {
     uint8_t colorByte = nes->ppu.vRamRead(address);
-    typename Ppu::PaletteT universalPalette = Ppu::getRGBPalette(colorByte & 0x3F);
+    Ppu::PaletteT universalPalette = Ppu::getRGBPalette(colorByte & 0x3F);
     return apply_from_tuple(qRgb, universalPalette);
 }
 

@@ -10,7 +10,7 @@
 #define mT(...) std::make_tuple<uint8_t, uint8_t, uint8_t>(__VA_ARGS__) // Quick make tuple without the large syntax of uint8_t's...
 
 // Using 2C02 Palette Configuration : https://wiki.nesdev.com/w/index.php/PPU_palettes#2C02
-const std::array<const typename Ppu::PaletteT, 0x40 > Ppu::RGBPaletteTable = {
+const std::array<const Ppu::PaletteT, 0x40 > Ppu::RGBPaletteTable = {
     //     X0                X1              X2               X3               X4              X5               X6                X7
 /*0X:*/mT(84,84,84),    mT(0,30,116),    mT(8,16,144),    mT(48,0,136),    mT(68,0,100),    mT(92,0,48),      mT(84,4,0),      mT(60,24,0),
     //     X8               X9               XA               XB               XC              XD               XE                XF
@@ -41,7 +41,7 @@ constexpr inline bool inRange(const uint16_t& min, const uint16_t& max, const ui
     return val <= max && val >= min;
 }
 
-typename Ppu::PatternTableT Ppu::getPatternTile(const uint16_t& tileAddress) const {
+Ppu::PatternTableT Ppu::getPatternTile(const uint16_t& tileAddress) const {
     if (tileAddress >= 0x2000 - 0xF) throw std::runtime_error("Given tile address it not a pattern table address");
 
     PatternTableT tile{};
@@ -80,7 +80,7 @@ void Ppu::stdDrawPatternTile(const uint16_t& tileAddress) const {
 
 }
 
-typename Ppu::PaletteT Ppu::getRGBPalette(const uint8_t &paletteNum) {
+Ppu::PaletteT Ppu::getRGBPalette(const uint8_t &paletteNum) {
     if (paletteNum > 0x40) {
         std::cerr << " In " << __FILE__ << " Palette Number is out of range of the table";
         throw std::out_of_range("Palette Number is out of range");
@@ -147,7 +147,7 @@ uint8_t Ppu::getPaletteFromNameTable(const uint16_t& nameTableRelativeAdr, const
 }
 
 // Assuming always background palette
-typename Ppu::ColorSetT Ppu::getColorSetFromAdr(const uint16_t& paletteAdr) const {
+Ppu::ColorSetT Ppu::getColorSetFromAdr(const uint16_t& paletteAdr) const {
     if (!inRange(0x3F00, 0x3F1F, paletteAdr)) {
         std::cerr << "Palette Address is not a background or sprite palette address\n";
         throw std::runtime_error("Palette Address is invalid");
