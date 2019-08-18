@@ -98,7 +98,7 @@ uint16_t Ppu::getAtrAddress(const uint16_t& nameTableRelativeAdr, const uint16_t
     // TODO : Make it such that relative addresses and the attribute table starts are unneeded for the function
     // Do when donkey kong works
     uint8_t hTableLevel = static_cast<uint8_t>( (nameTableRelativeAdr % 32) / 4); // Get horizontal table location, there is 32 bytes in a partial vertical line, and 4 numbers routes to one (0,1,2,3->0)
-    uint8_t vTableLevel = static_cast<uint8_t>( nameTableRelativeAdr / 64); // Get vertical, The next vertical tile occurs every 64 bytes
+    uint8_t vTableLevel = static_cast<uint8_t>( nameTableRelativeAdr / 128); // Get vertical, The next vertical tile occurs every 64 bytes
     uint16_t adr = atrTableStart + hTableLevel + vTableLevel * 8;
     return adr;
 }
