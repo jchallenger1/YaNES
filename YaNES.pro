@@ -11,6 +11,7 @@ SOURCES += \
         src/Memory.cpp \
         src/NES.cpp \
         src/Ppu.cpp \
+        src/debugview.cpp \
         src/main.cpp \
         src/mainwindow.cpp
 
@@ -22,10 +23,17 @@ HEADERS += \
     include/Memory.hpp \
     include/NES.hpp \
     include/Ppu.hpp \
-    include/mainwindow.h
+    include/debugview.h \
+    include/functions.hpp \
+    include/mainwindow.h \
+    include/nametableview.hpp \
+    include/patterntableview.hpp
 
 FORMS += \
-    forms/mainwindow.ui
+    forms/debugview.ui \
+    forms/mainwindow.ui \
+    forms/nametableview.ui \
+    forms/patterntableview.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -1,12 +1,35 @@
-#include "Ppu.hpp"
+﻿#include "Ppu.hpp"
 #include "NES.hpp"
 #include <bitset>
 #include <iostream>
 #include <memory>
+#include <cmath>
 
 #define UNUSED(x) (void)(x)
 
+#define mT(...) std::make_tuple<uint8_t, uint8_t, uint8_t>(__VA_ARGS__) // Quick make tuple without the large syntax of uint8_t's...
+
+// Using 2C02 Palette Configuration : https://wiki.nesdev.com/w/index.php/PPU_palettes#2C02
+const std::array<const Ppu::PaletteT, 0x40 > Ppu::RGBPaletteTable = {
+    //     X0                X1              X2               X3               X4              X5               X6                X7
+/*0X:*/mT(84,84,84),    mT(0,30,116),    mT(8,16,144),    mT(48,0,136),    mT(68,0,100),    mT(92,0,48),      mT(84,4,0),      mT(60,24,0),
+    //     X8               X9               XA               XB               XC              XD               XE                XF
+       mT(32,42,0),     mT(8,58,0),      mT(0,64,0),      mT(0,60,0),      mT(0,50,60),     mT(0,0,0),        mT(0,0,0),       mT(0,0,0),
+/*1X:*/
+       mT(152,150,152), mT(8,76,197),    mT(48,50,236),   mT(92,30,228),   mT(136,20,176),  mT(160,20,100),   mT(152,34,32),   mT(120,60,0),
+       mT(84, 90, 0),   mT(40,114,0),    mT(8,124,0),     mT(0,118,40),    mT(0,102,120),   mT(0,0,0),        mT(0,0,0),       mT(0,0,0),
+/*2X:*/
+       mT(236,238,236), mT(76,154,236),  mT(120,124,236), mT(176,98,236),  mT(228,84,236),  mT(236, 88, 180), mT(236,106,100), mT(212,136,32),
+       mT(160,170,0),   mT(116,196,0),   mT(76,208,32),   mT(56,204,108),  mT(57,180,204),  mT(60,60,60),     mT(0,0,0),       mT(0,0,0),
+/*3X:*/
+       mT(236,238,236), mT(168,204,236), mT(188,188,236), mT(212,178,236), mT(236,174,236), mT(236,174,212),  mT(236,180,176), mT(228,196,144),
+       mT(204,210,120), mT(180,222,120), mT(168,226,144), mT(152,226,180), mT(160,214,228), mT(160,162,160),  mT(0,0,0),       mT(0,0,0)
+};
+
+#undef mT
+
 Ppu::Ppu() {
+
     clear();
 }
 
@@ -18,48 +41,141 @@ constexpr inline bool inRange(const uint16_t& min, const uint16_t& max, const ui
     return val <= max && val >= min;
 }
 
-constexpr inline uint8_t getBit(const uint16_t& val, const uint8_t& bitNum) {
-    return static_cast<uint8_t>((val & (1 << bitNum)) >> bitNum);
-}
+// Get both bit planes starting at tileAddress and make into patterntableT
+// This structure is traversable via example of stdDrawPatternTile
+Ppu::PatternTableT Ppu::getPatternTile(const uint16_t& tileAddress) const {
+    if (tileAddress >= 0x2000 - 0xF) throw std::runtime_error("Given tile address it not a pattern table address");
 
-constexpr inline void setBit(uint16_t& val, const uint8_t& bitNum) {
-    val |= (1 << bitNum);
-}
+    PatternTableT tile{};
+    // Create a line of a tile
+    // For every bit position of left and right, set it to the two bits equivalent position
+    // in a 16 bit field, ex if left -> 0 , right -> 1, then bitPos(line) = 10 in the u16 type
+    // But note that setting left to right immeditely to 0 and 1 reverses the line, instead set to bits 16 and 15
+    auto createLine = [](const uint8_t& left, const uint8_t& right) -> uint16_t {
+            uint16_t line = 0;
+            for (short bitPos = 0, topBitLoc = 0; bitPos != 8; bitPos++, topBitLoc+=2) {
+                const uint16_t pow2 = static_cast<uint16_t>(std::pow(2, bitPos)); // select which bit to choose
+                // Take the bit and move to 1's position, then move it to the line's bits bottom down
+                line |= ( (static_cast<uint16_t>(right) & pow2) >> bitPos) << (15 - topBitLoc);
+                line |= ( (static_cast<uint16_t>(left) & pow2) >> bitPos) << (15 - topBitLoc - 1);
+            }
+            return line;
+    };
 
-uint16_t createLine(uint8_t left, uint8_t right) {
-    uint16_t line = 0;
-    for (uint8_t i = 0; i != 8; i++) {
-        if (!getBit(left, i) && !getBit(right, i))
-            setBit(line, 2 * i);
-        if (getBit(left, i) && getBit(right, i)) {
-            setBit(line, 2 * i);
-            setBit(line, 2 * i + 1);
-        }
-        if (getBit(left, i) == 1 && !getBit(right,i))
-            setBit(line, 2 * i);
-        else
-            setBit(line, 2 * i + 1);
-    }
-    return line;
-}
-
-void printTile(std::array<uint16_t, 8>& tile) {
-    for (auto begin = tile.cbegin(); begin != tile.cend(); begin++) {
-        std::bitset<16> p(*begin);
-        std::cout << p << "\n";
-    }
-    std::cout << std::endl;
-}
-
-std::array<uint16_t, 8> Ppu::getTile(unsigned x, unsigned y) {
-    std::array<uint16_t, 8> tile{};
-    UNUSED(x); UNUSED(y);
     for (unsigned i = 0; i != 8; i++) {
-        tile[i] = createLine(memory[0x1000 + i], memory[0x1000 + i + 8]);
+        tile[i % 8] = createLine(nes->ppu.memory[tileAddress + i], nes->ppu.memory[tileAddress + i + 8]);
     }
-    printTile(tile);
     return tile;
 }
+
+Ppu::PatternTableT Ppu::getPatternTile(const uint8_t& tileID, bool isLeft) const {
+    if (isLeft)
+        return getPatternTile(tileID * 16);
+    return getPatternTile(0x1000 + tileID * 16);
+}
+
+void Ppu::stdDrawPatternTile(const uint16_t& tileAddress) const {
+    PatternTableT tile = getPatternTile(tileAddress);
+    for (uint8_t y = 0; y != 8; y++) {
+        uint16_t line = tile[y];
+        for (uint8_t x = 0; x != 8; x++) {
+            uint8_t pixel = ( line >> (x * 2) ) & 0b11;
+            std::cout << static_cast<int>(pixel);
+        }
+        std::cout << "\n";
+    }
+    std::cout << std::endl;
+
+}
+
+Ppu::PaletteT Ppu::getRGBPalette(const uint8_t &paletteNum) {
+    if (paletteNum > 0x40) {
+        std::cerr << " In " << __FILE__ << " Palette Number is out of range of the table";
+        throw std::out_of_range("Palette Number is out of range");
+    }
+    return RGBPaletteTable[paletteNum];
+}
+
+// https://wiki.nesdev.com/w/index.php/PPU_attribute_tables
+// Get the Attribute Table Address from a nametable address
+// NameTableAdr must NOT be the actual address, but the relative one to the name table source
+// Ex if nametable Address = 0x2005, then relative address is 0x5, Similarly 0x3325 -> 0x125
+// atrTableStart must be the origin location attribute table to the particular nametable
+// Ex if nameTable Adr = 0x2000, then atrTableStart = 0x23C0
+uint16_t Ppu::getAtrAddress(const uint16_t& nameTableRelativeAdr, const uint16_t& atrTableStart) const {
+    // TODO : Make it such that relative addresses and the attribute table starts are unneeded for the function
+    // Do when donkey kong works
+    uint8_t hTableLevel = static_cast<uint8_t>( (nameTableRelativeAdr % 32) / 4); // Get horizontal table location, there is 32 bytes in a partial vertical line, and 4 numbers routes to one (0,1,2,3->0)
+    uint8_t vTableLevel = static_cast<uint8_t>( nameTableRelativeAdr / 128); // Get vertical, The next vertical tile occurs every 64 bytes
+    uint16_t adr = atrTableStart + hTableLevel + vTableLevel * 8;
+    return adr;
+}
+
+// Function gets the shift from a attribute table needed for the correct palette selection
+uint8_t Ppu::getShift(const uint16_t& nameTableRelativeAdr) const {
+    // Compress all vertical tiles into one vertical tile (%64), if the address is divisable by 32 then it's in the upper half of tile, otherwise in lower half
+    if (static_cast<int>( (nameTableRelativeAdr % 64) / 32) == 0) {
+        switch(nameTableRelativeAdr % 4){ // Top Half
+            case 0: case 1:
+                return 0;
+            case 2: case 3:
+                return 2;
+        }
+    }
+    else {
+        switch(nameTableRelativeAdr % 4) { // Lower half
+            case 0: case 1:
+                return 4;
+            case 2: case 3:
+                return 6;
+        }
+    }
+    std::cerr << "In " << __FUNCTION__ << " in " << __FILE__ << " Reached end of function without a shift, Relative Address : " << nameTableRelativeAdr << "\n";
+    throw std::runtime_error("Could not get a shift from name table address");
+}
+
+// https://wiki.nesdev.com/w/index.php/PPU_attribute_tables
+// Gets Palette selection from a nametable address
+uint8_t Ppu::getPaletteFromNameTable(const uint16_t& nameTableRelativeAdr, const uint16_t& atrTableStart) const {
+    uint8_t byte = vRamRead( getAtrAddress(nameTableRelativeAdr, atrTableStart) );
+
+    switch(getShift(nameTableRelativeAdr)) {
+        case 0:
+            return byte & 0x3;
+        case 2:
+            return (byte & 0xC) >> 2;
+        case 4:
+            return (byte & 0x30) >> 4;
+        case 6:
+            return (byte & 0xC0) >> 6;
+    }
+    std::cerr << "In " << __FUNCTION__ << " in " << __FILE__ << " Reached end of function without a palett, Relative Address : " << nameTableRelativeAdr << "\n";
+    throw std::runtime_error("Could not get a shift from name table address");
+}
+
+
+Ppu::ColorSetT Ppu::getColorSetFromAdr(const uint16_t& paletteAdr) const {
+    // Assuming always background palette for now
+    if (!inRange(0x3F00, 0x3F1F, paletteAdr)) {
+        std::cerr << "Palette Address is not a background or sprite palette address\n";
+        throw std::runtime_error("Palette Address is invalid");
+    }
+    else if (paletteAdr == 0x3F00) { // universal only
+        uint8_t u = vRamRead(0x3F00);
+        return std::make_tuple(u, u, u, u);
+    }
+
+    ColorSetT set;
+    std::get<0>(set) = vRamRead(0x3F00); // Universal
+    // Next three palette colours
+    std::get<1>(set) = vRamRead(paletteAdr);
+    std::get<2>(set) = vRamRead(paletteAdr + 1);
+    std::get<3>(set) = vRamRead(paletteAdr + 2);
+    return set;
+}
+
+
+
 
 
 void Ppu::vRamWrite(const uint16_t& adr, const uint8_t& val) {
@@ -210,6 +326,19 @@ void Ppu::clear() {
     scanline = vAdr = vTempAdr = fineXScroll = writeToggle = 0;
 }
 
+// Vblanking Functions
+// TODO : When vblank is set and cleared, there is a delay in timing.
+
+// Sets VBlank
+void Ppu::setVBlank() {
+    PpuStatus.vblank = 1;
+    nes->cpu.signalNMI();
+}
+
+// Clear vblank, 0 sprite and overflow flags
+void Ppu::clearVBlank() {
+    PpuStatus.clear();
+}
 
 void Ppu::runCycle() {
 
@@ -229,6 +358,20 @@ void Ppu::runCycle() {
                 break;
         }
     }
+
+    if (scanline == 241 && cycle == 1) {
+        setVBlank();
+    }
+    if (scanline == 261 && cycle == 1) {
+        clearVBlank();
+    }
+
+    if (scanline == 261) scanline = 0;
+    if (cycle == 340) {
+        cycle = 0;
+        ++scanline;
+    }
+    ++cycle;
 
 }
 

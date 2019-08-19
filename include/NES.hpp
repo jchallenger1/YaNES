@@ -17,6 +17,8 @@ public:
     Ppu& ppu;
 
     void clear();
+    void step();
+    void powerUp(); // Creates the powerup state
 };
 
 #endif // NES_HPP

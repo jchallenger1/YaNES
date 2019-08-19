@@ -32,10 +32,10 @@ test_suite* createPpuTestSuite() {
 test_suite* init_unit_test_suite(int argc, char* argv[]) {
     UNUSED(argv);
     bool allowOp = true, allowDiag = true, allowPpu = true;
-    /*if (argc == 1) {
+    if (argc == 1) {
         Tests::testenv();
         return nullptr;
-    }*/
+    }
     if (allowPpu) {
         framework::master_test_suite().add(createPpuTestSuite());
     }

@@ -10,22 +10,39 @@ class NES;
 class Ppu {
     friend struct GamePak;
     friend struct Tests;
+    friend class DebugView;
 public:
+    using PatternTableT = std::array<uint16_t, 8>; // A 8x8 tile, each pixel is 2 bits
+    using PaletteT = std::tuple<uint8_t, uint8_t, uint8_t>; // A RGB representation of a palette colour
+    using ColorSetT = std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>; // A set of colors, each value is the NES's chrome color signal
     Ppu();
     Ppu(NES&);
+    void setNESHandle(NES&) &;
 
-    std::array<uint16_t, 8> getTile(unsigned x, unsigned y);
     uint8_t readRegister(const uint16_t& adr);
     void writeRegister(const uint16_t& adr, const uint8_t& val);
-
     void vRamWrite(const uint16_t& adr, const uint8_t& val);
     uint8_t vRamRead(const uint16_t& adr) const;
-    void setNESHandle(NES&) &;
+
     void clear();
     void runCycle();
+
+    PatternTableT getPatternTile(const uint16_t& tileAddress) const;
+    PatternTableT getPatternTile(const uint8_t& tileID, bool isLeft) const;
+    void stdDrawPatternTile(const uint16_t& tileAddress) const;
+
+    void setVBlank();
+    void clearVBlank();
+
+    // Converts a NES's chrome color to regular RGB values
+    static PaletteT getRGBPalette(const uint8_t& paletteNum);
+    // Get the Palette Selection (0,1,2,3) based on nametable address
+    uint8_t getPaletteFromNameTable(const uint16_t& nameTableRelativeAdr, const uint16_t& atrTableStart) const;
+    // Get A color set from the palette addresses (defined in wiki where)
+    ColorSetT getColorSetFromAdr(const uint16_t& paletteAdr) const;
 private:
     std::shared_ptr<NES> nes;
-
+    static const std::array<const PaletteT, 0x40 > RGBPaletteTable;
 
 
     uint16_t scanline = 0;
@@ -100,6 +117,12 @@ private:
     void fetchAttrTableByte();
     void fetchTableLowByte();
     void fetchTableHighByte();
-};
 
+    // Helper functions for getPalette
+    // Get the bit shift required from the byte of the attribute table for the nametable
+    // for the correct palette to be selected
+    uint8_t getShift(const uint16_t& nameTableRelativeAdr) const;
+    // Get the Attribute tile address from the nametable address
+    uint16_t getAtrAddress(const uint16_t& nameTableRelativeAdr, const uint16_t& atrTableStart) const;
+};
 #endif // PPU_HPP

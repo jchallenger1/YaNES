@@ -1,6 +1,8 @@
 #include <iostream>
 #include <algorithm>
+#include <sstream>
 #include "Cpu6502.hpp"
+#include "functions.hpp" // toHex()
 
 #define EXECOPCODE(instrPtr, adringPtr) (this->*(instrPtr))((adringPtr))
 #define EXECADDRESSING(adringPtr) (this->*(adringPtr))()
@@ -222,6 +224,7 @@ void Cpu6502::runCycle(const uint64_t& num) {
         uint8_t opcode = memory.read(pc);
         Instr instruction = opcodeTable[opcode];
         EXECOPCODE(instruction.instr, instruction.addr);
+        ++instrCount;
     }
 }
 
@@ -241,9 +244,10 @@ void Cpu6502::signalNMI() {
 // note that no stack operations are done
 void Cpu6502::signalRESET() {
     // Assumption that this also resets the state as well
-    pc =  static_cast<uint16_t>( (static_cast<uint16_t>(memory[vectorRESET + 1]) << 8) | memory[vectorRESET] );
+    pc = static_cast<uint16_t>( (static_cast<uint16_t>(memory[vectorRESET + 1]) << 8) | memory[vectorRESET] );
     status.reset();
-    sp = a = x = y = 0;
+    sp = 0xFD; // <- This is NES specific
+    a = x = y = 0;
 }
 
 // Interrupt Request:
@@ -416,10 +420,20 @@ uint16_t Cpu6502::ADR_RELATIVE() {
 
     if (!canBranch) return pc + 2;
 
-    uint8_t byte = memory.read(pc + 1);
+    // Original implementation did not work, using implementation from :
+    // https://github.com/gianlucag/mos6502/blob/master/mos6502.cpp
+    uint16_t offset = memory.read(++pc);
+    ++pc;
+    if (offset & 0x80)
+        offset |= 0xFF00;
+    return pc + offset;
+    /*
+    uint16_t byte = memory.read(pc + 1);
     bool isPositive = (0x80 & byte) >> 7 == 0;
     uint8_t offset = (~0x80) & byte;
     return (isPositive ? pc + offset : pc - offset) + 2;
+    */
+
 }
 
 // Accumulator : Same as implied, but its always accumulator(a) register.
@@ -499,11 +513,13 @@ inline uint8_t Cpu6502::POP() {
 ///
 ///
 
+[[ noreturn ]]
+void Cpu6502::OP_ILLEGAL(AddressingPtr&) {
+    std::cerr << " In " << __FILE__ << std::hex
+              << " opcode " << static_cast<int>(memory.read(pc))
+              << " is ILLEGAL at address " << static_cast<int>(pc) << std::dec << "\n";
 
-void Cpu6502::OP_ILLEGAL(AddressingPtr& adr) {
-    std::cerr << std::hex << "opcode " << static_cast<int>(memory.read(pc))
-              << " is ILLEGAL at address " << static_cast<int>(pc) << std::dec;
-    EXECADDRESSING(adr);
+    throw std::runtime_error("Cpu illegal opcode failure, opcode : " + toHex(memory.read(pc)) + ", pc : " + toHex(pc));
 }
 
 /// ---- Storage Instructions ----

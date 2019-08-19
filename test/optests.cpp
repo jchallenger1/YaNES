@@ -73,6 +73,7 @@ void Tests::cpuMathTests() {
     cpu.clear();
 
     // Add two in decimal mode
+    cpu.cpuAllowDec = true;
     memory.write(0, 0x69);
     memory.write(1, 20); // 20 in BCD is 14
     cpu.status.c = 0;
@@ -82,6 +83,7 @@ void Tests::cpuMathTests() {
     // 93 in BCD (79+14=93)
     ckPassErr(cpu.a == 147, "2.12 Decimal ADC failure");
     cpu.clear();
+    cpu.cpuAllowDec = false;
 
     // Sub 2 num w/ borrow w/ positive
     cpu.status.c = 1;
