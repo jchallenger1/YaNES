@@ -1,5 +1,5 @@
-﻿#include "Ppu.hpp"
-#include "NES.hpp"
+﻿#include "Ppu.h"
+#include "NES.h"
 #include <bitset>
 #include <iostream>
 #include <memory>

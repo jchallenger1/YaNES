@@ -2,7 +2,7 @@
 #include <sstream>
 #include <numeric>
 #include <queue>
-#include "NES.hpp"
+#include "NES.h"
 #include "functions.hpp" // toHex()
 
 NES::NES(Cpu6502& cpu, Ppu& ppu) : cpu(cpu), ppu(ppu) {

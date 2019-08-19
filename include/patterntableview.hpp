@@ -9,8 +9,8 @@
 #include <memory>
 #include <iostream>
 #include "ui_patterntableview.h"
-#include "NES.hpp"
-#include "Ppu.hpp"
+#include "NES.h"
+#include "Ppu.h"
 #include "functions.hpp" // apply_from_tuple()
 
 namespace Ui {

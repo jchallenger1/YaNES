@@ -1,7 +1,7 @@
 #ifndef PPU_HPP
 #define PPU_HPP
 
-#include "GamePak.hpp"
+#include "GamePak.h"
 #include <array>
 #include <memory>
 

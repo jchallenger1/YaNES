@@ -6,7 +6,7 @@
 #include <QPainter>
 #include <iostream>
 #include "ui_nametableview.h"
-#include "NES.hpp"
+#include "NES.h"
 #include "functions.hpp"
 
 namespace Ui {
