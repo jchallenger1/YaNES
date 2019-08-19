@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QTimer>
 #include <memory>
-#include "NES.hpp"
+#include "NES.h"
 #include "patterntableview.hpp"
 #include "nametableview.hpp"
 

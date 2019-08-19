@@ -1,5 +1,5 @@
-#include "Memory.hpp"
-#include "NES.hpp"
+#include "Memory.h"
+#include "NES.h"
 
 #include <fstream>
 #include <iostream>

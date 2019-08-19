@@ -1,7 +1,7 @@
-#include "GamePak.hpp"
+#include "GamePak.h"
 #include "tests.hpp"
-#include "Cpu6502.hpp"
-#include "Memory.hpp"
+#include "Cpu6502.h"
+#include "Memory.h"
 
 
 #include <boost/test/results_collector.hpp>

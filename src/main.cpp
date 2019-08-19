@@ -1,10 +1,10 @@
 #include <QApplication>
 #include "mainwindow.h"
 #include "debugview.h"
-#include "Cpu6502.hpp"
-#include "Ppu.hpp"
-#include "NES.hpp"
-#include "GamePak.hpp"
+#include "Cpu6502.h"
+#include "Ppu.h"
+#include "NES.h"
+#include "GamePak.h"
 
 int main(int argc, char *argv[]) {
     Ppu ppu;

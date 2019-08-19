@@ -1,8 +1,8 @@
 #include "tests.hpp"
-#include "NES.hpp"
-#include "Cpu6502.hpp"
-#include "Ppu.hpp"
-#include "Memory.hpp"
+#include "NES.h"
+#include "Cpu6502.h"
+#include "Ppu.h"
+#include "Memory.h"
 
 
 void Tests::ppuRegisterTests() {

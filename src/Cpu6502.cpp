@@ -1,7 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <sstream>
-#include "Cpu6502.hpp"
+#include "Cpu6502.h"
 #include "functions.hpp" // toHex()
 
 #define EXECOPCODE(instrPtr, adringPtr) (this->*(instrPtr))((adringPtr))

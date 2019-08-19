@@ -1,6 +1,6 @@
-#include "GamePak.hpp"
-#include "Memory.hpp"
-#include "Ppu.hpp"
+#include "GamePak.h"
+#include "Memory.h"
+#include "Ppu.h"
 #include <string>
 #include <fstream>
 #include <iostream>

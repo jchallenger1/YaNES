@@ -1,11 +1,11 @@
 #include "tests.hpp"
 #include <iostream>
 
-#include "Memory.hpp"
-#include "Ppu.hpp"
-#include "Cpu6502.hpp"
-#include "GamePak.hpp"
-#include "NES.hpp"
+#include "Memory.h"
+#include "Ppu.h"
+#include "Cpu6502.h"
+#include "GamePak.h"
+#include "NES.h"
 
 void Tests::testenv() {
     Memory memory;

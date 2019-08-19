@@ -18,11 +18,11 @@ SOURCES += \
 INCLUDEPATH += include/
 
 HEADERS += \
-    include/Cpu6502.hpp \
-    include/GamePak.hpp \
-    include/Memory.hpp \
-    include/NES.hpp \
-    include/Ppu.hpp \
+    include/Cpu6502.h \
+    include/GamePak.h \
+    include/Memory.h \
+    include/NES.h \
+    include/Ppu.h \
     include/debugview.h \
     include/functions.hpp \
     include/mainwindow.h \

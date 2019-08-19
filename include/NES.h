@@ -3,9 +3,9 @@
 
 #include <memory>
 
-#include "Memory.hpp"
-#include "Cpu6502.hpp"
-#include "Ppu.hpp"
+#include "Memory.h"
+#include "Cpu6502.h"
+#include "Ppu.h"
 
 class NES {
 public:

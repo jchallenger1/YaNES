@@ -6,7 +6,7 @@
 #include <QPainter>
 #include "include/debugview.h"
 #include "ui_debugview.h"
-#include "NES.hpp"
+#include "NES.h"
 
 DebugView::DebugView(QWidget *parent) : QWidget(parent),  ui(new Ui::DebugView) {
     init();

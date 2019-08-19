@@ -3,7 +3,7 @@
 
 #include <array>
 #include <memory>
-#include "GamePak.hpp"
+#include "GamePak.h"
 
 class NES;
 

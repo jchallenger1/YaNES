@@ -1,5 +1,5 @@
 #include "tests.hpp"
-#include "Cpu6502.hpp"
+#include "Cpu6502.h"
 
 void Tests::cpuMessage() { std::cout << " --- Running Opcode Test Cases ---\n"; }
 
