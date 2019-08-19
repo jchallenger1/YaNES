@@ -23,14 +23,13 @@ public:
     inline explicit PatternTableView(NES& nes, bool stepNES, QWidget *parent = nullptr);
     inline virtual ~PatternTableView() override;
 
-    inline void paintEvent(QPaintEvent*) override;
-
-    static inline constexpr auto getColor(const uint8_t&);
-    static inline void setColor(QPainter& painter, const QColor& color);
-
 private:
     inline void paint();
     inline void stepNES();
+
+    inline void paintEvent(QPaintEvent*) override;
+    static inline constexpr auto getColor(const uint8_t&);
+    static inline void setColor(QPainter& painter, const QColor& color);
 
     inline void drawPatternTable(QPainter& painter, const uint16_t& startAdr, const int& originX, const int& originY);
     inline QColor getPalQColor(const uint16_t& address) const;
@@ -69,6 +68,7 @@ void PatternTableView::paintEvent(QPaintEvent *) {
 }
 
 constexpr auto PatternTableView::getColor(const uint8_t& n) {
+    // Use predefaults instead of the attribute table's
     switch(n) {
         case 0: return Qt::black;
         case 1: return Qt::red;
@@ -107,6 +107,7 @@ QColor PatternTableView::getPalQColor(const uint16_t &address) const {
 }
 
 inline void PatternTableView::drawPalette(QPainter& painter, const uint16_t& startAdr, const int& originX, const int& originY, const bool& isGroup) {
+    // A group is such that the next three bytes are also color values such that it creates a color set
     for (uint16_t colorAdr = startAdr, times = 0; times != (isGroup ? 3 : 1); ++colorAdr, ++times ) {
         setColor(painter, getPalQColor(colorAdr));
         int pixelX = originX + 16 * times;

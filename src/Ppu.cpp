@@ -41,6 +41,8 @@ constexpr inline bool inRange(const uint16_t& min, const uint16_t& max, const ui
     return val <= max && val >= min;
 }
 
+// Get both bit planes starting at tileAddress and make into patterntableT
+// This structure is traversable via example of stdDrawPatternTile
 Ppu::PatternTableT Ppu::getPatternTile(const uint16_t& tileAddress) const {
     if (tileAddress >= 0x2000 - 0xF) throw std::runtime_error("Given tile address it not a pattern table address");
 
@@ -141,13 +143,13 @@ uint8_t Ppu::getPaletteFromNameTable(const uint16_t& nameTableRelativeAdr, const
         case 6:
             return (byte & 0xC0) >> 6;
     }
-
     std::cerr << "In " << __FUNCTION__ << " in " << __FILE__ << " Reached end of function without a palett, Relative Address : " << nameTableRelativeAdr << "\n";
     throw std::runtime_error("Could not get a shift from name table address");
 }
 
-// Assuming always background palette
+
 Ppu::ColorSetT Ppu::getColorSetFromAdr(const uint16_t& paletteAdr) const {
+    // Assuming always background palette for now
     if (!inRange(0x3F00, 0x3F1F, paletteAdr)) {
         std::cerr << "Palette Address is not a background or sprite palette address\n";
         throw std::runtime_error("Palette Address is invalid");
@@ -158,12 +160,17 @@ Ppu::ColorSetT Ppu::getColorSetFromAdr(const uint16_t& paletteAdr) const {
     }
 
     ColorSetT set;
-    std::get<0>(set) = vRamRead(0x3F00);
+    std::get<0>(set) = vRamRead(0x3F00); // Universal
+    // Next three palette colours
     std::get<1>(set) = vRamRead(paletteAdr);
     std::get<2>(set) = vRamRead(paletteAdr + 1);
     std::get<3>(set) = vRamRead(paletteAdr + 2);
     return set;
 }
+
+
+
+
 
 void Ppu::vRamWrite(const uint16_t& adr, const uint8_t& val) {
     if (inRange(0x3000, 0x3EFF, adr))

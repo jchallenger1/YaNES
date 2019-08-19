@@ -20,12 +20,12 @@ public:
     inline NameTableView(NES& nes, bool shouldStepNes, QWidget *parent = nullptr);
     inline ~NameTableView() override;
 
+private:
     inline void timeTick();
     inline void paintEvent(QPaintEvent*) override;
     inline void paint();
     inline QColor getPalQColor(const uint8_t& colorByte) const;
     inline QColor getColor(const uint8_t& n) const;
-private:
     inline void setColorSet(const uint16_t&);
     Ppu::ColorSetT colorSet;
     Ui::NameTableView *ui;
@@ -84,6 +84,8 @@ QColor NameTableView::getColor(const uint8_t &n) const {
 }
 
 void NameTableView::setColorSet(const uint16_t& relNameTableAdr) {
+    // PaletteId of the nametable determines which palette to talk to
+    // and what bits the colours represent.
     uint8_t paletteID = nes->ppu.getPaletteFromNameTable(relNameTableAdr, 0x23C0);
     switch (paletteID) {
         case 0:

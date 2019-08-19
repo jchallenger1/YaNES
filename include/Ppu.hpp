@@ -12,9 +12,9 @@ class Ppu {
     friend struct Tests;
     friend class DebugView;
 public:
-    using PatternTableT = std::array<uint16_t, 8>;
-    using PaletteT = std::tuple<uint8_t, uint8_t, uint8_t>;
-    using ColorSetT = std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>;
+    using PatternTableT = std::array<uint16_t, 8>; // A 8x8 tile, each pixel is 2 bits
+    using PaletteT = std::tuple<uint8_t, uint8_t, uint8_t>; // A RGB representation of a palette colour
+    using ColorSetT = std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>; // A set of colors, each value is the NES's chrome color signal
     Ppu();
     Ppu(NES&);
     void setNESHandle(NES&) &;
@@ -33,8 +33,11 @@ public:
     void setVBlank();
     void clearVBlank();
 
+    // Converts a NES's chrome color to regular RGB values
     static PaletteT getRGBPalette(const uint8_t& paletteNum);
+    // Get the Palette Selection (0,1,2,3) based on nametable address
     uint8_t getPaletteFromNameTable(const uint16_t& nameTableRelativeAdr, const uint16_t& atrTableStart) const;
+    // Get A color set from the palette addresses (defined in wiki where)
     ColorSetT getColorSetFromAdr(const uint16_t& paletteAdr) const;
 private:
     std::shared_ptr<NES> nes;
@@ -115,7 +118,10 @@ private:
     void fetchTableHighByte();
 
     // Helper functions for getPalette
+    // Get the bit shift required from the byte of the attribute table for the nametable
+    // for the correct palette to be selected
     uint8_t getShift(const uint16_t& nameTableRelativeAdr) const;
+    // Get the Attribute tile address from the nametable address
     uint16_t getAtrAddress(const uint16_t& nameTableRelativeAdr, const uint16_t& atrTableStart) const;
 };
 #endif // PPU_HPP
