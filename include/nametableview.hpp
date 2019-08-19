@@ -118,9 +118,9 @@ void NameTableView::paint() {
         uint8_t addressX = tileNum % 32;
         uint8_t addressY = static_cast<uint8_t>(static_cast<int>(tileNum / 32));
         uint8_t byte = nes->ppu.vRamRead(address);
-        // NOTE/TODO: It was noticed in donkey kong its always the 2nd pattern table
+        // NOTE/TODO: It was noticed in donkey kong its always the 2nd/left pattern table
         // In other games it's probably determined by the bit in the ppu's ctrl
-        Ppu::PatternTableT tile = nes->ppu.getPatternTile(0x1000 + byte * 16);
+        Ppu::PatternTableT tile = nes->ppu.getPatternTile(byte, false);
         for (uint8_t tileY = 0; tileY != 8; tileY++) {
             uint16_t line = tile[tileY];
             for (uint8_t tileX = 0; tileX != 8; tileX++) {

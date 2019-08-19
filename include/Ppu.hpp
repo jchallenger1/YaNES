@@ -28,6 +28,7 @@ public:
     void runCycle();
 
     PatternTableT getPatternTile(const uint16_t& tileAddress) const;
+    PatternTableT getPatternTile(const uint8_t& tileID, bool isLeft) const;
     void stdDrawPatternTile(const uint16_t& tileAddress) const;
 
     void setVBlank();

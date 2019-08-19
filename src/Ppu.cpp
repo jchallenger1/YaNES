@@ -68,6 +68,12 @@ Ppu::PatternTableT Ppu::getPatternTile(const uint16_t& tileAddress) const {
     return tile;
 }
 
+Ppu::PatternTableT Ppu::getPatternTile(const uint8_t& tileID, bool isLeft) const {
+    if (isLeft)
+        return getPatternTile(tileID * 16);
+    return getPatternTile(0x1000 + tileID * 16);
+}
+
 void Ppu::stdDrawPatternTile(const uint16_t& tileAddress) const {
     PatternTableT tile = getPatternTile(tileAddress);
     for (uint8_t y = 0; y != 8; y++) {
