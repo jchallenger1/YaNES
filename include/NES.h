@@ -2,7 +2,6 @@
 #define NES_HPP
 
 #include <memory>
-#include <queue>
 
 #include "Memory.h"
 #include "Cpu6502.h"
@@ -10,7 +9,8 @@
 
 class NES : public std::enable_shared_from_this<NES> {
 public:
-    using PixelT = std::tuple<uint8_t, uint8_t, Ppu::PaletteT>;
+    // x, y, chroma colour
+    using PixelT = std::tuple<uint8_t, uint8_t, uint8_t>;
     void init(); // This function must be called right after the constructor
     Cpu6502 cpu;
     Ppu ppu;

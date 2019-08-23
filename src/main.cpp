@@ -14,11 +14,5 @@ int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
     MainWindow w(nes->getPtr());
     w.show();
-    //DebugView d(nes);
-    //d.show();
-    //NameTableView view(nes, true);
-    //view.show();
-    //PatternTableView pview(nes, true);
-   // pview.show();
     return a.exec();
 }

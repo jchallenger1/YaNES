@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <cmath>
+#include "functions.hpp" // apply_from_tuple
 
 #define UNUSED(x) (void)(x)
 
@@ -355,12 +356,36 @@ void Ppu::clearVBlank() {
 }
 
 void Ppu::renderPixel() {
+    static auto getSetAdr = [](const uint8_t& id) -> uint16_t {
+        switch(id) {
+            case 0: return 0x3F01;
+            case 1: return 0x3F05;
+            case 2: return 0x3F09;
+            case 3: return 0x3F0D;
+            default: throw std::runtime_error("invalid set address");
+        }
+    };
+
+    static auto getChromaColour = [](const ColorSetT& set, const uint8_t& pixel) -> uint8_t {
+        switch(pixel) {
+            case 0: return std::get<0>(set);
+            case 1: return std::get<1>(set);
+            case 2: return std::get<2>(set);
+            case 3: return std::get<3>(set);
+            default: throw std::runtime_error("invalid 2 bit pixel");
+        }
+    };
+
     uint16_t x = cycle - 1;
     uint16_t y = scanline;
 
     uint8_t backgroundPix = bGPixel();
-    PaletteT palette = getRGBPalette( (backgroundPix & 0xC) >> 2 );
-    nes->addVideoData(std::make_tuple(x, y, palette));
+    uint8_t paletteID = (backgroundPix & 0xC) >> 2; // 0 1 2 3 of which palette using
+    ColorSetT colorGroup = getColorSetFromAdr(getSetAdr(paletteID)); // get color group from which background palette
+    uint8_t chromaColor = getChromaColour(colorGroup, backgroundPix & 3);
+
+
+    nes->addVideoData(std::make_tuple(x, y, chromaColor));
     nes->videoRequested = true;
 }
 
