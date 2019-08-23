@@ -16,6 +16,7 @@ public:
 
 private:
     void paintEvent(QPaintEvent*) override;
+    static inline void setPaintColour(QPainter& painter, const QColor& c);
     void paint();
     void timeTick();
     Ui::MainWindow *ui;

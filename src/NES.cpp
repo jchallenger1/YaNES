@@ -1,5 +1,4 @@
 #include <iostream>
-#include <sstream>
 #include <numeric>
 #include <queue>
 #include "NES.h"
@@ -26,4 +25,17 @@ void NES::step() {
 
 void NES::powerUp() {
     cpu.signalRESET();
+}
+
+void NES::addVideoData(const PixelT& pixel) {
+    pixelsToAdd.push(pixel);
+    videoRequested = true;
+}
+
+void NES::removeRequest() {
+    //videoRequested = false;
+}
+
+bool NES::videoRequest() const {
+    return videoRequested;
 }

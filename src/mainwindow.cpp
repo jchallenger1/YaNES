@@ -5,6 +5,7 @@
 #include <memory>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "functions.hpp" // apply_from_tuple
 
 
 
@@ -27,21 +28,30 @@ void MainWindow::paintEvent(QPaintEvent*) {
     paint();
 }
 
+void MainWindow::setPaintColour(QPainter& painter, const QColor& c) {
+    painter.setPen(c);
+    painter.setBrush(c);
+}
+
 void MainWindow::paint() {
-    QPainter* painter = new QPainter(this);
-    painter->setPen(Qt::black);
-    painter->setBrush(Qt::black);
-    painter->drawRect(20,20,100,100);
+    QPainter painter;
+    while(!nes->pixelsToAdd.empty()) {
+        std::cerr << "draw";
+        NES::PixelT pixel = nes->pixelsToAdd.front();
+
+        QColor colour = apply_from_tuple(qRgb, std::get<2>(pixel));
+        setPaintColour(painter, colour);
+        painter.drawRect(std::get<0>(pixel), std::get<1>(pixel), 1, 1);
+
+        nes->pixelsToAdd.pop();
+    }
+
 }
 
 void MainWindow::timeTick() {
-
-    static int i = 0;
-
     nes->step();
-
-
-    if (i % 100 == 0) this->repaint();
-
-    i++;
+    if (nes->videoRequested) {
+        std::cerr << "req";
+        this->repaint();
+    }
 }

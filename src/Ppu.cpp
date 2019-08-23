@@ -40,6 +40,20 @@ void Ppu::setNESHandle(NES& nes) & {
 constexpr inline bool inRange(const uint16_t& min, const uint16_t& max, const uint16_t& val) {
     return val <= max && val >= min;
 }
+    // Create a line of a tile
+    // For every bit position of left and right, set it to the two bits equivalent position
+    // in a 16 bit field, ex if left -> 0 , right -> 1, then bitPos(line) = 10 in the u16 type
+    // But note that setting left to right immeditely to 0 and 1 reverses the line, instead set to bits 16 and 15
+uint16_t Ppu::createLine(const uint8_t &left, const uint8_t &right) {
+    uint16_t line = 0;
+    for (short bitPos = 0, topBitLoc = 0; bitPos != 8; bitPos++, topBitLoc+=2) {
+        const uint16_t pow2 = static_cast<uint16_t>(std::pow(2, bitPos)); // select which bit to choose
+        // Take the bit and move to 1's position, then move it to the line's bits bottom down
+        line |= ( (static_cast<uint16_t>(right) & pow2) >> bitPos) << (15 - topBitLoc);
+        line |= ( (static_cast<uint16_t>(left) & pow2) >> bitPos) << (15 - topBitLoc - 1);
+    }
+    return line;
+}
 
 // Get both bit planes starting at tileAddress and make into patterntableT
 // This structure is traversable via example of stdDrawPatternTile
@@ -47,20 +61,6 @@ Ppu::PatternTableT Ppu::getPatternTile(const uint16_t& tileAddress) const {
     if (tileAddress >= 0x2000 - 0xF) throw std::runtime_error("Given tile address it not a pattern table address");
 
     PatternTableT tile{};
-    // Create a line of a tile
-    // For every bit position of left and right, set it to the two bits equivalent position
-    // in a 16 bit field, ex if left -> 0 , right -> 1, then bitPos(line) = 10 in the u16 type
-    // But note that setting left to right immeditely to 0 and 1 reverses the line, instead set to bits 16 and 15
-    auto createLine = [](const uint8_t& left, const uint8_t& right) -> uint16_t {
-            uint16_t line = 0;
-            for (short bitPos = 0, topBitLoc = 0; bitPos != 8; bitPos++, topBitLoc+=2) {
-                const uint16_t pow2 = static_cast<uint16_t>(std::pow(2, bitPos)); // select which bit to choose
-                // Take the bit and move to 1's position, then move it to the line's bits bottom down
-                line |= ( (static_cast<uint16_t>(right) & pow2) >> bitPos) << (15 - topBitLoc);
-                line |= ( (static_cast<uint16_t>(left) & pow2) >> bitPos) << (15 - topBitLoc - 1);
-            }
-            return line;
-    };
 
     for (unsigned i = 0; i != 8; i++) {
         tile[i % 8] = createLine(nes->ppu.memory[tileAddress + i], nes->ppu.memory[tileAddress + i + 8]);
@@ -294,12 +294,13 @@ void Ppu::writeRegister(const uint16_t& adr, const uint8_t& val) {
 
 void Ppu::fetchNameTableByte() {
     uint16_t tileAddress = 0x2000 | (vAdr & 0x0FFF);
-    nameTable = vRamRead(tileAddress);
+    nameTableLatch = vRamRead(tileAddress);
 }
 
 void Ppu::fetchAttrTableByte() {
     uint16_t attrAddress = 0x23C0 | (vAdr & 0x0C00) | ((vAdr >> 4) & 0x38) | ((vAdr >> 2) & 0x07);
-    attrTable = vRamRead(attrAddress);
+    uint8_t shift = ( (vAdr >> 4) & 4) | (vAdr & 2);
+    attrTableLatch = vRamRead(attrAddress) >> shift;
 }
 
 // Refer to https://wiki.nesdev.com/w/index.php/PPU_pattern_tables on left/right bit planes
@@ -307,14 +308,23 @@ void Ppu::fetchAttrTableByte() {
 void Ppu::fetchTableLowByte() {
     // TODO : Scroll Y from first 3 bits in vAdr to use in scrolling
     uint16_t address = PpuCtrl.bkgrdTile * 0x1000 + // Which pattern table to use
-            + nameTable * 16; // which specific 8x8 CHR to use in the table, * 16 because both left and right tables are 8 bytes, 16 bytes to skip to next one.
-    patternTableLow = vRamRead(address);
+            + nameTableLatch * 16; // which specific 8x8 CHR to use in the table, * 16 because both left and right tables are 8 bytes, 16 bytes to skip to next one.
+    patternTableLowLatch = vRamRead(address);
 }
 void Ppu::fetchTableHighByte() {
-    uint16_t address = PpuCtrl.bkgrdTile * 0x1000 + nameTable * 16;
-    patternTableHigh = vRamRead(address + 8); // high pattern table is 8 bytes after the low
+    uint16_t address = PpuCtrl.bkgrdTile * 0x1000 + nameTableLatch * 16;
+    patternTableHighLatch = vRamRead(address + 8); // high pattern table is 8 bytes after the low
 }
 
+// https://forums.nesdev.com/viewtopic.php?t=10348
+uint8_t Ppu::bGPixel() {
+    // Recall that fineX determines which bit to use
+    uint8_t a = attrShiftHigh >> (7 - fineXScroll) & 0x1 ; // high palette bit
+    uint8_t b = attrShiftLow >> (7 - fineXScroll) & 0x1; // low palette bit
+    uint8_t c = (bkShiftHigh >> (15 - fineXScroll) ) & 0x1; // bg high bit
+    uint8_t d = (bkShiftLow >> (15 - fineXScroll) ) & 0x1; // bg low bit
+    return static_cast<uint8_t>(  (a << 3) | (b << 2) | (c << 1) | d  );
+}
 
 void Ppu::clear() {
     PpuCtrl.clear();
@@ -340,12 +350,38 @@ void Ppu::clearVBlank() {
     PpuStatus.clear();
 }
 
-void Ppu::runCycle() {
+void Ppu::renderPixel() {
+    uint16_t x = cycle - 1;
+    uint16_t y = scanline;
 
-    if (inRange(0, 256, cycle)) { // Data for the current scanline, note that the first 2 tiles are already filled
+    uint8_t backgroundPix = bGPixel();
+    PaletteT palette = getRGBPalette( (backgroundPix & 0xC) >> 2 );
+    nes->addVideoData(std::make_tuple(x, y, palette));
+    nes->videoRequested = true;
+}
+
+void Ppu::runCycle() {
+    std::cerr << nes.use_count();
+    static uint8_t atrLatchLow = 0;
+    static uint8_t atrLatchHigh = 0;
+
+    if (inRange(1, 256, cycle)) { // Data for the current scanline, note that the first 2 tiles are already filled
+        renderPixel();
+        bkShiftLow <<= 1;
+        bkShiftHigh <<= 1;
+        attrShiftLow <<= 1;
+        attrShiftHigh <<= 1;
+        attrShiftLow |= atrLatchLow;
+        attrShiftHigh |= atrLatchHigh << 1;
         switch (cycle % 8) {
             case 1:
                 fetchNameTableByte();
+                // Get new data into shift registers, occurs every 8 cycles
+                bkShiftLow |= patternTableLowLatch;
+                bkShiftHigh |= patternTableHighLatch;
+
+                atrLatchLow = attrTableLatch & 1;
+                atrLatchHigh = (attrShiftHigh >> 1) & 1;
                 break;
             case 3:
                 fetchAttrTableByte();
@@ -356,9 +392,12 @@ void Ppu::runCycle() {
             case 7:
                 fetchTableHighByte();
                 break;
+            case 0:
+                break;
         }
     }
 
+    // Vblanking and cycling logic
     if (scanline == 241 && cycle == 1) {
         setVBlank();
     }

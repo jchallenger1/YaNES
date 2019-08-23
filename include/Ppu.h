@@ -27,6 +27,7 @@ public:
     void clear();
     void runCycle();
 
+    static uint16_t createLine(const uint8_t& left, const uint8_t& right);
     PatternTableT getPatternTile(const uint16_t& tileAddress) const;
     PatternTableT getPatternTile(const uint8_t& tileID, bool isLeft) const;
     void stdDrawPatternTile(const uint16_t& tileAddress) const;
@@ -106,17 +107,26 @@ private:
     // During rendering secondary oam is the sprites that are on the current scanline
     std::array<uint8_t, 0x20> secondOAM{};
 
-    // Temporary variables (Internal Latches) used during rendering and evaluation
-    // These are wrote to every 8 cycles in the visible frame of the ppu
-    uint8_t nameTable;
-    uint8_t attrTable;
-    uint8_t patternTableLow;
-    uint8_t patternTableHigh;
+
+    // Variables used for background ppu proccessing
+    // These variables act as temporary variables
+    uint8_t nameTableLatch;
+    uint8_t attrTableLatch;
+    uint16_t patternTableLowLatch;
+    uint16_t patternTableHighLatch;
+    // Shift registers
+    uint8_t attrShiftLow = 0;
+    uint8_t attrShiftHigh = 0;
+    uint8_t bkShiftLow = 0;
+    uint8_t bkShiftHigh = 0;
 
     void fetchNameTableByte();
     void fetchAttrTableByte();
     void fetchTableLowByte();
     void fetchTableHighByte();
+    void lineStore();
+
+    uint8_t bGPixel();
 
     // Helper functions for getPalette
     // Get the bit shift required from the byte of the attribute table for the nametable
@@ -124,5 +134,7 @@ private:
     uint8_t getShift(const uint16_t& nameTableRelativeAdr) const;
     // Get the Attribute tile address from the nametable address
     uint16_t getAtrAddress(const uint16_t& nameTableRelativeAdr, const uint16_t& atrTableStart) const;
+
+    void renderPixel();
 };
 #endif // PPU_HPP
