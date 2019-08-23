@@ -365,7 +365,6 @@ void Ppu::renderPixel() {
 }
 
 void Ppu::runCycle() {
-    std::cerr << nes.use_count();
     static uint8_t atrLatchLow = 0;
     static uint8_t atrLatchHigh = 0;
 

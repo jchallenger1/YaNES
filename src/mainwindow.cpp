@@ -34,9 +34,9 @@ void MainWindow::setPaintColour(QPainter& painter, const QColor& c) {
 }
 
 void MainWindow::paint() {
-    QPainter painter;
+    QPainter painter(this);
+    /*
     while(!nes->pixelsToAdd.empty()) {
-        std::cerr << "draw";
         NES::PixelT pixel = nes->pixelsToAdd.front();
 
         QColor colour = apply_from_tuple(qRgb, std::get<2>(pixel));
@@ -45,13 +45,12 @@ void MainWindow::paint() {
 
         nes->pixelsToAdd.pop();
     }
-
+    */
 }
 
 void MainWindow::timeTick() {
     nes->step();
     if (nes->videoRequested) {
-        std::cerr << "req";
         this->repaint();
     }
 }

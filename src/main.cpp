@@ -7,12 +7,12 @@
 #include "GamePak.h"
 
 int main(int argc, char *argv[]) {
-    NES nes;
-    GamePak::load(nes.cpu.memory, nes.ppu, "../YaNES/rsc/roms/Donkey Kong (World) (Rev A).nes");
-    nes.powerUp();
-
+    std::shared_ptr<NES> nes = std::make_shared<NES>();
+    nes->init();
+    GamePak::load(nes->cpu.memory, nes->ppu, "../YaNES/rsc/roms/Donkey Kong (World) (Rev A).nes");
+    nes->powerUp();
     QApplication a(argc, argv);
-    MainWindow w(nes.thisPtr);
+    MainWindow w(nes->getPtr());
     w.show();
     //DebugView d(nes);
     //d.show();

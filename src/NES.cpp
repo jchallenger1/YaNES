@@ -4,11 +4,14 @@
 #include "NES.h"
 #include "functions.hpp" // toHex()
 
-NES::NES() : thisPtr(this){
-    cpu.memory.setNESHandle(thisPtr);
-    ppu.setNESHandle(thisPtr);
+void NES::init() {
+    ppu.setNESHandle(getPtr());
+    cpu.memory.setNESHandle(getPtr());
 }
 
+std::shared_ptr<NES> NES::getPtr() {
+    return shared_from_this();
+}
 
 void NES::clear() {
     ppu.clear();
@@ -28,7 +31,7 @@ void NES::powerUp() {
 }
 
 void NES::addVideoData(const PixelT& pixel) {
-    pixelsToAdd.push(pixel);
+    //pixelsToAdd.push(pixel);
     videoRequested = true;
 }
 
