@@ -7,14 +7,12 @@
 #include "GamePak.h"
 
 int main(int argc, char *argv[]) {
-    Ppu ppu;
-    Cpu6502 cpu;
-    GamePak::load(cpu.memory, ppu, "../YaNES/rsc/roms/Donkey Kong (World) (Rev A).nes");
-
-    NES nes(cpu, ppu);
+    NES nes;
+    GamePak::load(nes.cpu.memory, nes.ppu, "../YaNES/rsc/roms/Donkey Kong (World) (Rev A).nes");
     nes.powerUp();
+
     QApplication a(argc, argv);
-    MainWindow w(nes);
+    MainWindow w(nes.thisPtr);
     w.show();
     //DebugView d(nes);
     //d.show();

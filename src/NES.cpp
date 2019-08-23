@@ -4,9 +4,9 @@
 #include "NES.h"
 #include "functions.hpp" // toHex()
 
-NES::NES(Cpu6502& cpu, Ppu& ppu) : cpu(cpu), ppu(ppu) {
-    ppu.setNESHandle(*this);
-    cpu.memory.setNESHandle(*this);
+NES::NES() : thisPtr(this){
+    cpu.memory.setNESHandle(thisPtr);
+    ppu.setNESHandle(thisPtr);
 }
 
 

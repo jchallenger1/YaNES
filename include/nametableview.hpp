@@ -16,8 +16,8 @@ class NameTableView;
 class NameTableView : public QWidget {
     Q_OBJECT
 public:
-    inline NameTableView(NES& nes, QWidget *parent = nullptr);
-    inline NameTableView(NES& nes, bool shouldStepNes, QWidget *parent = nullptr);
+    inline NameTableView(std::shared_ptr<NES> nes, QWidget *parent = nullptr);
+    inline NameTableView(std::shared_ptr<NES> nes, bool shouldStepNes, QWidget *parent = nullptr);
     inline ~NameTableView() override;
 
 private:
@@ -33,14 +33,14 @@ private:
     QTimer* timer;
 };
 
-NameTableView::NameTableView(NES& nes, QWidget *parent) : QWidget(parent), ui(new Ui::NameTableView) {
+NameTableView::NameTableView(std::shared_ptr<NES> nes, QWidget *parent) : QWidget(parent), ui(new Ui::NameTableView) {
     ui->setupUi(this);
-    this->nes = std::make_shared<NES>(nes);
+    this->nes = nes;
 }
 
-NameTableView::NameTableView(NES& nes, bool shouldStepNes, QWidget *parent) : QWidget(parent), ui(new Ui::NameTableView) {
+NameTableView::NameTableView(std::shared_ptr<NES> nes, bool shouldStepNes, QWidget *parent) : QWidget(parent), ui(new Ui::NameTableView) {
     ui->setupUi(this);
-    this->nes = std::make_shared<NES>(nes);
+    this->nes = nes;
     if (shouldStepNes) {
         timer = new QTimer(this);
         connect(timer, &QTimer::timeout, this, &NameTableView::timeTick);

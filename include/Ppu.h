@@ -16,8 +16,8 @@ public:
     using PaletteT = std::tuple<uint8_t, uint8_t, uint8_t>; // A RGB representation of a palette colour
     using ColorSetT = std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>; // A set of colors, each value is the NES's chrome color signal
     Ppu();
-    Ppu(NES&);
-    void setNESHandle(NES&) &;
+    Ppu(std::shared_ptr<NES>);
+    void setNESHandle(std::shared_ptr<NES>) &;
 
     uint8_t readRegister(const uint16_t& adr);
     void writeRegister(const uint16_t& adr, const uint8_t& val);

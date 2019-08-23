@@ -9,12 +9,12 @@
 
 
 
-MainWindow::MainWindow(NES& nes, QWidget *parent) :
+MainWindow::MainWindow(std::shared_ptr<NES> nes, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
     {
     ui->setupUi(this);
-    this->nes = std::make_shared<NES>(nes);
+    this->nes = nes;
     this->timer = new QTimer(this);
     connect(this->timer, &QTimer::timeout, this, &MainWindow::timeTick);
     timer->start(0);

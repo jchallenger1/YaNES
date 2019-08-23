@@ -20,7 +20,7 @@ DebugView::DebugView(NES& nes, QWidget* parent) : QWidget (parent), ui(new Ui::D
 void DebugView::init() {
     ui->setupUi(this);
     // Remove predefault widgets in stack and put in the one we want
-    pTableView = new PatternTableView(*nes, true);
+    //pTableView = new PatternTableView(*nes, true);
     //nTableView = new NameTableView(*nes, true);
     ui->stackedWidget->removeWidget(ui->page);
     ui->stackedWidget->removeWidget(ui->page_2);

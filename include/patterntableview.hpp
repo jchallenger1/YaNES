@@ -20,7 +20,7 @@ class PatternTableView;
 class PatternTableView : public QWidget {
     Q_OBJECT
 public:
-    inline explicit PatternTableView(NES& nes, bool stepNES, QWidget *parent = nullptr);
+    inline explicit PatternTableView(std::shared_ptr<NES> nes, bool stepNES, QWidget *parent = nullptr);
     inline virtual ~PatternTableView() override;
 
 private:
@@ -41,9 +41,9 @@ private:
     uint8_t resizeFactor = 2;
 };
 
-PatternTableView::PatternTableView(NES& nes, bool stepNES, QWidget *parent) : QWidget(parent), ui(new Ui::PatternTableView) {
+PatternTableView::PatternTableView(std::shared_ptr<NES> nes, bool stepNES, QWidget *parent) : QWidget(parent), ui(new Ui::PatternTableView) {
     ui->setupUi(this);
-    this->nes = std::make_shared<NES>(nes);
+    this->nes = nes;
     if (stepNES) {
         timer = new QTimer(this);
         connect(timer, &QTimer::timeout, this, &PatternTableView::stepNES);

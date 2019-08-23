@@ -14,9 +14,10 @@ public:
     // note that unique ptrs may have to be used later
     // Otherwise when the original location of the cpu's scope is destroyed so is the reference and creates a dangling reference
     // For now be safe with this class.
-    NES(Cpu6502& cpu, Ppu& ppu);
-    Cpu6502& cpu;
-    Ppu& ppu;
+    NES();
+    Cpu6502 cpu;
+    Ppu ppu;
+    std::shared_ptr<NES> thisPtr;
 
     void clear();
     void step();

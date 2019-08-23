@@ -16,12 +16,12 @@ Memory::Memory() {
         std::cerr << "Warning, Memory class does not have a NES handle\n";
 }
 
-Memory::Memory(NES& nes) {
+Memory::Memory(std::shared_ptr<NES> nes) {
     setNESHandle(nes);
 }
 
-void Memory::setNESHandle(NES& nes) {
-    this->nes = std::make_shared<NES>(nes);
+void Memory::setNESHandle(std::shared_ptr<NES> nes) {
+    this->nes = nes;
 }
 
 uint8_t Memory::read(const uint16_t& adr) const {

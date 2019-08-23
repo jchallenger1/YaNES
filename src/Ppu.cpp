@@ -29,12 +29,16 @@ const std::array<const Ppu::PaletteT, 0x40 > Ppu::RGBPaletteTable = {
 #undef mT
 
 Ppu::Ppu() {
-
     clear();
 }
 
-void Ppu::setNESHandle(NES& nes) & {
-    this->nes = std::make_shared<NES>(nes);
+Ppu::Ppu(std::shared_ptr<NES> nes) {
+    setNESHandle(nes);
+    clear();
+}
+
+void Ppu::setNESHandle(std::shared_ptr<NES> nes) & {
+    this->nes = nes;
 }
 
 constexpr inline bool inRange(const uint16_t& min, const uint16_t& max, const uint16_t& val) {

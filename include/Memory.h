@@ -14,7 +14,7 @@ class Memory {
     static constexpr uint16_t MAXBYTES = 0xFFFF;
 public:
     Memory();
-    Memory(NES& nes);
+    Memory(std::shared_ptr<NES> nes);
 
     // These two read/write functions are necessary for later
     uint8_t read(const uint16_t& adr) const;
@@ -25,7 +25,7 @@ public:
     const uint8_t& operator[](const size_t&) const;
 
     void clear();
-    void setNESHandle(NES& nes);
+    void setNESHandle(std::shared_ptr<NES> nes);
 
 private:
     std::array<uint8_t, MAXBYTES> memory{};
