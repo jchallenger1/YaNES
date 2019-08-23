@@ -356,7 +356,7 @@ void Ppu::clearVBlank() {
 }
 
 void Ppu::renderPixel() {
-    static auto getSetAdr = [](const uint8_t& id) -> uint16_t {
+    auto getSetAdr = [](const uint8_t& id) -> uint16_t {
         switch(id) {
             case 0: return 0x3F01;
             case 1: return 0x3F05;
@@ -366,7 +366,7 @@ void Ppu::renderPixel() {
         }
     };
 
-    static auto getChromaColour = [](const ColorSetT& set, const uint8_t& pixel) -> uint8_t {
+    auto getChromaColour = [](const ColorSetT& set, const uint8_t& pixel) -> uint8_t {
         switch(pixel) {
             case 0: return std::get<0>(set);
             case 1: return std::get<1>(set);

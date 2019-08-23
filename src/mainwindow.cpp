@@ -7,7 +7,7 @@
 #include "ui_mainwindow.h"
 #include "functions.hpp" // apply_from_tuple
 
-
+#define UNUSED(x) (void)(x)
 
 MainWindow::MainWindow(std::shared_ptr<NES> nes, QWidget *parent) :
     QMainWindow(parent),
@@ -28,6 +28,14 @@ void MainWindow::paintEvent(QPaintEvent*) {
     paint();
 }
 
+void MainWindow::keyPressEvent(QKeyEvent *key) {
+    UNUSED(key);
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent *key) {
+    UNUSED(key);
+}
+
 void MainWindow::setPaintColour(QPainter& painter, const QColor& c) {
     painter.setPen(c);
     painter.setBrush(c);
@@ -35,27 +43,22 @@ void MainWindow::setPaintColour(QPainter& painter, const QColor& c) {
 
 void MainWindow::paint() {
     QPainter painter(this);
+    /*
     for (uint8_t y = 0; y != 240; y++) {
         for (uint8_t x = 0; x != 255; x++) {
-            auto rgb = Ppu::getRGBPalette(nes->screen[x][y] & 0x3F);
+            auto rgb = Ppu::getRGBPalette(nes->screen[y][x] & 0x3F);
             QColor colour = apply_from_tuple(qRgb, rgb);
             setPaintColour(painter, colour);
-            painter.drawRect(x, y, 1, 1);
+            //painter.drawRect(x, y, 1, 1);
         }
     }
+    */
 }
 
 void MainWindow::timeTick() {
-    static int i = 0;
     nes->step();
-
-    if (i % 1000 == 0)
+    if (nes->videoRequest()) {
         this->repaint();
-
-    /*
-    if (nes->videoRequested) {
-        this->repaint();
+        nes->removeRequest();
     }
-    */
-    ++i;
 }

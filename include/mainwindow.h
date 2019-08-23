@@ -14,9 +14,12 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(std::shared_ptr<NES> nes, QWidget *parent = nullptr);
     ~MainWindow() override;
+protected:
+    void virtual paintEvent(QPaintEvent*) override;
+    void virtual keyPressEvent(QKeyEvent* key) override;
+    void virtual keyReleaseEvent(QKeyEvent* key) override;
 
 private:
-    void paintEvent(QPaintEvent*) override;
     static inline void setPaintColour(QPainter& painter, const QColor& c);
     void paint();
     void timeTick();
