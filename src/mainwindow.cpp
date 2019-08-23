@@ -35,22 +35,27 @@ void MainWindow::setPaintColour(QPainter& painter, const QColor& c) {
 
 void MainWindow::paint() {
     QPainter painter(this);
-    /*
-    while(!nes->pixelsToAdd.empty()) {
-        NES::PixelT pixel = nes->pixelsToAdd.front();
-
-        QColor colour = apply_from_tuple(qRgb, std::get<2>(pixel));
-        setPaintColour(painter, colour);
-        painter.drawRect(std::get<0>(pixel), std::get<1>(pixel), 1, 1);
-
-        nes->pixelsToAdd.pop();
+    for (uint8_t y = 0; y != 240; y++) {
+        for (uint8_t x = 0; x != 255; x++) {
+            auto rgb = Ppu::getRGBPalette(nes->screen[x][y] & 0x3F);
+            QColor colour = apply_from_tuple(qRgb, rgb);
+            setPaintColour(painter, colour);
+            painter.drawRect(x, y, 1, 1);
+        }
     }
-    */
 }
 
 void MainWindow::timeTick() {
+    static int i = 0;
     nes->step();
+
+    if (i % 1000 == 0)
+        this->repaint();
+
+    /*
     if (nes->videoRequested) {
         this->repaint();
     }
+    */
+    ++i;
 }

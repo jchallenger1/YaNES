@@ -1,5 +1,6 @@
 #include <iostream>
 #include <numeric>
+#include <tuple>
 #include <queue>
 #include "NES.h"
 #include "functions.hpp" // toHex()
@@ -30,13 +31,13 @@ void NES::powerUp() {
     cpu.signalRESET();
 }
 
-void NES::addVideoData(const PixelT& pixel) {
-    //pixelsToAdd.push(pixel);
+void NES::addVideoData(const uint8_t& x, const uint8_t& y, const uint8_t& chroma) {
+    screen[y][x] = chroma;
     videoRequested = true;
 }
 
 void NES::removeRequest() {
-    //videoRequested = false;
+    videoRequested = false;
 }
 
 bool NES::videoRequest() const {

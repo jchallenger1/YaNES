@@ -376,16 +376,15 @@ void Ppu::renderPixel() {
         }
     };
 
-    uint16_t x = cycle - 1;
-    uint16_t y = scanline;
+    uint8_t x = static_cast<uint8_t>(cycle - 1);
+    uint8_t y = static_cast<uint8_t>(scanline);
 
     uint8_t backgroundPix = bGPixel();
     uint8_t paletteID = (backgroundPix & 0xC) >> 2; // 0 1 2 3 of which palette using
     ColorSetT colorGroup = getColorSetFromAdr(getSetAdr(paletteID)); // get color group from which background palette
     uint8_t chromaColor = getChromaColour(colorGroup, backgroundPix & 3);
 
-
-    nes->addVideoData(std::make_tuple(x, y, chromaColor));
+    nes->addVideoData(x, y, chromaColor);
     nes->videoRequested = true;
 }
 

@@ -10,7 +10,6 @@
 class NES : public std::enable_shared_from_this<NES> {
 public:
     // x, y, chroma colour
-    using PixelT = std::tuple<uint8_t, uint8_t, uint8_t>;
     void init(); // This function must be called right after the constructor
     Cpu6502 cpu;
     Ppu ppu;
@@ -20,10 +19,12 @@ public:
     void step();
     void powerUp(); // Creates the powerup state
 
-   void addVideoData(const PixelT& pixel);
+   void addVideoData(const uint8_t& x, const uint8_t& y, const uint8_t& chroma);
    void removeRequest();
    bool videoRequest() const;
    bool videoRequested = false;
+
+   std::array<std::array<uint8_t, 256>, 240> screen{};
 };
 
 #endif // NES_HPP
