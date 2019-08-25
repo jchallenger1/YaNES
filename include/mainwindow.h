@@ -14,6 +14,7 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(std::shared_ptr<NES> nes, QWidget *parent = nullptr);
     ~MainWindow() override;
+
 protected:
     void virtual paintEvent(QPaintEvent*) override;
     void virtual keyPressEvent(QKeyEvent* key) override;

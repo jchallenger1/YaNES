@@ -43,22 +43,28 @@ void MainWindow::setPaintColour(QPainter& painter, const QColor& c) {
 
 void MainWindow::paint() {
     QPainter painter(this);
-    /*
+
     for (uint8_t y = 0; y != 240; y++) {
         for (uint8_t x = 0; x != 255; x++) {
             auto rgb = Ppu::getRGBPalette(nes->screen[y][x] & 0x3F);
             QColor colour = apply_from_tuple(qRgb, rgb);
             setPaintColour(painter, colour);
-            //painter.drawRect(x, y, 1, 1);
+            painter.drawRect(x, y, 1, 1);
         }
     }
-    */
+
 }
 
 void MainWindow::timeTick() {
-    nes->step();
-    if (nes->videoRequest()) {
-        this->repaint();
-        nes->removeRequest();
+    for (int i = 0 ; i <= 50; i++)
+        nes->step();
+
+    static int p = 0;
+
+    if (p >= 10000) {
+        p = 0;
+        repaint();
     }
+
+    ++p;
 }

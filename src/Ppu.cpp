@@ -347,7 +347,8 @@ void Ppu::clear() {
 // Sets VBlank
 void Ppu::setVBlank() {
     PpuStatus.vblank = 1;
-    nes->cpu.signalNMI();
+    if (PpuCtrl.NMI)
+        nes->cpu.signalNMI();
 }
 
 // Clear vblank, 0 sprite and overflow flags
@@ -432,11 +433,14 @@ void Ppu::runCycle() {
         clearVBlank();
     }
 
-    if (scanline == 261) scanline = 0;
-    if (cycle == 340) {
+
+    if (cycle >= 340) {
         cycle = 0;
         ++scanline;
     }
+    if (scanline >= 261)
+        scanline = 0;
+
     ++cycle;
 
 }
