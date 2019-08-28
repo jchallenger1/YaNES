@@ -6,9 +6,9 @@
 
 
 void Tests::ppuRegisterTests() {
-    Cpu6502 cpu;
-    Ppu ppu;
-    NES nes(cpu, ppu);
+    NES nes;
+    Cpu6502& cpu = nes.cpu;
+    Ppu& ppu = nes.ppu;
 
     // Check write to 0x2000
     cpu.a = 0xAB;
