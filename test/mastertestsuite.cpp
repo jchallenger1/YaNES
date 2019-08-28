@@ -1,6 +1,8 @@
 #include "tests.hpp"
 #include <boost/test/included/unit_test.hpp>
+#include <boost/program_options.hpp>
 using namespace boost::unit_test;
+namespace po = boost::program_options;
 
 #define UNUSED(x) (void)(x)
 
@@ -30,6 +32,9 @@ test_suite* createPpuTestSuite() {
 }
 
 test_suite* init_unit_test_suite(int argc, char* argv[]) {
+
+    po::options_description desc("Allowed options");
+
     UNUSED(argv);
     bool allowOp = true, allowDiag = true, allowPpu = true;
     if (argc == 1) {
