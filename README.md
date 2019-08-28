@@ -1,5 +1,5 @@
 # Yanes
-Yet Another NES emulator
+Yet Another NES emulator &nbsp;&nbsp;&nbsp;&nbsp; [![Build Status](https://travis-ci.org/Grandduchy/YaNES.svg?branch=master)](https://travis-ci.org/Grandduchy/YaNES)
 
 - http://nesdev.com/NESDoc.pdf
 - https://n3s.io/index.php?title=How_It_Works

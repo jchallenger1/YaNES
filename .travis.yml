@@ -21,7 +21,6 @@ before_install:
   # BOOST
   - sudo apt-get -qq install -qq libboost-dev
   - sudo apt-get -qq install -qq libboost-program-options-dev
-  - sudo apt-get -qq install -qq libboost-program-options1.65-dev
 
 install: 
   # C++14
