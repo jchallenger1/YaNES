@@ -33,7 +33,6 @@ test_suite* createPpuTestSuite() {
 
 
 test_suite* init_unit_test_suite(int argc, char* argv[]) {
-
     po::options_description desc("Allowed options");
     desc.add_options()
             ("help", "Produce help message")
