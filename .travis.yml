@@ -35,4 +35,4 @@ script:
         - qmake
         - make
         - chmod +x testing
-        - ./runTest -- -a # Does it pass the tests
+        - ./testing -- -a # Does it pass the tests
