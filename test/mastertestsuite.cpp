@@ -1,6 +1,8 @@
 #include "tests.hpp"
 #include <boost/test/included/unit_test.hpp>
+#include <boost/program_options.hpp>
 using namespace boost::unit_test;
+namespace po = boost::program_options;
 
 #define UNUSED(x) (void)(x)
 
@@ -29,26 +31,52 @@ test_suite* createPpuTestSuite() {
     return ppuTest;
 }
 
+
 test_suite* init_unit_test_suite(int argc, char* argv[]) {
-    UNUSED(argv);
-    bool allowOp = true, allowDiag = true, allowPpu = true;
-    if (argc == 1) {
+    po::options_description desc("Allowed options");
+    desc.add_options()
+            ("help", "Produce help message")
+            ("env", "Use the predefault programming environment for YaNES's classes")
+            ("opcode", "Performs opcode tests")
+            ("nestest", "Peform nesTest cpu tests")
+            ("ppureg", "Performs register tests for the ppu")
+            ("all,a", "Performs all tests")
+    ;
+
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
+
+    if (vm.count("env")) {
         Tests::testenv();
         return nullptr;
     }
-    if (allowPpu) {
-        framework::master_test_suite().add(createPpuTestSuite());
+
+    if (vm.empty() || vm.count("help")) {
+        std::cout << "\t USAGE: testing -- [OPTION]...\n";
+        std::cout << desc << "\n";
+        return nullptr;
     }
-    if (allowOp) {
+
+    if (vm.count("all") || vm.count("a")) {
+        framework::master_test_suite().add(createOpcodeTestSuite());
+        framework::master_test_suite().add(createCpuDiagTestSuite());
+        framework::master_test_suite().add(createPpuTestSuite());
+        return nullptr;
+    }
+
+    if (vm.count("opcode")) {
         test_suite* opTests = createOpcodeTestSuite();
         framework::master_test_suite().add(opTests);
-        std::cout << "\n";
     }
-    if (allowDiag) {
+    if (vm.count("nestest")) {
         test_suite* cpuDiag = createCpuDiagTestSuite();
         framework::master_test_suite().add(cpuDiag);
-        std::cout << "\n";
     }
+    if (vm.count("ppureg")) {
+        framework::master_test_suite().add(createPpuTestSuite());
+    }
+
     return nullptr;
 }
 

@@ -6,9 +6,10 @@
 
 
 void Tests::ppuRegisterTests() {
-    Cpu6502 cpu;
-    Ppu ppu;
-    NES nes(cpu, ppu);
+    std::shared_ptr<NES> nes = std::make_shared<NES>();
+    nes->init();
+    Cpu6502& cpu = nes->cpu;
+    Ppu& ppu = nes->ppu;
 
     // Check write to 0x2000
     cpu.a = 0xAB;
@@ -64,7 +65,7 @@ void Tests::ppuRegisterTests() {
     cpu.runCycle();
     ckPassErr(cpu.a == 0xBF, "OAM Data Read/Write failure");
 
-    nes.clear();
+    nes->clear();
     // Check Double write 0x2006
     cpu.a = 0x21; // high byte
     cpu.memory[0] = 0x8D;
@@ -89,7 +90,7 @@ void Tests::ppuRegisterTests() {
 
     ckPassErr(ppu.memory[0x2108] == 0xFD, "Data 0x2007 ppu register failure");
 
-    nes.clear();
+    nes->clear();
 
     // Check write to 0x4014
     std::fill(cpu.memory.memory.begin() + 0x8000, cpu.memory.memory.begin() + 0x80FF, 0x50);
