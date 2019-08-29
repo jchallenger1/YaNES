@@ -294,6 +294,44 @@ void Ppu::writeRegister(const uint16_t& adr, const uint8_t& val) {
     }
 }
 
+
+
+void Ppu::coraseXIncr() {
+    if ((vAdr & 0x001F) == 31) { // if coarse X == 31
+        vAdr &= ~0x001F;         // coarse X = 0
+        vAdr ^= 0x0400;         // switch horizontal nametable
+    }
+    else {
+        vAdr += 1;                // increment coarse X
+    }
+}
+
+void Ppu::coraseYIncr() {
+    if ((vAdr & 0x7000) != 0x7000) {        // if fine Y < 7
+        vAdr += 0x1000;                      // increment fine Y
+    }
+    else {
+        vAdr &= ~0x7000;                     // fine Y = 0
+        int y = (vAdr & 0x03E0) >> 5;        // let y = coarse Y
+        if (y == 29) {
+            y = 0;                          // coarse Y = 0
+            vAdr ^= 0x0800;                    // switch vertical nametable
+        }
+        else if (y == 31) {
+            y = 0;                          // coarse Y = 0, nametable not switched
+        }
+        else {
+            y += 1;                         // increment coarse Y
+        }
+        vAdr = static_cast<uint16_t>( (vAdr & ~0x03E0) | (y << 5) );     // put coarse Y back into v
+    }
+}
+
+
+
+
+
+
 // Both these functions address finding comes from here:
 // https://wiki.nesdev.com/w/index.php/PPU_scrolling#Tile_and_attribute_fetching
 
@@ -393,8 +431,10 @@ void Ppu::runCycle() {
     static uint8_t atrLatchLow = 0;
     static uint8_t atrLatchHigh = 0;
 
-    if (inRange(1, 256, cycle)) { // Data for the current scanline, note that the first 2 tiles are already filled
-        renderPixel();
+    if (inRange(1, 256, cycle) || inRange(321, 336, cycle)) { // Data for the current scanline, note that the first 2 tiles are already filled
+        if (inRange(1, 256, cycle))
+            renderPixel();
+
         bkShiftLow <<= 1;
         bkShiftHigh <<= 1;
         attrShiftLow <<= 1;
@@ -421,9 +461,14 @@ void Ppu::runCycle() {
                 fetchTableHighByte();
                 break;
             case 0:
+                coraseXIncr();
                 break;
         }
     }
+
+
+    if (cycle == 256)
+       coraseYIncr();
 
     // Vblanking and cycling logic
     if (scanline == 241 && cycle == 1) {

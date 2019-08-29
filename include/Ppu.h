@@ -128,6 +128,9 @@ private:
 
     uint8_t bGPixel();
 
+    void coraseXIncr();
+    void coraseYIncr();
+
     // Helper functions for getPalette
     // Get the bit shift required from the byte of the attribute table for the nametable
     // for the correct palette to be selected
