@@ -218,8 +218,11 @@ uint8_t Ppu::readRegister(const uint16_t& adr) {
         }
         case 0x2004: // OAM data <> Read/Write
             return OAM[OamAddr];
-        case 0x2007: // Data <> Read/Write
-            return vRamRead(vAdr);
+        case 0x2007: { // Data <> Read/Write
+            uint8_t byte = vRamRead(vAdr);
+            vAdr += PpuCtrl.increment == 0 ? 1 : 32;
+            return byte;
+        }
         default:
             std::cerr << "Error Read to address " << std::hex << "0x" << adr << " was detected\n";
             throw std::runtime_error("Attempted read to non PPU register or to a writeonly register of (dec) " + std::to_string(adr));
