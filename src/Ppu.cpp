@@ -367,7 +367,7 @@ uint8_t Ppu::bGPixel() {
     // Recall that fineX determines which bit to use
     uint8_t a = attrShiftHigh >> (7 - fineXScroll) & 0x1 ; // high palette bit
     uint8_t b = attrShiftLow >> (7 - fineXScroll) & 0x1; // low palette bit
-    std::cerr << "l: " << toHex(bkShiftLow) << ", h: " << toHex(bkShiftHigh) << "\n";
+    //std::cerr << "l: " << toHex(bkShiftLow) << ", h: " << toHex(bkShiftHigh) << "\n";
     uint8_t c = (bkShiftHigh >> (15 - fineXScroll) ) & 0x1; // bg high bit
     uint8_t d = (bkShiftLow >> (15 - fineXScroll) ) & 0x1; // bg low bit
     return static_cast<uint8_t>(  (a << 3) | (b << 2) | (c << 1) | d  );

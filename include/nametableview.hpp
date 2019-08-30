@@ -21,7 +21,8 @@ public:
     inline ~NameTableView() override;
 
 private:
-    inline void timeTick();
+    inline void stepTimeTick();
+    inline void noStepTimeTick();
     inline void paintEvent(QPaintEvent*) override;
     inline void paint();
     inline QColor getPalQColor(const uint8_t& colorByte) const;
@@ -41,10 +42,14 @@ NameTableView::NameTableView(std::shared_ptr<NES> nes, QWidget *parent) : QWidge
 NameTableView::NameTableView(std::shared_ptr<NES> nes, bool shouldStepNes, QWidget *parent) : QWidget(parent), ui(new Ui::NameTableView) {
     ui->setupUi(this);
     this->nes = nes;
+    timer = new QTimer(this);
     if (shouldStepNes) {
-        timer = new QTimer(this);
-        connect(timer, &QTimer::timeout, this, &NameTableView::timeTick);
+        connect(timer, &QTimer::timeout, this, &NameTableView::stepTimeTick);
         timer->start(0);
+    }
+    else {
+        connect(timer, &QTimer::timeout, this, &NameTableView::noStepTimeTick);
+        timer->start(1000);
     }
 }
 
@@ -52,9 +57,8 @@ NameTableView::~NameTableView() {
     delete ui;
 }
 
-void NameTableView::timeTick() {
+void NameTableView::stepTimeTick() {
     static int i = 0;
-    std::cerr << std::to_string(i) << "\n";
 
     for (int n = 0; n != 50; ++n)
         nes->step();
@@ -62,6 +66,10 @@ void NameTableView::timeTick() {
         this->repaint();
 
     ++i;
+}
+
+void NameTableView::noStepTimeTick() {
+    this->repaint();
 }
 
 void NameTableView::paintEvent(QPaintEvent *) {

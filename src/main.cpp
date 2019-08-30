@@ -16,9 +16,10 @@ int main(int argc, char *argv[]) {
         GamePak::load(nes->cpu.memory, nes->ppu, "../YaNES/rsc/roms/Donkey Kong (World) (Rev A).nes");
         nes->powerUp();
 
-        MainWindow w(nes->getPtr());
-       // NameTableView w(nes->getPtr(), true);
-        w.show();
+        MainWindow main(nes->getPtr());
+        NameTableView name(nes->getPtr(), false);
+        main.show();
+        name.show();
         return a.exec();
     } catch (const QException& e) {
         std::cerr << e.what() << std::endl;

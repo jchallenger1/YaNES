@@ -61,7 +61,7 @@ void MainWindow::timeTick() {
 
     static int p = 0;
 
-    if (p >= 100) {
+    if (p >= 10000) {
         p = 0;
         repaint();
     }
