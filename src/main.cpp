@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
         nes->powerUp();
 
         MainWindow w(nes->getPtr());
+       // NameTableView w(nes->getPtr(), true);
         w.show();
         return a.exec();
     } catch (const QException& e) {

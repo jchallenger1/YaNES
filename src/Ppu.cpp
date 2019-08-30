@@ -328,8 +328,10 @@ void Ppu::coraseYIncr() {
 }
 
 
-
-
+//return (addr.VAddr >> 12) & 0x07
+inline uint8_t Ppu::getFineY() const {
+    return (vAdr >> 12) & 0x07;
+}
 
 
 // Both these functions address finding comes from here:
@@ -351,11 +353,12 @@ void Ppu::fetchAttrTableByte() {
 void Ppu::fetchTableLowByte() {
     // TODO : Scroll Y from first 3 bits in vAdr to use in scrolling
     uint16_t address = PpuCtrl.bkgrdTile * 0x1000 + // Which pattern table to use
-            + nameTableLatch * 16; // which specific 8x8 CHR to use in the table, * 16 because both left and right tables are 8 bytes, 16 bytes to skip to next one.
+            + nameTableLatch * 16 // which specific 8x8 CHR to use in the table, * 16 because both left and right tables are 8 bytes, 16 bytes to skip to next one.
+            + getFineY(); // Which line to use from the 8 different lines
     patternTableLowLatch = vRamRead(address);
 }
 void Ppu::fetchTableHighByte() {
-    uint16_t address = PpuCtrl.bkgrdTile * 0x1000 + nameTableLatch * 16;
+    uint16_t address = PpuCtrl.bkgrdTile * 0x1000 + nameTableLatch * 16 + getFineY();
     patternTableHighLatch = vRamRead(address + 8); // high pattern table is 8 bytes after the low
 }
 
@@ -364,6 +367,7 @@ uint8_t Ppu::bGPixel() {
     // Recall that fineX determines which bit to use
     uint8_t a = attrShiftHigh >> (7 - fineXScroll) & 0x1 ; // high palette bit
     uint8_t b = attrShiftLow >> (7 - fineXScroll) & 0x1; // low palette bit
+    std::cerr << "l: " << toHex(bkShiftLow) << ", h: " << toHex(bkShiftHigh) << "\n";
     uint8_t c = (bkShiftHigh >> (15 - fineXScroll) ) & 0x1; // bg high bit
     uint8_t d = (bkShiftLow >> (15 - fineXScroll) ) & 0x1; // bg low bit
     return static_cast<uint8_t>(  (a << 3) | (b << 2) | (c << 1) | d  );
@@ -415,6 +419,16 @@ void Ppu::renderPixel() {
         }
     };
 
+    auto defaultColour = [](const uint8_t& pixel) -> uint8_t {
+        switch (pixel) {
+            case 0: return 0x0d; // black
+            case 1: return 0x01; // blue
+            case 2: return 0x06; // red
+            case 3: return 0x09; // green
+            default: throw std::runtime_error("invalid 2 bit pixel");
+        }
+    };
+
     uint8_t x = static_cast<uint8_t>(cycle - 1);
     uint8_t y = static_cast<uint8_t>(scanline);
 
@@ -423,11 +437,14 @@ void Ppu::renderPixel() {
     ColorSetT colorGroup = getColorSetFromAdr(getSetAdr(paletteID)); // get color group from which background palette
     uint8_t chromaColor = getChromaColour(colorGroup, backgroundPix & 3);
 
-    nes->addVideoData(x, y, chromaColor);
+    //nes->addVideoData(x, y, chromaColor);
+    nes->addVideoData(x, y, defaultColour(backgroundPix & 3));
     nes->videoRequested = true;
 }
 
 void Ppu::runCycle() {
+
+
     static uint8_t atrLatchLow = 0;
     static uint8_t atrLatchHigh = 0;
 
@@ -437,10 +454,10 @@ void Ppu::runCycle() {
 
         bkShiftLow <<= 1;
         bkShiftHigh <<= 1;
-        attrShiftLow <<= 1;
-        attrShiftHigh <<= 1;
-        attrShiftLow |= atrLatchLow;
-        attrShiftHigh |= atrLatchHigh << 1;
+        //attrShiftLow <<= 1;
+      //  attrShiftHigh <<= 1;
+      //  attrShiftLow |= atrLatchLow;
+      //  attrShiftHigh |= atrLatchHigh << 1;
         switch (cycle % 8) {
             case 1:
                 fetchNameTableByte();
@@ -448,8 +465,8 @@ void Ppu::runCycle() {
                 bkShiftLow |= patternTableLowLatch;
                 bkShiftHigh |= patternTableHighLatch;
 
-                atrLatchLow = attrTableLatch & 1;
-                atrLatchHigh = (attrShiftHigh >> 1) & 1;
+             //   atrLatchLow = attrTableLatch & 1;
+             //   atrLatchHigh = (attrShiftHigh >> 1) & 1;
                 break;
             case 3:
                 fetchAttrTableByte();
@@ -461,14 +478,11 @@ void Ppu::runCycle() {
                 fetchTableHighByte();
                 break;
             case 0:
-                coraseXIncr();
+                //coraseXIncr();
                 break;
         }
     }
 
-
-    if (cycle == 256)
-       coraseYIncr();
 
     // Vblanking and cycling logic
     if (scanline == 241 && cycle == 1) {

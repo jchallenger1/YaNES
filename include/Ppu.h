@@ -130,6 +130,7 @@ private:
 
     void coraseXIncr();
     void coraseYIncr();
+    inline uint8_t getFineY() const;
 
     // Helper functions for getPalette
     // Get the bit shift required from the byte of the attribute table for the nametable
