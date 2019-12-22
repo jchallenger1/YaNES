@@ -203,7 +203,7 @@ uint8_t Ppu::vRamRead(const uint16_t& adr) const {
 uint8_t Ppu::readRegister(const uint16_t& adr) {
     switch(adr) {
         case 0x2002: { // Status < read
-            uint8_t stat = PpuStatus.asByte();
+            uint8_t stat = PpuStatus;
             PpuStatus.sOverflow = 0;
             writeToggle = 0;
             /* TODO :
@@ -511,8 +511,9 @@ void Ppu::runCycle() {
 
 
 
+// --------- PPU CONTROL ---------------
 
-uint8_t Ppu::PPUCTRL::asByte() const noexcept {
+Inner::PPUCTRL::operator uint8_t() const noexcept {
     uint8_t byte = 0;
     byte |= nameTable;
     byte |= increment << 2;
@@ -524,7 +525,7 @@ uint8_t Ppu::PPUCTRL::asByte() const noexcept {
     return byte;
 }
 
-void Ppu::PPUCTRL::fromByte(const uint8_t& byte) noexcept {
+void Inner::PPUCTRL::fromByte(const uint8_t& byte) noexcept {
     nameTable = byte & 0b11;
     increment = (byte & 0b100) >> 2;
     spriteTile = (byte & 0x8) >> 3;
@@ -534,11 +535,13 @@ void Ppu::PPUCTRL::fromByte(const uint8_t& byte) noexcept {
     NMI = (byte & 0x80) >> 7;
 }
 
-void Ppu::PPUCTRL::clear() noexcept {
+void Inner::PPUCTRL::clear() noexcept {
     nameTable = increment = spriteTile = bkgrdTile = spriteSz = masterSlave = NMI = 0;
 }
 
-uint8_t Ppu::PPUMASK::asByte() const noexcept {
+// ------------ PPU MASK ------------
+
+Inner::PPUMASK::operator uint8_t() const noexcept {
     uint8_t byte = 0;
     byte |= greyScale;
     byte |= bkgrdLeftEnable << 1;
@@ -551,7 +554,7 @@ uint8_t Ppu::PPUMASK::asByte() const noexcept {
     return byte;
 }
 
-void Ppu::PPUMASK::fromByte(const uint8_t& byte) noexcept {
+void Inner::PPUMASK::fromByte(const uint8_t& byte) noexcept {
     greyScale = byte & 1;
     bkgrdLeftEnable = (byte & 2) >> 1;
     spriteLeftEnable = (byte & 0b100) >> 2;
@@ -562,11 +565,13 @@ void Ppu::PPUMASK::fromByte(const uint8_t& byte) noexcept {
     blue = (byte & 0x80) >> 7;
 }
 
-void Ppu::PPUMASK::clear() noexcept {
+void Inner::PPUMASK::clear() noexcept {
     greyScale = bkgrdLeftEnable = spriteLeftEnable = bkgrdEnable = spriteEnable = red = green = blue = 0;
 }
 
-uint8_t Ppu::PPUSTATUS::asByte() const noexcept {
+// ------------ PPU STATUS -----------
+
+Inner::PPUSTATUS::operator uint8_t() const noexcept {
     uint8_t byte = 0;
     byte |= sOverflow << 5;
     byte |= sprite0Hit << 6;
@@ -574,12 +579,12 @@ uint8_t Ppu::PPUSTATUS::asByte() const noexcept {
     return byte;
 }
 
-void Ppu::PPUSTATUS::fromByte(const uint8_t& byte) noexcept {
+void Inner::PPUSTATUS::fromByte(const uint8_t& byte) noexcept {
     sOverflow = (byte & 0x20) >> 5;
     sprite0Hit = (byte & 0x40) >> 6;
     vblank = (byte & 0x80) >> 7;
 }
 
-void Ppu::PPUSTATUS::clear() noexcept {
+void Inner::PPUSTATUS::clear() noexcept {
     sOverflow = sprite0Hit = vblank = 0;
 }
