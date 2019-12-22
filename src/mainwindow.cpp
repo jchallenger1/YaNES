@@ -7,8 +7,6 @@
 #include "ui_mainwindow.h"
 #include "functions.hpp" // apply_from_tuple
 
-#define UNUSED(x) (void)(x)
-
 MainWindow::MainWindow(std::shared_ptr<NES> nes, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)

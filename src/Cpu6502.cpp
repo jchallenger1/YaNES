@@ -261,7 +261,7 @@ void Cpu6502::signalIRQ() {
 inline void Cpu6502::generateInterrupt(const uint16_t& vector) {
     PUSH((pc & 0xFF00) >> 8);
     PUSH(pc & 0xFF);
-    PUSH(status.asByte());
+    PUSH(status);
     status.i = 1;
     pc =  static_cast<uint16_t>( (static_cast<uint16_t>(memory[vector + 1]) << 8) | memory[vector] );
 }
@@ -562,7 +562,7 @@ void Cpu6502::OP_TXA(AddressingPtr& adr) {
 }
 void Cpu6502::OP_TXS(AddressingPtr& adr) {
     // TXS does not modify processor state
-    Status s = status;
+    Inner::Status s = status;
     TR(adr, x, sp);
     std::swap(s, status);
 }
@@ -918,7 +918,7 @@ void Cpu6502::OP_PHA(AddressingPtr& adr) {
 void Cpu6502::OP_PHP(AddressingPtr& adr) {
     EXECADDRESSING(adr);
     status.b = 1;
-    PUSH(status.asByte());
+    PUSH(status);
     status.b = 0;
 }
 
@@ -964,20 +964,25 @@ void Cpu6502::clear() {
 
 
 
-Cpu6502::Status::Status() {
+Inner::Status::Status() {
     reset();
 }
 
-void Cpu6502::Status::clear() noexcept {
+Inner::Status::Status(const uint8_t& byte) {
+    reset();
+    fromByte(byte);
+}
+
+void Inner::Status::clear() noexcept {
     c = z = i = d = b = pad = o = n = 0;
 }
 
-void Cpu6502::Status::reset() noexcept {
+void Inner::Status::reset() noexcept {
     i = 1;
     n = o = d = c = z = b = 0;
 }
 
-uint8_t Cpu6502::Status::asByte() const noexcept {
+Inner::Status::operator uint8_t() const noexcept {
     uint8_t byte = 0x20;
     byte |= c;
     byte |= z << 1;
@@ -990,7 +995,7 @@ uint8_t Cpu6502::Status::asByte() const noexcept {
     return byte;
 }
 
-void Cpu6502::Status::fromByte(const uint8_t& byte) noexcept {
+void Inner::Status::fromByte(const uint8_t& byte) noexcept {
     c = byte & 1;
     z = (byte & 2) >> 1;
     i = (byte & 4) >> 2;
@@ -998,8 +1003,3 @@ void Cpu6502::Status::fromByte(const uint8_t& byte) noexcept {
     o = (byte & 0x40) >> 6;
     n = (byte & 0x80) >> 7;
 }
-
-
-
-
-

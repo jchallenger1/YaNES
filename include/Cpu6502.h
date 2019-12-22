@@ -6,14 +6,12 @@
 #include <array>
 
 
-
-
-class Cpu6502 {
-    friend struct Tests;
-    friend class NES;
-    // Status registers
+namespace Inner {
+    // Status registers for 6502
     struct Status {
         Status();
+        Status(const uint8_t& byte);
+
         uint8_t c : 1; // Carry flag
         uint8_t z : 1; // Zero flag
         uint8_t i : 1; // Interrupt Disable
@@ -26,16 +24,27 @@ class Cpu6502 {
 
         void clear() noexcept;
         void reset() noexcept;
-        uint8_t asByte() const noexcept;
+        operator uint8_t() const noexcept;
         void fromByte(const uint8_t&) noexcept;
     };
-    // First is the particular instruction
-    // Second is the addressing mode w/ the instruction
+}
+
+class Cpu6502 {
+    friend struct Tests;
+    friend class NES;
+
+    // addressing mode function to be performed per instruction
     using AddressingPtr = uint16_t (Cpu6502::*)();
+    // instruction function to be performed
     using InstrFuncPtr = void (Cpu6502::*)(AddressingPtr&);
+    // Type used to fill opcode table
+    struct Instr {
+        InstrFuncPtr instr;
+        AddressingPtr addr;
+    };
 public:
     Cpu6502();
-    Status status;
+    Inner::Status status;
 
     Memory memory;
 
@@ -58,13 +67,15 @@ private:
     uint8_t sp = 0; // Stack Pointer
     uint16_t pc = 0; // Program Counter
 
+    // Counters
     uint64_t cycleCount = 0;
     uint64_t instrCount = 0;
 
     // Allow Decimal mode of Cpu, uneeded for NES
     bool cpuAllowDec = false;
-
+    // Opcode Table
     void fillOpTable();
+    std::array<Instr, 0xFF> opcodeTable;
 
     // Vectors are vector pointers pointing to an address where the pc should be
     // Each variable is where the signal's vector points to, the value is the low byte of the address
@@ -72,13 +83,8 @@ private:
     constexpr static uint16_t vectorRESET = 0xFFFC;
     constexpr static uint16_t vectorIRQ = 0xFFFE; // note that IRQ and BRK use the same vector
 
-    struct Instr {
-        InstrFuncPtr instr;
-        AddressingPtr addr;
-    };
-
-    std::array<Instr, 0xFF> opcodeTable;
-    bool canBranch; // used by branching instructions
+    // used by branching instructions
+    bool canBranch;
 
     // General Interrupt Function
     inline void generateInterrupt(const uint16_t& vector);
@@ -188,6 +194,8 @@ private:
     void OP_BRK(AddressingPtr&);
 
 };
+
+
 
 
 #endif // CPU6502_HPP
