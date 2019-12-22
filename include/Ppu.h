@@ -1,10 +1,11 @@
 #ifndef PPU_HPP
 #define PPU_HPP
 
-#include "GamePak.h"
 #include <array>
 #include <memory>
 
+#include "functions.hpp"
+#include "GamePak.h"
 class NES;
 
 class Ppu {
@@ -99,7 +100,7 @@ private:
     // may or may not be needed, but added for now to easily know the scrolling that was set
     uint16_t scrollPos = 0; // (0-0xFF) -> x scroll, (0x100-0xFFFF) -> y scroll
 
-    std::array<uint8_t, GamePak::KB16> memory{};
+    std::array<uint8_t, memsize::KB16> memory{};
     // Oam is list of 64 sprites, each having info of 4 bytes
     // Description of each byte : https://wiki.nesdev.com/w/index.php/PPU_OAM
     std::array<uint8_t, 0xFF> OAM{};

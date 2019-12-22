@@ -1,14 +1,10 @@
 #include "Memory.h"
 #include "NES.h"
+#include "functions.hpp"
 
 #include <fstream>
 #include <iostream>
 #include <memory>
-
-constexpr inline bool inRange(const uint16_t& min, const uint16_t& max, const uint16_t& val) {
-    return val <= max && val >= min;
-}
-
 
 Memory::Memory() {
     static constexpr bool warn = false;

@@ -4,9 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <cmath>
-#include "functions.hpp" // apply_from_tuple
-
-#define UNUSED(x) (void)(x)
+#include "functions.hpp" // apply_from_tuple inRange
 
 #define mT(...) std::make_tuple<uint8_t, uint8_t, uint8_t>(__VA_ARGS__) // Quick make tuple without the large syntax of uint8_t's...
 
@@ -42,13 +40,12 @@ void Ppu::setNESHandle(std::shared_ptr<NES> nes) & {
     this->nes = nes;
 }
 
-constexpr inline bool inRange(const uint16_t& min, const uint16_t& max, const uint16_t& val) {
-    return val <= max && val >= min;
-}
-    // Create a line of a tile
-    // For every bit position of left and right, set it to the two bits equivalent position
-    // in a 16 bit field, ex if left -> 0 , right -> 1, then bitPos(line) = 10 in the u16 type
-    // But note that setting left to right immeditely to 0 and 1 reverses the line, instead set to bits 16 and 15
+
+
+// Create a line of a tile
+// For every bit position of left and right, set it to the two bits equivalent position
+// in a 16 bit field, ex if left -> 0 , right -> 1, then bitPos(line) = 10 in the u16 type
+// But note that setting left to right immeditely to 0 and 1 reverses the line, instead set to bits 16 and 15
 uint16_t Ppu::createLine(const uint8_t &left, const uint8_t &right) {
     uint16_t line = 0;
     for (short bitPos = 0, topBitLoc = 0; bitPos != 8; bitPos++, topBitLoc+=2) {
