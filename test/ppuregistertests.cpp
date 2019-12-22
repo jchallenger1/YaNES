@@ -17,7 +17,7 @@ void Tests::ppuRegisterTests() {
     cpu.memory[1] = 0;
     cpu.memory[2] = 0x20;
     cpu.runCycle();
-    ckPassErr(ppu.PpuCtrl.asByte() == cpu.a && cpu.a == 0xAB, "Writing A to register Ppu 0x2000 fail");
+    ckPassErr(ppu.PpuCtrl == cpu.a && cpu.a == 0xAB, "Writing A to register Ppu 0x2000 fail");
 
     // Check write to 0x2001
     cpu.a = 0xAE;
@@ -25,7 +25,7 @@ void Tests::ppuRegisterTests() {
     cpu.memory[4] = 1;
     cpu.memory[5] = 0x20;
     cpu.runCycle();
-    ckPassErr(ppu.PpuMask.asByte() == cpu.a && cpu.a == 0xAE, "Writing A to register Ppu 0x2001 fail");
+    ckPassErr(ppu.PpuMask == cpu.a && cpu.a == 0xAE, "Writing A to register Ppu 0x2001 fail");
 
     // Check read from 0x2002
     ppu.PpuStatus.vblank = ppu.PpuStatus.sOverflow = ppu.PpuStatus.sprite0Hit = 1;
@@ -35,7 +35,7 @@ void Tests::ppuRegisterTests() {
     cpu.memory[8] = 0x20;
     cpu.runCycle();
     // Note that sOverflow is reset on a read
-    ckPassErr(ppu.PpuStatus.asByte() == 0xC0 && cpu.a == 0xE0, "Reading from Ppu Register 0x2002 fail");
+    ckPassErr(ppu.PpuStatus == 0xC0 && cpu.a == 0xE0, "Reading from Ppu Register 0x2002 fail");
 
     // Check write to 0x2003
     cpu.a = 0xAB;

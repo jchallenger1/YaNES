@@ -86,7 +86,7 @@ void Tests::nesCpuTest() {
         std::string instrDesc;
         uint8_t a, x, y, p, sp;
         uint16_t pc;
-        uint8_t Statep = cpu.status.asByte();
+        uint8_t Statep = cpu.status;
         std::tie(pc, a, x, y, p, sp, instrDesc) = getTestState(cycleResults);
         ckPassErr(cpu.a == a, "(" + std::to_string(i) + ") Accumulator Register failure detected at " + instrDesc);
         ckPassErr(cpu.x == x && cpu.y == y, "(" + std::to_string(i) + ") X,Y Register failure detected at " + instrDesc);
