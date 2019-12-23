@@ -185,6 +185,23 @@ void Ppu::vRamWrite(const uint16_t& adr, const uint8_t& val) {
         memory[0x2000 + adr % 1000] = val;
     else if (inRange(0x3F20, 0x3FFF, adr))
         memory[0x3F00 + adr % 0x20] = val;
+    else if (inRange(0x2000, 0x3EFF, adr)) {
+        // This is hard coded for now, for NROM, the mapper on flag 6
+        // indicates if its scrolling horizontally or vertically.
+        // Since right now we are only worried about donkey koney, it always has horizontal mirroring
+        // Horizontal mirroring : nametables 1, 3 route to instead 0 and 2
+
+        // Note that 0x3000 - 0x3EFF are mirror of 0x2000-0x2EFF, so ignore the most sig 8 bits
+        uint16_t cutAdr = adr & 0xFFF;
+        if (inRange(0x400, 0x7FF, cutAdr)) { // nametable 1
+            memory[0x2000 + cutAdr % 0x400] = val;
+        }
+        else if (inRange(0xC00, 0xFFF, cutAdr)) {// nametable 3
+            memory[0x2800 + cutAdr % 0x400] = val;
+        }
+        else
+            memory[0x2000 + cutAdr] = val;
+    }
     else
         memory[adr] = val;
 }
@@ -194,6 +211,18 @@ uint8_t Ppu::vRamRead(const uint16_t& adr) const {
         return memory[0x2000 + adr % 3000];
     else if (inRange(0x3F20, 0x3FFF, adr))
         return memory[0x3F00 + adr % 0x20];
+    else if (inRange(0x2000, 0x3EFF, adr)) {
+        // only horizontal mirroring
+        uint16_t cutAdr = adr & 0xFFF;
+        if (inRange(0x400, 0x7FF, cutAdr)) { // nametable 1
+            return memory[0x2000 + cutAdr % 0x400];
+        }
+        else if (inRange(0xC00, 0xFFF, cutAdr)) {// nametable 3
+            return memory[0x2800 + cutAdr % 0x400];
+        }
+        else
+            return memory[0x2000 + cutAdr];
+    }
     else
         return memory[adr];
 }
@@ -252,7 +281,6 @@ void Ppu::writeRegister(const uint16_t& adr, const uint8_t& val) {
                 vTempAdr |= val >> 3;
                 fineXScroll = val & 0b111;
                 writeToggle = 1;
-                scrollPos = (~0x00FF & scrollPos) | val;
             }
             else { // second write is Y
                 vTempAdr &= ~0x73E0; // fill in order of CBA..HG FED...., d=HGFEDCBA
@@ -260,7 +288,6 @@ void Ppu::writeRegister(const uint16_t& adr, const uint8_t& val) {
                 vTempAdr |= static_cast<uint16_t>(val & 0xC0) << 2; // fill HG
                 vTempAdr |= static_cast<uint16_t>(val & 0x38) << 2; // fill FED
                 writeToggle = 0;
-                scrollPos = static_cast<uint16_t>( (~0xFF00 & scrollPos) | static_cast<uint16_t>(val) << 8 );
             }
             break;
         case 0x2006: // Address >> write x2
@@ -443,10 +470,6 @@ void Ppu::renderPixel() {
 }
 
 void Ppu::runCycle() {
-
-
-    static uint8_t atrLatchLow = 0;
-    static uint8_t atrLatchHigh = 0;
 
     if (inRange(1, 256, cycle) || inRange(321, 336, cycle)) { // Data for the current scanline, note that the first 2 tiles are already filled
         if (inRange(1, 256, cycle))

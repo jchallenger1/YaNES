@@ -107,7 +107,6 @@ private:
     Inner::PPUSTATUS PpuStatus;
     uint8_t OamAddr = 0;
     // may or may not be needed, but added for now to easily know the scrolling that was set
-    uint16_t scrollPos = 0; // (0-0xFF) -> x scroll, (0x100-0xFFFF) -> y scroll
 
     std::array<uint8_t, memsize::KB16> memory{};
     // Oam is list of 64 sprites, each having info of 4 bytes
