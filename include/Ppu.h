@@ -94,11 +94,14 @@ private:
 
     // Four Internal Registers
     // VRAM address pointer
+    // vAdr contains coarse X (scroll) and coarse Y (scroll) in its lower bits that determines which tile to select
     uint16_t vAdr = 0; // see https://wiki.nesdev.com/w/index.php/PPU_scrolling on how it's deconstructed
     uint16_t vTempAdr = 0; // Temporary vram addressing pointer, note that last bit (15th bit) is not used
+
     // fine X and fine Y select which specific pixel/bit it needs from a particular tile
-    // The tile is selected by coarse X and coarse Y. fineYScroll is contained in vAdr
+    // The tile is selected by coarse X and coarse Y. both is contained in vAdr
     // it is 3 bits because each tile is a 8x8 grid, the max range of 3 bits is 0-7 to select which bit it needs
+    // fine Y is contained in vAdr.
     uint8_t fineXScroll = 0; // only three bits
     // toggler for reads and writes on the cpu bus
     uint8_t writeToggle = 0; // 1 bit
@@ -124,21 +127,25 @@ private:
 
 
     // Variables used for background ppu proccessing
-    // These variables act as temporary variables
+    // These variables act as temporary variables used for each 8 cycles to put into the shift registers
+    // once the 8 cycles are done (then the shift registers has the next 8 pixels)
     uint8_t nameTableLatch;
     uint8_t attrTableLatch;
     uint16_t patternTableLowLatch;
     uint16_t patternTableHighLatch;
+    // Functions used to fetch each latch
+    void fetchNameTableByte();
+    void fetchAttrTableByte();
+    void fetchPatternLowByte();
+    void fetchPatternHighByte();
+
     // Shift registers
     uint8_t attrShiftLow = 0;
     uint8_t attrShiftHigh = 0;
     uint8_t bkShiftLow = 0;
     uint8_t bkShiftHigh = 0;
 
-    void fetchNameTableByte();
-    void fetchAttrTableByte();
-    void fetchTableLowByte();
-    void fetchTableHighByte();
+
     void lineStore();
 
     uint8_t bGPixel();

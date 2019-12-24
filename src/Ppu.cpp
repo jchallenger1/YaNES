@@ -41,7 +41,7 @@ void Ppu::setNESHandle(std::shared_ptr<NES> nes) & {
 }
 
 
-
+// Refer to https://wiki.nesdev.com/w/index.php/PPU_pattern_tables on left/right bit planes
 // Create a line of a tile
 // For every bit position of left and right, set it to the two bits equivalent position
 // in a 16 bit field, ex if left -> 0 , right -> 1, then bitPos(line) = 10 in the u16 type
@@ -367,21 +367,57 @@ inline uint8_t Ppu::getFineY() const noexcept {
 // table to be used to grab the low and high tile background address
 // Essentialy a tile to be represented
 void Ppu::fetchNameTableByte() {
-// The 0x0FFF mask of VAdr returns coarse X and coarse Y scroll into the nametable
-// The upper two bits contains which nametable, each a multiple of 1024; the size of a nametable
-// Combined this is just the (y * width) + x of a nametable -> (coarse Y scroll) + coarse X scroll
-
+    // The 0x0FFF mask of VAdr returns coarse X and coarse Y scroll into the nametable
+    // The upper two bits contains which nametable, each a multiple of 1024; the size of a nametable
+    // Combined this is just the (y * width) + x of a nametable -> (coarse Y scroll) + coarse X scroll
+    // Since coarse Y is already in the upper bits of 32, there is no reason to split it
+    nameTableLatch = vRamRead(0x2000 | (vAdr & 0x0FFF));
 }
 
+// Fetch the attribute table byte
 void Ppu::fetchAttrTableByte() {
+    // Recall the attribute table at the end of a nametable
+    // divide coarse x and coarse y by 4(bit shift by 2) to get which attribute table to use at the end of the nametable
+    uint16_t finalCoarse = 0;
+    uint8_t coarseX = vAdr & 0x1F;
+    uint8_t coarseY = (vAdr & 0x3E0) >> 5;
+
+    finalCoarse = coarseX >> 2; // coarse x
+    finalCoarse |= (coarseY >> 2) << 3; // coarse y
+    finalCoarse |= vAdr & 0x300; // nametable select
+    finalCoarse |= 0x23C0; // where the attribute tables are located
+
+    // At this point there is a further spliting into the byte
+    // each 2 bits represent a tile
+    uint8_t tileAttr = vRamRead(finalCoarse);
+    if (coarseY & 0x02) tileAttr >>= 4;
+    if (coarseX & 0x02) tileAttr >>= 2;
+    tileAttr &= 0x03;
+
+    attrTableLatch = tileAttr;
 }
 
-// Refer to https://wiki.nesdev.com/w/index.php/PPU_pattern_tables on left/right bit planes
 
-void Ppu::fetchTableLowByte() {
+
+// Fetch the lower background tile byte
+// It's location is known from fetching the nametable byte of which the id is given
+void Ppu::fetchPatternLowByte() {
+    // The control register determines which pattern table will be used
+    uint16_t patternSelect = static_cast<uint16_t>(PpuCtrl.bkgrdTile << 12);
+    // The fetch from the nametable tells the ID of tile that will be used in range 0-0xFF
+    // Each tile is 16 bytes long, so we must skip to the id we actually want
+    uint16_t patternLoc = nameTableLatch * 16;
+    // The fine y portion of vAdr tells which line of the tile it needs (0-7)
+    uint8_t y = getFineY();
+
+    patternTableLowLatch = vRamRead(patternSelect + patternLoc + y);
+
 }
 
-void Ppu::fetchTableHighByte() {
+// Fetch the higher background tile byte
+void Ppu::fetchPatternHighByte() {
+    // Same code and idea for lower byte, but +8 for the higher bit plane line
+    patternTableHighLatch = vRamRead( static_cast<uint16_t>( (PpuCtrl.bkgrdTile << 12) + nameTableLatch * 16 + getFineY() + 8) );
 }
 
 // https://forums.nesdev.com/viewtopic.php?t=10348
@@ -490,15 +526,13 @@ void Ppu::runCycle() {
                 case 2:
                     fetchAttrTableByte();
                     break;
-                // Fetch the lower background tile byte
-                // It's location is known from fetching the nametable byte of which the id is given
                 case 4:
-                    fetchTableLowByte();
+                    fetchPatternLowByte();
                     break;
                 // Fetch the higher background tile byte
                 // Recall that the higher byte is +8 bytes away from the lower
                 case 6:
-                    fetchTableHighByte();
+                    fetchPatternHighByte();
                     break;
                 case 7:
                     coraseXIncr();
