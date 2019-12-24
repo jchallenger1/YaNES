@@ -88,14 +88,19 @@ private:
     std::shared_ptr<NES> nes;
     static const std::array<const PaletteT, 0x40 > RGBPaletteTable;
 
-
-    uint16_t scanline = 0;
+    bool completeFrame = false;
+    int32_t scanline = 0;
     uint16_t cycle = 0;
 
     // Four Internal Registers
-    uint16_t vAdr = 0; // VRAM address pointer
+    // VRAM address pointer
+    uint16_t vAdr = 0; // see https://wiki.nesdev.com/w/index.php/PPU_scrolling on how it's deconstructed
     uint16_t vTempAdr = 0; // Temporary vram addressing pointer, note that last bit (15th bit) is not used
+    // fine X and fine Y select which specific pixel/bit it needs from a particular tile
+    // The tile is selected by coarse X and coarse Y. fineYScroll is contained in vAdr
+    // it is 3 bits because each tile is a 8x8 grid, the max range of 3 bits is 0-7 to select which bit it needs
     uint8_t fineXScroll = 0; // only three bits
+    // toggler for reads and writes on the cpu bus
     uint8_t writeToggle = 0; // 1 bit
 
 
@@ -106,8 +111,9 @@ private:
     Inner::PPUMASK PpuMask;
     Inner::PPUSTATUS PpuStatus;
     uint8_t OamAddr = 0;
-    // may or may not be needed, but added for now to easily know the scrolling that was set
 
+    // Ppu has its own RAM on its own bus separate from the CPU
+    // See memory map https://wiki.nesdev.com/w/index.php/PPU_memory_map for it's details
     std::array<uint8_t, memsize::KB16> memory{};
     // Oam is list of 64 sprites, each having info of 4 bytes
     // Description of each byte : https://wiki.nesdev.com/w/index.php/PPU_OAM
@@ -139,7 +145,7 @@ private:
 
     void coraseXIncr();
     void coraseYIncr();
-    inline uint8_t getFineY() const;
+    inline uint8_t getFineY() const noexcept;
 
     // Helper functions for getPalette
     // Get the bit shift required from the byte of the attribute table for the nametable

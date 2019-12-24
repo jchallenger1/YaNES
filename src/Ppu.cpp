@@ -355,8 +355,7 @@ void Ppu::coraseYIncr() {
 }
 
 
-//return (addr.VAddr >> 12) & 0x07
-inline uint8_t Ppu::getFineY() const {
+inline uint8_t Ppu::getFineY() const noexcept {
     return (vAdr >> 12) & 0x07;
 }
 
@@ -364,29 +363,25 @@ inline uint8_t Ppu::getFineY() const {
 // Both these functions address finding comes from here:
 // https://wiki.nesdev.com/w/index.php/PPU_scrolling#Tile_and_attribute_fetching
 
+// Fetch the NameTable byte, NT byte is from VRAM, the byte is the id of the pattern
+// table to be used to grab the low and high tile background address
+// Essentialy a tile to be represented
 void Ppu::fetchNameTableByte() {
-    uint16_t tileAddress = 0x2000 | (vAdr & 0x0FFF);
-    nameTableLatch = vRamRead(tileAddress);
+// The 0x0FFF mask of VAdr returns coarse X and coarse Y scroll into the nametable
+// The upper two bits contains which nametable, each a multiple of 1024; the size of a nametable
+// Combined this is just the (y * width) + x of a nametable -> (coarse Y scroll) + coarse X scroll
+
 }
 
 void Ppu::fetchAttrTableByte() {
-    uint16_t attrAddress = 0x23C0 | (vAdr & 0x0C00) | ((vAdr >> 4) & 0x38) | ((vAdr >> 2) & 0x07);
-    uint8_t shift = ( (vAdr >> 4) & 4) | (vAdr & 2);
-    attrTableLatch = vRamRead(attrAddress) >> shift;
 }
 
 // Refer to https://wiki.nesdev.com/w/index.php/PPU_pattern_tables on left/right bit planes
 
 void Ppu::fetchTableLowByte() {
-    // TODO : Scroll Y from first 3 bits in vAdr to use in scrolling
-    uint16_t address = PpuCtrl.bkgrdTile * 0x1000 + // Which pattern table to use
-            + nameTableLatch * 16 // which specific 8x8 CHR to use in the table, * 16 because both left and right tables are 8 bytes, 16 bytes to skip to next one.
-            + getFineY(); // Which line to use from the 8 different lines
-    patternTableLowLatch = vRamRead(address);
 }
+
 void Ppu::fetchTableHighByte() {
-    uint16_t address = PpuCtrl.bkgrdTile * 0x1000 + nameTableLatch * 16 + getFineY();
-    patternTableHighLatch = vRamRead(address + 8); // high pattern table is 8 bytes after the low
 }
 
 // https://forums.nesdev.com/viewtopic.php?t=10348
@@ -406,7 +401,7 @@ void Ppu::clear() {
     PpuStatus.clear();
     std::fill(memory.begin(), memory.end(), 0);
     std::fill(OAM.begin(), OAM.end(), 0);
-    OamAddr = scrollPos = 0;
+    OamAddr = 0;
     scanline = vAdr = vTempAdr = fineXScroll = writeToggle = 0;
 }
 
@@ -470,61 +465,65 @@ void Ppu::renderPixel() {
 }
 
 void Ppu::runCycle() {
+    // The visible scanline
+    if (scanline >= -1 && scanline < 240) {
+        // Odd Frame skip
+        if (scanline == 0 && cycle == 0) {
+            cycle = 1;
+        }
 
-    if (inRange(1, 256, cycle) || inRange(321, 336, cycle)) { // Data for the current scanline, note that the first 2 tiles are already filled
-        if (inRange(1, 256, cycle))
-            renderPixel();
+        // Start of the rendering frame, clear the flag so the cpu can't do work to the ppu
+        if (scanline == -1 && cycle == 1) {
+            clearVBlank();
+            completeFrame = false;
+        }
 
-        bkShiftLow <<= 1;
-        bkShiftHigh <<= 1;
-        //attrShiftLow <<= 1;
-      //  attrShiftHigh <<= 1;
-      //  attrShiftLow |= atrLatchLow;
-      //  attrShiftHigh |= atrLatchHigh << 1;
-        switch (cycle % 8) {
-            case 1:
-                fetchNameTableByte();
-                // Get new data into shift registers, occurs every 8 cycles
-                bkShiftLow |= patternTableLowLatch;
-                bkShiftHigh |= patternTableHighLatch;
+        // At each cycle here the ppu is getting data ready for the NEXT 8 pixels
+        // 2-258 is the actual visual location on screen
+        // 321-338 is for the next scanline after this one
+        if ((cycle >= 2 && cycle < 258) || (cycle >= 321 && cycle < 338)) {
 
-             //   atrLatchLow = attrTableLatch & 1;
-             //   atrLatchHigh = (attrShiftHigh >> 1) & 1;
-                break;
-            case 3:
-                fetchAttrTableByte();
-                break;
-            case 5:
-                fetchTableLowByte();
-                break;
-            case 7:
-                fetchTableHighByte();
-                break;
-            case 0:
-                //coraseXIncr();
-                break;
+            switch((cycle - 1) % 8) {
+                case 0:
+                    fetchNameTableByte();
+                    break;
+                case 2:
+                    fetchAttrTableByte();
+                    break;
+                // Fetch the lower background tile byte
+                // It's location is known from fetching the nametable byte of which the id is given
+                case 4:
+                    fetchTableLowByte();
+                    break;
+                // Fetch the higher background tile byte
+                // Recall that the higher byte is +8 bytes away from the lower
+                case 6:
+                    fetchTableHighByte();
+                    break;
+                case 7:
+                    coraseXIncr();
+                    break;
+            }
         }
     }
 
-
-    // Vblanking and cycling logic
+    // end of the visible frame, set vBlank to true such that cpu can now do work
     if (scanline == 241 && cycle == 1) {
         setVBlank();
     }
-    if (scanline == 261 && cycle == 1) {
-        clearVBlank();
-    }
-
-
-    if (cycle >= 340) {
-        cycle = 0;
-        ++scanline;
-    }
-    if (scanline >= 261)
-        scanline = 0;
 
     ++cycle;
 
+    // end of hblank, go down one
+    if (cycle > 341) {
+        cycle = 0;
+        ++scanline;
+        // vblank triggered
+        if (scanline >= 261) {
+            scanline = -1; // -1 for a pre render scanline to render the next 8 pixels
+            completeFrame = true;
+        }
+    }
 }
 
 
