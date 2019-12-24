@@ -127,31 +127,38 @@ private:
 
 
     // Variables used for background ppu proccessing
+
     // These variables act as temporary variables used for each 8 cycles to put into the shift registers
     // once the 8 cycles are done (then the shift registers has the next 8 pixels)
     uint8_t nameTableLatch;
     uint8_t attrTableLatch;
-    uint16_t patternTableLowLatch;
-    uint16_t patternTableHighLatch;
+    uint8_t patternTableLowLatch;
+    uint8_t patternTableHighLatch;
     // Functions used to fetch each latch
     void fetchNameTableByte();
     void fetchAttrTableByte();
     void fetchPatternLowByte();
     void fetchPatternHighByte();
-
     // Shift registers
-    uint8_t attrShiftLow = 0;
-    uint8_t attrShiftHigh = 0;
-    uint8_t bkShiftLow = 0;
-    uint8_t bkShiftHigh = 0;
+    uint16_t attrShiftLow = 0;
+    uint16_t attrShiftHigh = 0;
+    uint16_t bkShiftLow = 0;
+    uint16_t bkShiftHigh = 0;
+    // Four operations are done throughout the proccess of cycling
+    // Increment the coarse X and Y variables to select a new tile
+    void coraseXIncr(); // done every 8 cycles(needs the next tile)
+    void coraseYIncr(); // done every scanline (needs the next line of each tile)
+    // Transfer parts of the temp X or Y into the vAdr
+    void transferX();
+    void transferY();
+
 
 
     void lineStore();
 
     uint8_t bGPixel();
 
-    void coraseXIncr();
-    void coraseYIncr();
+
     inline uint8_t getFineY() const noexcept;
 
     // Helper functions for getPalette

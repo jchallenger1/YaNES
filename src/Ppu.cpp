@@ -322,8 +322,12 @@ void Ppu::writeRegister(const uint16_t& adr, const uint8_t& val) {
 }
 
 
-
+// Increment coarse X of vAdr
+// Both these functions are taken from nesdev:
+// https://wiki.nesdev.com/w/index.php/PPU_scrolling
 void Ppu::coraseXIncr() {
+    if (!PpuMask.bkgrdEnable && !PpuMask.spriteEnable) return;
+
     if ((vAdr & 0x001F) == 31) { // if coarse X == 31
         vAdr &= ~0x001F;         // coarse X = 0
         vAdr ^= 0x0400;         // switch horizontal nametable
@@ -333,7 +337,10 @@ void Ppu::coraseXIncr() {
     }
 }
 
+// Increment coarse Y of vAdr
 void Ppu::coraseYIncr() {
+    if (!PpuMask.bkgrdEnable && !PpuMask.spriteEnable) return;
+
     if ((vAdr & 0x7000) != 0x7000) {        // if fine Y < 7
         vAdr += 0x1000;                      // increment fine Y
     }
@@ -354,14 +361,36 @@ void Ppu::coraseYIncr() {
     }
 }
 
+// These transfers simply move the temporary vAdr into vAdr assossiated with X or Y
 
+// Move all parts X parts of vTemp into vAdr
+void Ppu::transferX() {
+    if (!PpuMask.bkgrdEnable && !PpuMask.spriteEnable) return;
+
+    // set the nameTable x of temp to the vram
+    vAdr = (vAdr & ~0x0400) | (vTempAdr & 0x0400);
+    // set the coarse x as well
+    vAdr = (vAdr & ~0x001F) | (vTempAdr & 0x001F);
+
+}
+
+// Move all parts of Y of vTemp to vAdr
+void Ppu::transferY() {
+    if (!PpuMask.bkgrdEnable && !PpuMask.spriteEnable) return;
+    // set fineY
+    vAdr = (vAdr & ~0x7000) | (vTempAdr & 0x7000);
+    // set nameTable y
+    vAdr = (vAdr & ~0x0800) | (vTempAdr & 0x0800);
+    // set coarse Y
+    vAdr = (vAdr & ~0x03E0) | (vTempAdr & 0x3E0);
+
+}
+
+// Returns the Fine Y of vAdr
 inline uint8_t Ppu::getFineY() const noexcept {
     return (vAdr >> 12) & 0x07;
 }
 
-
-// Both these functions address finding comes from here:
-// https://wiki.nesdev.com/w/index.php/PPU_scrolling#Tile_and_attribute_fetching
 
 // Fetch the NameTable byte, NT byte is from VRAM, the byte is the id of the pattern
 // table to be used to grab the low and high tile background address
@@ -390,8 +419,9 @@ void Ppu::fetchAttrTableByte() {
     // At this point there is a further spliting into the byte
     // each 2 bits represent a tile
     uint8_t tileAttr = vRamRead(finalCoarse);
-    if (coarseY & 0x02) tileAttr >>= 4;
-    if (coarseX & 0x02) tileAttr >>= 2;
+    if (coarseY & 0x02) tileAttr >>= 4; // In the top half
+    if (coarseX & 0x02) tileAttr >>= 2; // In the left half
+    // only the bottom 2 bits are considered
     tileAttr &= 0x03;
 
     attrTableLatch = tileAttr;
@@ -529,15 +559,29 @@ void Ppu::runCycle() {
                 case 4:
                     fetchPatternLowByte();
                     break;
-                // Fetch the higher background tile byte
-                // Recall that the higher byte is +8 bytes away from the lower
                 case 6:
                     fetchPatternHighByte();
                     break;
                 case 7:
-                    coraseXIncr();
+                    coraseXIncr(); // done with current tile, incremenet the tiling address to go to the next tile
                     break;
             }
+        }
+        // done with current line of each tile +1 to the y direction for every next tile
+        // basically move on to the next row of each tile
+        if (cycle == 256) {
+            coraseYIncr();
+        }
+
+        // fix/reset x coordinate to the start of the scanline
+        if (cycle == 257) {
+            transferX();
+        }
+
+        // fix/reset y coordinate to the start aswell, but it must be done
+        // outside of the visible scanline
+        if (scanline == -1 && inRange(280, 304, cycle)) {
+            transferY();
         }
     }
 
