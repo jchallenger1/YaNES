@@ -450,15 +450,82 @@ void Ppu::fetchPatternHighByte() {
     patternTableHighLatch = vRamRead( static_cast<uint16_t>( (PpuCtrl.bkgrdTile << 12) + nameTableLatch * 16 + getFineY() + 8) );
 }
 
+// Shift all the shift registers by 1 to the left
+// Done for each working cycle to load in the next pixel to be manipulated/selected by fineX
+void Ppu::shiftRegisters() noexcept {
+    if (!PpuMask.bkgrdEnable) return;
+
+    attrShiftLow <<= 1;
+    attrShiftHigh <<= 1;
+    bkShiftLow <<= 1;
+    bkShiftHigh <<= 1;
+}
+
+// Every 8 cycles take the 8 bit latches and store them into the shift registers
+// Since every 8 cycles they are shifted 8 times, the last 8 bits will be 0
+void Ppu::updateShifters() noexcept {
+    bkShiftLow = (bkShiftLow & 0xFF00) | patternTableLowLatch;
+    bkShiftHigh = (bkShiftHigh & 0xFF00) | patternTableHighLatch;
+
+    // For attribute tables, one major restriction on NES is that a tile/line can only refer to one palette
+    // The attrLatch contains 3 bits of which id of palette to use.
+    // When they are grouped together to form a pixel (bl, bh, al, ah) al and ah must be consistent throughout the entire 8 bits
+    // So they are either a 0 or a 1 to tell which of the bits remains consistent
+    attrShiftLow = (attrShiftLow & 0xFF00) | ((attrTableLatch & 0b01) ? 0xFF : 0); // 0'th bit is consistent 1-> all 1s, 0-> all 0's
+    attrShiftHigh = (attrShiftHigh & 0xFF00) | ((attrTableLatch & 0b10) ? 0xFF : 0); // same thing but for 1'th bit
+}
+
 // https://forums.nesdev.com/viewtopic.php?t=10348
-uint8_t Ppu::bGPixel() {
-    // Recall that fineX determines which bit to use
-    uint8_t a = attrShiftHigh >> (7 - fineXScroll) & 0x1 ; // high palette bit
-    uint8_t b = attrShiftLow >> (7 - fineXScroll) & 0x1; // low palette bit
-    //std::cerr << "l: " << toHex(bkShiftLow) << ", h: " << toHex(bkShiftHigh) << "\n";
-    uint8_t c = (bkShiftHigh >> (15 - fineXScroll) ) & 0x1; // bg high bit
-    uint8_t d = (bkShiftLow >> (15 - fineXScroll) ) & 0x1; // bg low bit
-    return static_cast<uint8_t>(  (a << 3) | (b << 2) | (c << 1) | d  );
+void Ppu::renderPixel() {
+    // Definately rewrite how to do this later, it is very ugly.
+    if (PpuMask.bkgrdEnable) return;
+
+    auto getSetAdr = [](const uint8_t& id) -> uint16_t {
+        switch(id) {
+            case 0: return 0x3F01;
+            case 1: return 0x3F05;
+            case 2: return 0x3F09;
+            case 3: return 0x3F0D;
+            default: throw std::runtime_error("invalid set address");
+        }
+    };
+
+    auto getChromaColour = [](const ColorSetT& set, const uint8_t& pixel) -> uint8_t {
+        switch(pixel) {
+            case 0: return std::get<0>(set);
+            case 1: return std::get<1>(set);
+            case 2: return std::get<2>(set);
+            case 3: return std::get<3>(set);
+            default: throw std::runtime_error("invalid 2 bit pixel");
+        }
+    };
+
+    // now to display the pixel!
+    uint8_t pixel = 0; // pixel contains (paletteID(0-3) | pixelNum(0-3))
+    uint8_t paletteID = 0;
+    {
+        // now from each shift register, it makes sense to get only the highest/msb of each shift register (0x8000/15th bit)
+        // however fineXscroll determines it
+        uint16_t mask = 0x8000 >> fineXScroll;
+
+        // Get each individual bit from the shift registers
+        uint8_t p0=0, p1=0, b0=0, b1=0;
+        p0 = (mask & bkShiftLow) != 0;
+        p1 = (mask & bkShiftHigh) != 0;
+        b0 = (mask & attrShiftLow) != 0;
+        b1 = (mask & attrShiftHigh) != 0;
+        // now combine all into one 4 bit pixel
+        pixel = static_cast<uint8_t>( (p1 << 1) | p0);
+        paletteID = static_cast<uint8_t>( (b1 << 1) | b0);
+    }
+
+    uint8_t x = static_cast<uint8_t>(cycle - 1);
+    uint8_t y = static_cast<uint8_t>(scanline);
+
+    uint16_t paletteAddress = getSetAdr(paletteID);
+    ColorSetT colorGroup = getColorSetFromAdr(paletteAddress);
+    uint8_t chroma = getChromaColour(colorGroup, pixel);
+    nes->addVideoData(x, y, chroma);
 }
 
 void Ppu::clear() {
@@ -471,9 +538,6 @@ void Ppu::clear() {
     scanline = vAdr = vTempAdr = fineXScroll = writeToggle = 0;
 }
 
-// Vblanking Functions
-// TODO : When vblank is set and cleared, there is a delay in timing.
-
 // Sets VBlank
 void Ppu::setVBlank() {
     PpuStatus.vblank = 1;
@@ -485,7 +549,8 @@ void Ppu::setVBlank() {
 void Ppu::clearVBlank() {
     PpuStatus.clear();
 }
-
+// Old code for renderPixel for reference, delete when new one is working
+/*
 void Ppu::renderPixel() {
     auto getSetAdr = [](const uint8_t& id) -> uint16_t {
         switch(id) {
@@ -529,7 +594,7 @@ void Ppu::renderPixel() {
     nes->addVideoData(x, y, defaultColour(backgroundPix & 3));
     nes->videoRequested = true;
 }
-
+*/
 void Ppu::runCycle() {
     // The visible scanline
     if (scanline >= -1 && scanline < 240) {
@@ -548,9 +613,11 @@ void Ppu::runCycle() {
         // 2-258 is the actual visual location on screen
         // 321-338 is for the next scanline after this one
         if ((cycle >= 2 && cycle < 258) || (cycle >= 321 && cycle < 338)) {
+            shiftRegisters();
 
             switch((cycle - 1) % 8) {
                 case 0:
+                    updateShifters();
                     fetchNameTableByte();
                     break;
                 case 2:
@@ -589,6 +656,10 @@ void Ppu::runCycle() {
     if (scanline == 241 && cycle == 1) {
         setVBlank();
     }
+
+
+    // might want to put this when we're in visible scanline
+    renderPixel();
 
     ++cycle;
 

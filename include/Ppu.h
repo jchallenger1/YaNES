@@ -126,24 +126,26 @@ private:
     std::array<uint8_t, 0x20> secondOAM{};
 
 
-    // Variables used for background ppu proccessing
+    // ----------- Variables used for background ppu proccessing -----------
 
     // These variables act as temporary variables used for each 8 cycles to put into the shift registers
     // once the 8 cycles are done (then the shift registers has the next 8 pixels)
-    uint8_t nameTableLatch;
-    uint8_t attrTableLatch;
-    uint8_t patternTableLowLatch;
-    uint8_t patternTableHighLatch;
+    uint8_t nameTableLatch = 0;
+    uint8_t attrTableLatch = 0;
+    uint8_t patternTableLowLatch = 0;
+    uint8_t patternTableHighLatch = 0;
     // Functions used to fetch each latch
     void fetchNameTableByte();
     void fetchAttrTableByte();
     void fetchPatternLowByte();
     void fetchPatternHighByte();
-    // Shift registers
+    // Background Shift registers
     uint16_t attrShiftLow = 0;
     uint16_t attrShiftHigh = 0;
     uint16_t bkShiftLow = 0;
     uint16_t bkShiftHigh = 0;
+    void shiftRegisters() noexcept;
+    void updateShifters() noexcept;
     // Four operations are done throughout the proccess of cycling
     // Increment the coarse X and Y variables to select a new tile
     void coraseXIncr(); // done every 8 cycles(needs the next tile)
