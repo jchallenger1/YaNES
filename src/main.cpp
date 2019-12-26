@@ -16,10 +16,10 @@ int main(int argc, char *argv[]) {
     GamePak::load(nes->cpu.memory, nes->ppu, "../YaNES/rsc/roms/Donkey Kong (World) (Rev A).nes");
     nes->powerUp();
 
-    MainWindow main(nes->getPtr());
-   // NameTableView name(nes->getPtr(), false);
-    main.show();
-    //name.show();
+    //MainWindow main(nes->getPtr());
+    NameTableView name(nes->getPtr(), true);
+   // main.show();
+    name.show();
     return a.exec();
 
 }

@@ -56,11 +56,12 @@ PatternTableView::~PatternTableView() {
 }
 
 void PatternTableView::stepNES() {
-    for (int i = 0; i != 25; i++)
-        nes->step();
-    static int i = 0;
-    if (i++ % 10000 == 0)
+    for(unsigned i = 0 ; i != 5; ++i) nes->step();
+
+    if (nes->ppu.completeFrame) {
+        nes->ppu.completeFrame = false;
         repaint();
+    }
 }
 
 void PatternTableView::paintEvent(QPaintEvent *) {

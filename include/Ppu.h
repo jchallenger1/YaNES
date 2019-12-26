@@ -84,11 +84,13 @@ public:
     uint8_t getPaletteFromNameTable(const uint16_t& nameTableRelativeAdr, const uint16_t& atrTableStart) const;
     // Get A color set from the palette addresses (defined in wiki where)
     ColorSetT getColorSetFromAdr(const uint16_t& paletteAdr) const;
+
+    bool completeFrame = false;
 private:
     std::shared_ptr<NES> nes;
     static const std::array<const PaletteT, 0x40 > RGBPaletteTable;
 
-    bool completeFrame = false;
+
     int32_t scanline = 0;
     uint16_t cycle = 0;
 

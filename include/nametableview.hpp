@@ -58,14 +58,12 @@ NameTableView::~NameTableView() {
 }
 
 void NameTableView::stepTimeTick() {
-    static int i = 0;
+    for(unsigned i = 0 ; i != 5; ++i) nes->step();
 
-    for (int n = 0; n != 50; ++n)
-        nes->step();
-    if (i % 10000 == 0)
-        this->repaint();
-
-    ++i;
+    if (nes->ppu.completeFrame) {
+        nes->ppu.completeFrame = false;
+        repaint();
+    }
 }
 
 void NameTableView::noStepTimeTick() {
