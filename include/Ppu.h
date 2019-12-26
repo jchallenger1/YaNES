@@ -85,6 +85,8 @@ public:
     // Get A color set from the palette addresses (defined in wiki where)
     ColorSetT getColorSetFromAdr(const uint16_t& paletteAdr) const;
 
+    uint8_t getChromaFromPaletteRam(const uint8_t& paletteID, const uint8_t& pixel) const;
+
     bool completeFrame = false;
 private:
     std::shared_ptr<NES> nes;

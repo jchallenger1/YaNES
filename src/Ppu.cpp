@@ -179,8 +179,13 @@ Ppu::ColorSetT Ppu::getColorSetFromAdr(const uint16_t& paletteAdr) const {
     return set;
 }
 
-
-
+// Gets a chroma colour from a palette given the id and the pixel
+// id and pixel must be in the range (0-3) 2 bits.
+uint8_t Ppu::getChromaFromPaletteRam(const uint8_t& paletteID, const uint8_t& pixel) const {
+    uint16_t paletteStart = 0x3F00 + paletteID * 4; // each palette is 4 bytes long
+    paletteStart += pixel; // index into the palette to get the chroma
+    return vRamRead(paletteStart);
+}
 
 
 void Ppu::vRamWrite(const uint16_t& adr, const uint8_t& val) {
@@ -478,29 +483,9 @@ void Ppu::updateShifters() noexcept {
 void Ppu::renderPixel() {
     // Definately rewrite how to do this later, it is very ugly.
     if (!PpuMask.bkgrdEnable) return;
-    auto getSetAdr = [](const uint8_t& id) -> uint16_t {
-        switch(id) {
-            case 0: return 0x3F01;
-            case 1: return 0x3F05;
-            case 2: return 0x3F09;
-            case 3: return 0x3F0D;
-            default: throw std::runtime_error("invalid set address");
-        }
-    };
-
-    auto getChromaColour = [](const ColorSetT& set, const uint8_t& pixel) -> uint8_t {
-        switch(pixel) {
-            case 0: return std::get<0>(set);
-            case 1: return std::get<1>(set);
-            case 2: return std::get<2>(set);
-            case 3: return std::get<3>(set);
-            default: throw std::runtime_error("invalid 2 bit pixel");
-        }
-    };
-
     // now to display the pixel!
-    uint8_t pixel = 0; // pixel contains (paletteID(0-3) | pixelNum(0-3))
-    uint8_t paletteID = 0;
+    uint8_t pixel = 0; // pixel contains which color of the palette (0-3)
+    uint8_t paletteID = 0; // contains the id of palette
     {
         // now from each shift register, it makes sense to get only the highest/msb of each shift register (0x8000/15th bit)
         // however fineXscroll determines it
@@ -512,7 +497,7 @@ void Ppu::renderPixel() {
         p1 = (mask & bkShiftHigh) > 0;
         b0 = (mask & attrShiftLow) > 0;
         b1 = (mask & attrShiftHigh) > 0;
-        // now combine all into one 4 bit pixel
+        // now combine them
         pixel = static_cast<uint8_t>( (p1 << 1) | p0);
         paletteID = static_cast<uint8_t>( (b1 << 1) | b0);
     }
@@ -520,9 +505,7 @@ void Ppu::renderPixel() {
     uint8_t x = static_cast<uint8_t>(cycle - 1);
     uint8_t y = static_cast<uint8_t>(scanline);
 
-    uint16_t paletteAddress = getSetAdr(paletteID);
-    ColorSetT colorGroup = getColorSetFromAdr(paletteAddress);
-    uint8_t chroma = getChromaColour(colorGroup, pixel);
+    uint8_t chroma = getChromaFromPaletteRam(paletteID, pixel);
     nes->addVideoData(x, y, chroma);
 }
 
@@ -547,52 +530,7 @@ void Ppu::setVBlank() {
 void Ppu::clearVBlank() {
     PpuStatus.clear();
 }
-// Old code for renderPixel for reference, delete when new one is working
-/*
-void Ppu::renderPixel() {
-    auto getSetAdr = [](const uint8_t& id) -> uint16_t {
-        switch(id) {
-            case 0: return 0x3F01;
-            case 1: return 0x3F05;
-            case 2: return 0x3F09;
-            case 3: return 0x3F0D;
-            default: throw std::runtime_error("invalid set address");
-        }
-    };
 
-    auto getChromaColour = [](const ColorSetT& set, const uint8_t& pixel) -> uint8_t {
-        switch(pixel) {
-            case 0: return std::get<0>(set);
-            case 1: return std::get<1>(set);
-            case 2: return std::get<2>(set);
-            case 3: return std::get<3>(set);
-            default: throw std::runtime_error("invalid 2 bit pixel");
-        }
-    };
-
-    auto defaultColour = [](const uint8_t& pixel) -> uint8_t {
-        switch (pixel) {
-            case 0: return 0x0d; // black
-            case 1: return 0x01; // blue
-            case 2: return 0x06; // red
-            case 3: return 0x09; // green
-            default: throw std::runtime_error("invalid 2 bit pixel");
-        }
-    };
-
-    uint8_t x = static_cast<uint8_t>(cycle - 1);
-    uint8_t y = static_cast<uint8_t>(scanline);
-
-    uint8_t backgroundPix = bGPixel();
-    uint8_t paletteID = (backgroundPix & 0xC) >> 2; // 0 1 2 3 of which palette using
-    ColorSetT colorGroup = getColorSetFromAdr(getSetAdr(paletteID)); // get color group from which background palette
-    uint8_t chromaColor = getChromaColour(colorGroup, backgroundPix & 3);
-
-    //nes->addVideoData(x, y, chromaColor);
-    nes->addVideoData(x, y, defaultColour(backgroundPix & 3));
-    nes->videoRequested = true;
-}
-*/
 void Ppu::runCycle() {
     // The visible scanline
     if (scanline >= -1 && scanline < 240) {
