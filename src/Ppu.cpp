@@ -163,8 +163,11 @@ Ppu::ColorSetT Ppu::getColorSetFromAdr(const uint16_t& paletteAdr) const {
         throw std::runtime_error("Palette Address is invalid");
     }
     else if (paletteAdr == 0x3F00) { // universal only
+        //return std::make_tuple(vRamRead(0x3F00), vRamRead(0x3F01), vRamRead(0x3F02), vRamRead(0x3F03));
+
         uint8_t u = vRamRead(0x3F00);
         return std::make_tuple(u, u, u, u);
+
     }
 
     ColorSetT set;
@@ -181,11 +184,7 @@ Ppu::ColorSetT Ppu::getColorSetFromAdr(const uint16_t& paletteAdr) const {
 
 
 void Ppu::vRamWrite(const uint16_t& adr, const uint8_t& val) {
-    if (inRange(0x3000, 0x3EFF, adr))
-        memory[0x2000 + adr % 1000] = val;
-    else if (inRange(0x3F20, 0x3FFF, adr))
-        memory[0x3F00 + adr % 0x20] = val;
-    else if (inRange(0x2000, 0x3EFF, adr)) {
+    if (inRange(0x2000, 0x3EFF, adr)) {
         // This is hard coded for now, for NROM, the mapper on flag 6
         // indicates if its scrolling horizontally or vertically.
         // Since right now we are only worried about donkey koney, it always has horizontal mirroring
@@ -202,14 +201,14 @@ void Ppu::vRamWrite(const uint16_t& adr, const uint8_t& val) {
         else
             memory[0x2000 + cutAdr] = val;
     }
+    else if (inRange(0x3F20, 0x3FFF, adr))
+        memory[0x3F00 + adr % 0x20] = val;
     else
         memory[adr] = val;
 }
 
 uint8_t Ppu::vRamRead(const uint16_t& adr) const {
-    if (inRange(0x3000, 0x3EFF, adr))
-        return memory[0x2000 + adr % 3000];
-    else if (inRange(0x3F20, 0x3FFF, adr))
+    if (inRange(0x3F20, 0x3FFF, adr))
         return memory[0x3F00 + adr % 0x20];
     else if (inRange(0x2000, 0x3EFF, adr)) {
         // only horizontal mirroring
@@ -478,8 +477,7 @@ void Ppu::updateShifters() noexcept {
 // https://forums.nesdev.com/viewtopic.php?t=10348
 void Ppu::renderPixel() {
     // Definately rewrite how to do this later, it is very ugly.
-    if (PpuMask.bkgrdEnable) return;
-
+    if (!PpuMask.bkgrdEnable) return;
     auto getSetAdr = [](const uint8_t& id) -> uint16_t {
         switch(id) {
             case 0: return 0x3F01;
@@ -510,10 +508,10 @@ void Ppu::renderPixel() {
 
         // Get each individual bit from the shift registers
         uint8_t p0=0, p1=0, b0=0, b1=0;
-        p0 = (mask & bkShiftLow) != 0;
-        p1 = (mask & bkShiftHigh) != 0;
-        b0 = (mask & attrShiftLow) != 0;
-        b1 = (mask & attrShiftHigh) != 0;
+        p0 = (mask & bkShiftLow) > 0;
+        p1 = (mask & bkShiftHigh) > 0;
+        b0 = (mask & attrShiftLow) > 0;
+        b1 = (mask & attrShiftHigh) > 0;
         // now combine all into one 4 bit pixel
         pixel = static_cast<uint8_t>( (p1 << 1) | p0);
         paletteID = static_cast<uint8_t>( (b1 << 1) | b0);
@@ -612,7 +610,11 @@ void Ppu::runCycle() {
         // At each cycle here the ppu is getting data ready for the NEXT 8 pixels
         // 2-258 is the actual visual location on screen
         // 321-338 is for the next scanline after this one
-        if ((cycle >= 2 && cycle < 258) || (cycle >= 321 && cycle < 338)) {
+        if (inRange(2, 257, cycle) || inRange(321, 337, cycle)) {
+
+            // Draw and render a pixel on the visible scanline
+            if (inRange(2, 258, cycle)) renderPixel();
+            // left shift the shift registers
             shiftRegisters();
 
             switch((cycle - 1) % 8) {
@@ -656,10 +658,6 @@ void Ppu::runCycle() {
     if (scanline == 241 && cycle == 1) {
         setVBlank();
     }
-
-
-    // might want to put this when we're in visible scanline
-    renderPixel();
 
     ++cycle;
 

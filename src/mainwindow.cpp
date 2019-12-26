@@ -54,7 +54,7 @@ void MainWindow::paint() {
 }
 
 void MainWindow::timeTick() {
-    for (int i = 0; i != 3; ++i) nes->step();
+    for (int i = 0; i != 15; ++i) nes->step();
 
     if (nes->ppu.completeFrame) {
         nes->ppu.completeFrame = false;

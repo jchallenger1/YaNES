@@ -58,7 +58,7 @@ NameTableView::~NameTableView() {
 }
 
 void NameTableView::stepTimeTick() {
-    for(unsigned i = 0 ; i != 5; ++i) nes->step();
+    for(unsigned i = 0 ; i != 15; ++i) nes->step();
 
     if (nes->ppu.completeFrame) {
         nes->ppu.completeFrame = false;
@@ -115,8 +115,10 @@ void NameTableView::paint() {
     };
 
     // After 0x23C0 is the attribute table
-    for (uint16_t address = 0x2000; address != 0x23C0; address++) {
-        uint16_t tileNum = address - 0x2000;
+    uint16_t nameTableStart = 0x3C00;
+
+    for (uint16_t address = nameTableStart; address != nameTableStart + 0x3C0; address++) {
+        uint16_t tileNum = address - nameTableStart;
 
         setColorSet(tileNum);
         // Address X and Y determine where to put the tile
