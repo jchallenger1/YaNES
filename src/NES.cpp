@@ -33,13 +33,4 @@ void NES::powerUp() {
 
 void NES::addVideoData(const uint8_t& x, const uint8_t& y, const uint8_t& chroma) {
     screen[y][x] = chroma;
-    videoRequested = true;
-}
-
-void NES::removeRequest() {
-    videoRequested = false;
-}
-
-bool NES::videoRequest() const {
-    return videoRequested;
 }

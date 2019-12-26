@@ -20,10 +20,6 @@ public:
     void powerUp(); // Creates the powerup state
 
    void addVideoData(const uint8_t& x, const uint8_t& y, const uint8_t& chroma);
-   void removeRequest();
-   bool videoRequest() const;
-   bool videoRequested = false;
-
    std::array<std::array<uint8_t, 256>, 240> screen{};
 };
 
