@@ -63,7 +63,7 @@ Ppu::PatternTableT Ppu::getPatternTile(const uint16_t& tileAddress) const {
     if (tileAddress >= 0x2000 - 0xF) throw std::runtime_error("Given tile address it not a pattern table address");
 
     PatternTableT tile{};
-
+    // each bit plane is +8 bytes from the first left bitplane
     for (unsigned i = 0; i != 8; i++) {
         tile[i % 8] = createLine(nes->ppu.memory[tileAddress + i], nes->ppu.memory[tileAddress + i + 8]);
     }
@@ -71,6 +71,7 @@ Ppu::PatternTableT Ppu::getPatternTile(const uint16_t& tileAddress) const {
 }
 
 Ppu::PatternTableT Ppu::getPatternTile(const uint8_t& tileID, bool isLeft) const {
+    // move to the address of the pattern tile
     if (isLeft)
         return getPatternTile(tileID * 16);
     return getPatternTile(0x1000 + tileID * 16);
@@ -78,6 +79,7 @@ Ppu::PatternTableT Ppu::getPatternTile(const uint8_t& tileID, bool isLeft) const
 
 void Ppu::stdDrawPatternTile(const uint16_t& tileAddress) const {
     PatternTableT tile = getPatternTile(tileAddress);
+    // Traverse in a 8x8 grid
     for (uint8_t y = 0; y != 8; y++) {
         uint16_t line = tile[y];
         for (uint8_t x = 0; x != 8; x++) {
