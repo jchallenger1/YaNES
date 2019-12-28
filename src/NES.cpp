@@ -5,11 +5,16 @@
 #include "NES.h"
 #include "functions.hpp" // toHex()
 
+// Must be called right after the constructor, cannot be in the constructor
+// because at that point this is not a shared pointer and will throw
+// Sets handles to the ppu and cpu
 void NES::init() {
     ppu.setNESHandle(getPtr());
     cpu.memory.setNESHandle(getPtr());
 }
 
+// For this function to be used, the this pointer must
+// already be a shared pointer, otherwise bad_weak_ptr will be thrown
 std::shared_ptr<NES> NES::getPtr() {
     return shared_from_this();
 }
@@ -22,6 +27,7 @@ void NES::clear() {
 
 void NES::step() {
     cpu.runCycle();
+    // Ppu runs 3x as fast as cpu
     for (int var = 0; var < 3; ++var) {
         ppu.runCycle();
     }
