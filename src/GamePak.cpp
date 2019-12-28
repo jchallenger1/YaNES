@@ -101,7 +101,7 @@ GamePak GamePak::cpuLoad(Memory& memory, std::ifstream& ifs) {
     // Only supporting NROM
     if (mapperNum != 0) {
         std::cerr << "Non NROM not supported" << std::endl;
-        throw std::runtime_error("Unsupported Mapper type");
+        throw std::runtime_error("Unsupported Mapper type (" + std::to_string(mapperNum) + ")");
     }
 
     long startOfPROM = ifs.tellg();
