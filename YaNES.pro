@@ -11,7 +11,6 @@ SOURCES += \
         src/Memory.cpp \
         src/NES.cpp \
         src/Ppu.cpp \
-        src/debugview.cpp \
         src/main.cpp \
         src/mainwindow.cpp
 
@@ -23,14 +22,12 @@ HEADERS += \
     include/Memory.h \
     include/NES.h \
     include/Ppu.h \
-    include/debugview.h \
     include/functions.hpp \
     include/mainwindow.h \
     include/nametableview.hpp \
     include/patterntableview.hpp
 
 FORMS += \
-    forms/debugview.ui \
     forms/mainwindow.ui \
     forms/nametableview.ui \
     forms/patterntableview.ui

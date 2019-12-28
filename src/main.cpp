@@ -1,7 +1,6 @@
 #include <QApplication>
 #include <QException>
 #include "mainwindow.h"
-#include "debugview.h"
 #include "Cpu6502.h"
 #include "Ppu.h"
 #include "NES.h"
