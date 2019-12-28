@@ -12,7 +12,12 @@ class MainWindow;
 class MainWindow : public QMainWindow {
     Q_OBJECT
 public:
+    // This constructor is only if there is a file ready to go, all components
+    // of the NES is already set up, only used in debugging
+    // example of use in main
     explicit MainWindow(std::shared_ptr<NES> nes, QWidget *parent = nullptr);
+    // No components are set up constructor, default for UI
+    explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow() override;
 
 protected:
@@ -24,6 +29,10 @@ private:
     static inline void setPaintColour(QPainter& painter, const QColor& c);
     void paint();
     void timeTick();
+
+    void loadFile();
+    void sendMessage(const QString&, const QString& title = "Message");
+
     Ui::MainWindow *ui;
     std::shared_ptr<NES> nes;
     QTimer* timer;

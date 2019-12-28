@@ -27,6 +27,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionOpen_iNES_file"/>
    </widget>
    <widget class="QMenu" name="menuDebug">
     <property name="title">
@@ -40,6 +41,11 @@
   <action name="actionNameTable_Viewer">
    <property name="text">
     <string>TableViewer</string>
+   </property>
+  </action>
+  <action name="actionOpen_iNES_file">
+   <property name="text">
+    <string>Open iNES file</string>
    </property>
   </action>
  </widget>

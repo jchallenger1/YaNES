@@ -20,7 +20,6 @@ void GamePak::load(const std::string& fname) {
     if (!nes) {
         throw std::runtime_error("Gamepak must have a NES handle before loading a file.");
     }
-
     GamePak gamepak = load(nes->cpu.memory, nes->ppu, fname);
     std::swap(gamepak, *this);
 }

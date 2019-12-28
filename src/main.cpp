@@ -6,6 +6,9 @@
 #include "NES.h"
 #include "GamePak.h"
 
+// This creates a static application directly mounted to where nes is loaded
+// Should only be used for debugging purposes
+/*
 int main(int argc, char *argv[]) {
 
     QApplication a(argc, argv);
@@ -20,3 +23,17 @@ int main(int argc, char *argv[]) {
     return a.exec();
 
 }
+*/
+
+// UI interface of main
+int main(int argc, char *argv[]) {
+
+    QApplication a(argc, argv);
+
+    MainWindow mainWindow;
+    mainWindow.show();
+
+    return a.exec();
+
+}
+
