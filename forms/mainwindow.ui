@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>256</width>
+    <height>240</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
+     <width>256</width>
      <height>22</height>
     </rect>
    </property>
@@ -33,19 +33,25 @@
     <property name="title">
      <string>Debug</string>
     </property>
-    <addaction name="actionNameTable_Viewer"/>
+    <addaction name="actionPatternTable_Viewer"/>
+    <addaction name="actionNametable_Viewer"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuDebug"/>
   </widget>
-  <action name="actionNameTable_Viewer">
+  <action name="actionPatternTable_Viewer">
    <property name="text">
-    <string>TableViewer</string>
+    <string>Pattern and Palette Viewer</string>
    </property>
   </action>
   <action name="actionOpen_iNES_file">
    <property name="text">
     <string>Open iNES file</string>
+   </property>
+  </action>
+  <action name="actionNametable_Viewer">
+   <property name="text">
+    <string>Nametable Viewer</string>
    </property>
   </action>
  </widget>

@@ -5,6 +5,9 @@
 #include <memory>
 #include "NES.h"
 
+#include "nametableview.hpp"
+#include "patterntableview.hpp"
+
 namespace Ui {
 class MainWindow;
 }
@@ -35,6 +38,8 @@ private:
 
     Ui::MainWindow *ui;
     std::shared_ptr<NES> nes;
+    NameTableView* nameTableViewer;
+    PatternTableView* patternTableViewer;
     QTimer* timer;
 
 };

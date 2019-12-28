@@ -24,10 +24,10 @@ void NES::load(const std::string& fname) {
     // Get the basename of the file
     auto slash = std::find(fname.crbegin(), fname.crend(), '/');
     if (slash == fname.crend()) {
-        fileName = fname;
+        baseName = fname;
     }
     else {
-        fileName = std::string(slash.base(), fname.cend());
+        baseName = std::string(slash.base(), fname.cend());
     }
 }
 
@@ -36,6 +36,9 @@ void NES::clear() {
     cpu.clear();
 }
 
+std::string NES::getBaseName() const {
+    return baseName;
+}
 
 void NES::step() {
     cpu.runCycle();

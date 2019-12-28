@@ -49,7 +49,7 @@ NameTableView::NameTableView(std::shared_ptr<NES> nes, bool shouldStepNes, QWidg
     }
     else {
         connect(timer, &QTimer::timeout, this, &NameTableView::noStepTimeTick);
-        timer->start(1000);
+        timer->start(3000);
     }
 }
 
@@ -67,11 +67,14 @@ void NameTableView::stepTimeTick() {
 }
 
 void NameTableView::noStepTimeTick() {
-    this->repaint();
+    // very hacky way to tell if the NES is running something
+    if (nes->getBaseName().size() > 1)
+        this->repaint();
 }
 
 void NameTableView::paintEvent(QPaintEvent *) {
-    paint();
+    if (nes->getBaseName().size() > 1)
+        paint();
 }
 
 QColor NameTableView::getPalQColor(const uint8_t& colorByte) const {
@@ -114,8 +117,11 @@ void NameTableView::paint() {
         painter.setBrush(color);
     };
 
+
+    // Nametables : 0x2000, 0x2400, 0x2800, 0x2C00
+    // Later can have it so the user can select it
     // After 0x23C0 is the attribute table
-    uint16_t nameTableStart = 0x3C00;
+    uint16_t nameTableStart = 0x2000;
 
     for (uint16_t address = nameTableStart; address != nameTableStart + 0x3C0; address++) {
         uint16_t tileNum = address - nameTableStart;

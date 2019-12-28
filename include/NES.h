@@ -29,8 +29,10 @@ public:
     // adds a chroma colour to the screen
     void addVideoData(const uint8_t& x, const uint8_t& y, const uint8_t& chroma);
     std::array<std::array<uint8_t, 256>, 240> screen{};
+
+    std::string getBaseName() const;
 private:
-    std::string fileName;
+    std::string baseName;
 };
 
 #endif // NES_HPP

@@ -13,15 +13,32 @@
 
 std::ostream& operator<<(std::ostream&, const QString&); // helper for << operator for qstrings
 
-// File is not loaded
+// UI interface constructor
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
     nes = std::make_shared<NES>();
+    // Other tables must be intantiated after nes has been created
+    nameTableViewer = new NameTableView(nes, false);
+    patternTableViewer = new PatternTableView(nes, false);
+
+    nameTableViewer->hide();
+    patternTableViewer->hide();
+
     // connect everything but don't run it
     this->timer = new QTimer(this);
 
+    // Timer for stepping the nes
     connect(this->timer, &QTimer::timeout, this, &MainWindow::timeTick);
+    // File menubar
     connect(ui->actionOpen_iNES_file, &QAction::triggered, this, &MainWindow::loadFile);
+    // Debug menubar
+    connect(ui->actionNametable_Viewer, &QAction::triggered, this, [&](){
+        nameTableViewer->show();
+    });
+    connect(ui->actionPatternTable_Viewer, &QAction::triggered, this, [&](){
+        patternTableViewer->show();
+    });
+
 }
 
 // File is already good to go, only for debugging purposes

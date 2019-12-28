@@ -26,6 +26,7 @@ public:
 private:
     inline void paint();
     inline void stepNES();
+    inline void noStepNES();
 
     inline void paintEvent(QPaintEvent*) override;
     static inline constexpr auto getColor(const uint8_t&);
@@ -44,18 +45,23 @@ private:
 PatternTableView::PatternTableView(std::shared_ptr<NES> nes, bool stepNES, QWidget *parent) : QWidget(parent), ui(new Ui::PatternTableView) {
     ui->setupUi(this);
     this->nes = nes;
+    timer = new QTimer(this);
     if (stepNES) {
-        timer = new QTimer(this);
         connect(timer, &QTimer::timeout, this, &PatternTableView::stepNES);
         timer->start(0);
     }
+    else {
+        connect(timer, &QTimer::timeout, this, &PatternTableView::noStepNES);
+        timer->start(5000);
+    }
+
 }
 
 PatternTableView::~PatternTableView() {
     delete ui;
 }
 
-void PatternTableView::stepNES() {
+inline void PatternTableView::stepNES() {
     for(unsigned i = 0 ; i != 5; ++i) nes->step();
 
     if (nes->ppu.completeFrame) {
@@ -64,8 +70,17 @@ void PatternTableView::stepNES() {
     }
 }
 
+
+inline void PatternTableView::noStepNES() {
+    // very hacky way to tell if the NES is running something
+    if (nes->getBaseName().size() > 1)
+        repaint();
+}
+
+
 void PatternTableView::paintEvent(QPaintEvent *) {
-    paint();
+    if (nes->getBaseName().size() > 1)
+        paint();
 }
 
 constexpr auto PatternTableView::getColor(const uint8_t& n) {
