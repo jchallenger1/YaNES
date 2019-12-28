@@ -59,8 +59,7 @@ GamePak GamePak::load(Memory& memory, const std::string& fname) {
 }
 
 
-
-// Function is NOT apart of Gamepak itself
+// Breaks down a INES file into components used by the emulator and tests
 // Refer to https://wiki.nesdev.com/w/index.php/CPU_memory_map and
 //  https://wiki.nesdev.com/w/index.php/INES
 GamePak GamePak::cpuLoad(Memory& memory, std::ifstream& ifs) {
