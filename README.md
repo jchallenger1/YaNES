@@ -5,6 +5,10 @@ A Semi Cycle Accurate NES Emulator &nbsp;&nbsp;&nbsp;&nbsp;
 [![GitHub license](https://img.shields.io/github/license/Grandduchy/YaNES)](https://github.com/Grandduchy/YaNES/blob/master/LICENSE) &nbsp;
 [![GitHub stars](https://img.shields.io/github/stars/Grandduchy/YaNES)](https://github.com/Grandduchy/YaNES/stargazers) &nbsp;
 
+<p align = "center">
+  <img src="rsc/pictures/donkey_kong.png"/>
+</p>
+
 ## Getting Started
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. 
 
