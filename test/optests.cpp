@@ -1,11 +1,16 @@
+#include <memory>
 #include "tests.hpp"
 #include "Cpu6502.h"
+#include "NES.h"
 
 void Tests::cpuMessage() { std::cout << " --- Running Opcode Test Cases ---\n"; }
 
 // Test if all addressing modes work also check lda function
 void Tests::cpuLdaAddressingTests() {
-    Cpu6502 cpu;
+    std::shared_ptr<NES> nes = std::make_shared<NES>();
+    nes->init();
+
+    Cpu6502& cpu = nes->cpu;
     auto& memory = cpu.memory;
     memory.write(0, 0xA9); // check immediate
     memory.write(1, 0xFA);
@@ -42,7 +47,10 @@ void Tests::cpuLdaAddressingTests() {
 // These tests are from the examples databook
 // Tests are important for these instructions as they are the hardest in the entire instruction set
 void Tests::cpuMathTests() {
-    Cpu6502 cpu;
+    std::shared_ptr<NES> nes = std::make_shared<NES>();
+    nes->init();
+
+    Cpu6502& cpu = nes->cpu;
     auto& memory = cpu.memory;
 
     // Regular Add test
@@ -123,7 +131,10 @@ void Tests::cpuMathTests() {
 
 // Tests cpu's and/or/xor, also tests shifting ASL/LSR and rotating ROL/ROR
 void Tests::cpuBitwiseTests() {
-    Cpu6502 cpu;
+    std::shared_ptr<NES> nes = std::make_shared<NES>();
+    nes->init();
+
+    Cpu6502& cpu = nes->cpu;
     auto& memory = cpu.memory;
     memory.write(0, 0x29);
     memory.write(1, 0b11001111);
@@ -174,7 +185,10 @@ void Tests::cpuBitwiseTests() {
 
 // Tests cpu's clearing and setting status
 void Tests::cpuStatusTests() {
-    Cpu6502 cpu;
+    std::shared_ptr<NES> nes = std::make_shared<NES>();
+    nes->init();
+
+    Cpu6502& cpu = nes->cpu;
     auto& memory = cpu.memory;
 
     memory.write(0, 0x38);
@@ -211,7 +225,10 @@ void Tests::cpuStatusTests() {
 
 // Tests Cpu's jumping and branching functions
 void Tests::cpuJumpBranchTests() {
-    Cpu6502 cpu;
+    std::shared_ptr<NES> nes = std::make_shared<NES>();
+    nes->init();
+
+    Cpu6502& cpu = nes->cpu;
     auto& memory = cpu.memory;
     memory.write(0, 0x4C);
     memory.write(1, 0x56);
@@ -253,7 +270,10 @@ void Tests::cpuJumpBranchTests() {
 
 // Tests Cpu's compare function w/accumulator, also tests BIT compare
 void Tests::cpuCompareTests() {
-    Cpu6502 cpu;
+    std::shared_ptr<NES> nes = std::make_shared<NES>();
+    nes->init();
+
+    Cpu6502& cpu = nes->cpu;
     auto& memory = cpu.memory;
 
     memory.write(0, 0xC9);
@@ -292,7 +312,10 @@ void Tests::cpuCompareTests() {
 
 // Tests Stack's pulling and pushing PHP/PHA/PLA/PLP, also calling and returning
 void Tests::cpuStackTests() {
-    Cpu6502 cpu;
+    std::shared_ptr<NES> nes = std::make_shared<NES>();
+    nes->init();
+
+    Cpu6502& cpu = nes->cpu;
     auto& memory = cpu.memory;
 
     cpu.sp = 0x56;

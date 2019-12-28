@@ -24,11 +24,11 @@ public:
 
     void load(const std::string& fname);
 
-    uint8_t PRG_ROM_sz; // Program Read only memory in 16kb size
-    uint8_t CHR_ROM_sz; // Character Read only memory in 8kb size
-    uint8_t mapper; // Mapper number
-    MIRRORT mirror;
-    uint8_t flags7, flags8, flags9, flags10; // flags used in header, currently unused in this project
+    uint8_t PRG_ROM_sz = 0; // Program Read only memory in 16kb size
+    uint8_t CHR_ROM_sz = 0; // Character Read only memory in 8kb size
+    uint8_t mapper = 0; // Mapper number
+    MIRRORT mirror = MIRRORT::HORIZONTAL;
+    uint8_t flags7 = 0, flags8 = 0, flags9 = 0, flags10 = 0; // flags used in header, currently unused in this project
 
 private:
     std::shared_ptr<NES> nes;

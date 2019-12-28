@@ -1,10 +1,12 @@
 #include "GamePak.h"
 #include "tests.hpp"
 #include "Cpu6502.h"
+#include "NES.h"
 #include "Memory.h"
 
 
 #include <boost/test/results_collector.hpp>
+#include <memory>
 #include <fstream>
 #include <numeric>
 #include <iostream>
@@ -67,13 +69,16 @@ void Tests::nesCpuTest() {
 
     std::cout << "\n--- Running CPU Diagnostics, Nestest ---\n";
 
-    Memory memory;
+    std::shared_ptr<NES> nes = std::make_shared<NES>();
+    nes->init();
+
+    Cpu6502& cpu = nes->cpu;
+    Memory& memory = nes->cpu.memory;
     GamePak::load(memory, "../rsc/tests/nestest.nes");
 
     std::ifstream ifsLog("../rsc/tests/nestest.log", std::ios_base::in);
     ckPassFail(ifsLog.good(), "Could not open log file to compare testsing");
 
-    Cpu6502 cpu;
     cpu.cpuAllowDec = false;
     cpu.memory = memory;
     cpu.pc = 0xC000;
