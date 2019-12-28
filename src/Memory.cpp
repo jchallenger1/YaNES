@@ -27,6 +27,15 @@ uint8_t Memory::read(const uint16_t& adr) const {
         return nes->ppu.readRegister(0x2000 + adr % 8);
     else if (adr == 0x4014)
         return nes->ppu.readRegister(adr);
+    else if (inRange(0x8000, 0xFFFF, adr)) {
+        // NROM differs in if its a NROM-128 or NROM-256
+        // if NROM-128 its a mirror of 0x8000-0xBFFF
+        if (nes->gamepak.PRG_ROM_sz == 1){ // NROM-128
+            return memory[0x8000 + adr % 0x4000];
+        }
+        else
+            return memory[adr];
+    }
     else
         return memory[adr];
 }
@@ -38,6 +47,13 @@ void Memory::write(const uint16_t& adr, const uint8_t& val) {
         nes->ppu.writeRegister(0x2000 + adr % 8, val);
     else if (adr == 0x4014)
         return nes->ppu.writeRegister(adr, val);
+    else if (inRange(0x8000, 0xFFFF, adr)) {
+        if (nes->gamepak.PRG_ROM_sz == 1){ // NROM-128
+            memory[0x8000 + adr % 0x4000] = val;
+        }
+        else
+            memory[adr] = val;
+    }
     else
         memory[adr] = val;
 }

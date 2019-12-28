@@ -107,17 +107,18 @@ GamePak GamePak::cpuLoad(Memory& memory, std::ifstream& ifs) {
 
     long startOfPROM = ifs.tellg();
 
-    // Write PRG ROM @ 0x8000
+    // Write PRG ROM @ 0x8000 in 16 kb units
     for (uint16_t index = 0x8000, times = 0; times != gamepak.PRG_ROM_sz * memsize::KB16; times++, index++) {
         memory[index] = read();
     }
     // In NROM 128, after 0xBFFF is just a mirror of the rom of 0x8000 - 0xBFFF
     // For now most mirrors will actually write to memory
-    ifs.seekg(startOfPROM);
-    for (uint16_t index = 0xC000, times = 0; times != gamepak.PRG_ROM_sz * memsize::KB16; times++, index++) {
-        memory[index] = read();
+    if (gamepak.PRG_ROM_sz == 1) {
+        ifs.seekg(startOfPROM);
+        for (uint16_t index = 0xC000, times = 0; times != gamepak.PRG_ROM_sz * memsize::KB16; times++, index++) {
+            memory[index] = read();
+        }
     }
-
     return gamepak;
 }
 
