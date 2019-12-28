@@ -1,7 +1,6 @@
 #include <iostream>
-#include <numeric>
 #include <tuple>
-#include <queue>
+#include <algorithm>
 #include "NES.h"
 #include "functions.hpp" // toHex()
 
@@ -11,12 +10,25 @@
 void NES::init() {
     ppu.setNESHandle(getPtr());
     cpu.memory.setNESHandle(getPtr());
+    gamepak.setNESHandle(getPtr());
 }
 
 // For this function to be used, the this pointer must
 // already be a shared pointer, otherwise bad_weak_ptr will be thrown
 std::shared_ptr<NES> NES::getPtr() {
     return shared_from_this();
+}
+
+void NES::load(const std::string& fname) {
+    gamepak.load(fname);
+    // Get the basename of the file
+    auto slash = std::find(fname.crbegin(), fname.crend(), '/');
+    if (slash == fname.crend()) {
+        fileName = fname;
+    }
+    else {
+        fileName = std::string(slash.base(), fname.cend());
+    }
 }
 
 void NES::clear() {

@@ -12,8 +12,7 @@ int main(int argc, char *argv[]) {
 
     std::shared_ptr<NES> nes = std::make_shared<NES>();
     nes->init();
-
-    GamePak::load(nes->cpu.memory, nes->ppu, "../YaNES/rsc/roms/Donkey Kong (World) (Rev A).nes");
+    nes->load("../YaNES/rsc/roms/Donkey Kong (World) (Rev A).nes");
     nes->powerUp();
 
     MainWindow main(nes->getPtr());
