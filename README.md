@@ -6,7 +6,9 @@ A Semi Cycle Accurate NES Emulator &nbsp;&nbsp;&nbsp;&nbsp;
 [![GitHub stars](https://img.shields.io/github/stars/Grandduchy/YaNES)](https://github.com/Grandduchy/YaNES/stargazers) &nbsp;
 
 <p align = "center">
-  <img src="rsc/pictures/donkey_kong.png"/>
+  <img src="rsc/pictures/donkey_kong.png" />
+  <img src="rsc/pictures/pacman.png" />
+  <img src="rsc/pictures/balloon_fight.png" />
 </p>
 
 ## Getting Started
