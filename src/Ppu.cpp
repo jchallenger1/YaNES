@@ -189,45 +189,74 @@ uint8_t Ppu::getChromaFromPaletteRam(const uint8_t& paletteID, const uint8_t& pi
     return vRamRead(paletteStart);
 }
 
-
+// A write to the ppu's ram bus
 void Ppu::vRamWrite(const uint16_t& adr, const uint8_t& val) {
     if (inRange(0x2000, 0x3EFF, adr)) {
-        // This is hard coded for now, for NROM, the mapper on flag 6
-        // indicates if its scrolling horizontally or vertically.
-        // Since right now we are only worried about donkey koney, it always has horizontal mirroring
-        // Horizontal mirroring : nametables 1, 3 route to instead 0 and 2
+        // In this range there is only really two nametables out of the memory addresses of four
+        // Depending on the bit of the header, it will either mirror horizontally or vertically
 
         // Note that 0x3000 - 0x3EFF are mirror of 0x2000-0x2EFF, so ignore the most sig 8 bits
         uint16_t cutAdr = adr & 0xFFF;
-        if (inRange(0x400, 0x7FF, cutAdr)) { // nametable 1
-            memory[0x2000 + cutAdr % 0x400] = val;
+        // Vertical mirroring : nametables 1, 3 route to instead 0 and 2
+        if (nes->gamepak.mirror == GamePak::VERTICAL) {
+            if (inRange(0x400, 0x7FF, cutAdr)) { // nametable 1 to 0
+                memory[0x2000 + cutAdr % 0x400] = val;
+            }
+            else if (inRange(0xC00, 0xFFF, cutAdr)) {// nametable 3 to 2
+                memory[0x2800 + cutAdr % 0x400] = val;
+            }
+            else
+                memory[0x2000 + cutAdr] = val;
         }
-        else if (inRange(0xC00, 0xFFF, cutAdr)) {// nametable 3
-            memory[0x2800 + cutAdr % 0x400] = val;
+        // Horizontal mirroring : nametables 2, 3 route to 0, 1
+        else {
+            if (inRange(0x800, 0xBFF, cutAdr)) { // nametable 2 to 0
+                memory[0x2000 + cutAdr % 0x400] = val;
+            }
+            else if (inRange(0xC00, 0xFFF, cutAdr)) {// nametable 3 to 1
+                memory[0x2400 + cutAdr % 0x400] = val;
+            }
+            else
+                memory[0x2000 + cutAdr] = val;
         }
-        else
-            memory[0x2000 + cutAdr] = val;
+
     }
+    // Ppu palettes mirror every 0x20
     else if (inRange(0x3F20, 0x3FFF, adr))
         memory[0x3F00 + adr % 0x20] = val;
     else
         memory[adr] = val;
 }
 
+// A read from ppu's ram bus
+// Use comments from vRamWrite instead of here
 uint8_t Ppu::vRamRead(const uint16_t& adr) const {
     if (inRange(0x3F20, 0x3FFF, adr))
         return memory[0x3F00 + adr % 0x20];
     else if (inRange(0x2000, 0x3EFF, adr)) {
-        // only horizontal mirroring
         uint16_t cutAdr = adr & 0xFFF;
-        if (inRange(0x400, 0x7FF, cutAdr)) { // nametable 1
-            return memory[0x2000 + cutAdr % 0x400];
+        // Vertical mirroring : nametables 1, 3 route to instead 0 and 2
+        if (nes->gamepak.mirror == GamePak::VERTICAL) {
+            if (inRange(0x400, 0x7FF, cutAdr)) { // nametable 1 to 0
+                return memory[0x2000 + cutAdr % 0x400];
+            }
+            else if (inRange(0xC00, 0xFFF, cutAdr)) {// nametable 3 to 2
+                return memory[0x2800 + cutAdr % 0x400];
+            }
+            else
+                return memory[0x2000 + cutAdr];
         }
-        else if (inRange(0xC00, 0xFFF, cutAdr)) {// nametable 3
-            return memory[0x2800 + cutAdr % 0x400];
+        // Horizontal mirroring : nametables 2, 3 route to 0, 1
+        else {
+            if (inRange(0x800, 0xBFF, cutAdr)) { // nametable 2 to 0
+                return memory[0x2000 + cutAdr % 0x400];
+            }
+            else if (inRange(0xC00, 0xFFF, cutAdr)) {// nametable 3 to 1
+                return memory[0x2400 + cutAdr % 0x400];
+            }
+            else
+                return memory[0x2000 + cutAdr];
         }
-        else
-            return memory[0x2000 + cutAdr];
     }
     else
         return memory[adr];
