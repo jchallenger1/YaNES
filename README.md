@@ -88,3 +88,5 @@ Below are the main ones used.
 - https://github.com/fogleman/nes
 - https://wiki.nesdev.com/w/index.php/Emulator_tests
 - https://taywee.github.io/NerdyNights/nerdynights/backgrounds.html
+- https://github.com/OneLoneCoder/olcNES
+- https://gridbugs.org/zelda-screen-transitions-are-undefined-behaviour/
